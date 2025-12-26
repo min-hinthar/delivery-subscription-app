@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AppGuardProps = {
@@ -43,6 +45,36 @@ export default async function AppGuard({ children }: AppGuardProps) {
         </div>
       </div>
     );
+  }
+
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const adminClient = createSupabaseAdminClient();
+    await adminClient.from("profiles").upsert({
+      id: data.user.id,
+      email: data.user.email,
+      full_name:
+        data.user.user_metadata?.full_name ??
+        data.user.user_metadata?.name ??
+        null,
+      phone: data.user.user_metadata?.phone ?? null,
+    });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, onboarding_completed")
+    .eq("id", data.user.id)
+    .maybeSingle();
+
+  const { data: primaryAddress } = await supabase
+    .from("addresses")
+    .select("id")
+    .eq("user_id", data.user.id)
+    .eq("is_primary", true)
+    .maybeSingle();
+
+  if (!profile?.onboarding_completed || !primaryAddress?.id) {
+    redirect("/onboarding");
   }
 
   return children;
