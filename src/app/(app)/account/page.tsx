@@ -173,7 +173,7 @@ export default async function AccountPage() {
             </p>
           </div>
           <Link
-            href="/onboarding"
+            href="/account/profile"
             className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
           >
             Update profile details
@@ -206,7 +206,7 @@ export default async function AccountPage() {
             </p>
           )}
           <Link
-            href="/onboarding"
+            href="/account/profile"
             className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
           >
             Update delivery address
