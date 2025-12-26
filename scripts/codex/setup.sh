@@ -6,7 +6,10 @@ corepack enable
 
 if [ ! -f package.json ]; then
   echo "==> No package.json found. Scaffolding Next.js app into a temp dir (repo is not empty)..."
-  tmp="$(mktemp -d)"
+
+  tmp=".codex_next_scaffold"
+  rm -rf "$tmp"
+  mkdir -p "$tmp"
 
   pnpm dlx create-next-app@latest "$tmp" \
     --ts --tailwind --eslint --app --src-dir --use-pnpm --yes
