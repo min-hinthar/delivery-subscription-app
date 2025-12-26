@@ -12,11 +12,17 @@ begin
     new.raw_user_meta_data->>'name'
   );
 
-  insert into public.profiles (id, email, full_name)
-  values (new.id, new.email, computed_full_name)
+  insert into public.profiles (id, email, full_name, phone)
+  values (
+    new.id,
+    new.email,
+    computed_full_name,
+    new.raw_user_meta_data->>'phone'
+  )
   on conflict (id) do update
     set email = excluded.email,
         full_name = coalesce(excluded.full_name, public.profiles.full_name),
+        phone = coalesce(excluded.phone, public.profiles.phone),
         updated_at = now();
 
   return new;

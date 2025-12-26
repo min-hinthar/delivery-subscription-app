@@ -7,21 +7,32 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const DEFAULT_ERRORS = {
   missingEmail: "Email is required.",
-  missingPassword: "Password is required.",
+  missingPhone: "Phone number is required.",
 };
 
 type AuthFormProps = {
   mode: "login" | "signup";
 };
 
+const EMAIL_REDIRECTS = {
+  login: "/account",
+  signup: "/onboarding",
+};
+
+const InputIcon = ({ children }: { children: React.ReactNode }) => (
+  <span className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-slate-100 text-slate-600 shadow-sm dark:bg-slate-800 dark:text-slate-200">
+    {children}
+  </span>
+);
+
 export function AuthForm({ mode }: AuthFormProps) {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleAuth = async (intent: "password" | "magic") => {
+  const handleAuth = async () => {
     setError(null);
     setMessage(null);
 
@@ -30,8 +41,8 @@ export function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
-    if (intent === "password" && !password) {
-      setError(DEFAULT_ERRORS.missingPassword);
+    if (!phone) {
+      setError(DEFAULT_ERRORS.missingPhone);
       return;
     }
 
@@ -39,50 +50,31 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     try {
       const supabase = createSupabaseBrowserClient();
+      const redirectPath = EMAIL_REDIRECTS[mode];
 
-      if (intent === "magic") {
-        const { error: otpError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/account`,
-          },
-        });
-
-        if (otpError) {
-          throw otpError;
-        }
-
-        setMessage("Check your email for a login link.");
-        return;
-      }
-
-      if (mode === "signup") {
-        const { error: signupError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/onboarding`,
-          },
-        });
-
-        if (signupError) {
-          throw signupError;
-        }
-
-        setMessage("Account created. Check your inbox to confirm your email.");
-        return;
-      }
-
-      const { error: loginError } = await supabase.auth.signInWithPassword({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
-        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${redirectPath}`,
+          shouldCreateUser: mode === "signup",
+          data:
+            mode === "signup"
+              ? {
+                  phone,
+                }
+              : undefined,
+        },
       });
 
-      if (loginError) {
-        throw loginError;
+      if (otpError) {
+        throw otpError;
       }
 
-      window.location.assign("/account");
+      setMessage(
+        mode === "signup"
+          ? "Check your email to confirm and finish your account setup."
+          : "Check your email for a login link.",
+      );
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Authentication failed.");
     } finally {
@@ -91,52 +83,71 @@ export function AuthForm({ mode }: AuthFormProps) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="space-y-2">
         <label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-200">
           Email
         </label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
-          placeholder="you@example.com"
-          autoComplete="email"
-        />
+        <div className="relative">
+          <InputIcon>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M4 6h16v12H4z" />
+              <path d="M4 7l8 6 8-6" />
+            </svg>
+          </InputIcon>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            className="w-full rounded-md border border-slate-200 bg-white py-2 pl-12 pr-3 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+            placeholder="you@example.com"
+            autoComplete="email"
+          />
+        </div>
       </div>
       <div className="space-y-2">
-        <label
-          htmlFor="password"
-          className="text-sm font-medium text-slate-700 dark:text-slate-200"
-        >
-          Password
+        <label htmlFor="phone" className="text-sm font-medium text-slate-700 dark:text-slate-200">
+          Phone
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
-          placeholder="••••••••"
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-        />
+        <div className="relative">
+          <InputIcon>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+            >
+              <path d="M7 4h10v16H7z" />
+              <path d="M11 18h2" />
+            </svg>
+          </InputIcon>
+          <input
+            id="phone"
+            type="tel"
+            value={phone}
+            onChange={(event) => setPhone(event.target.value)}
+            className="w-full rounded-md border border-slate-200 bg-white py-2 pl-12 pr-3 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+            placeholder="(555) 123-4567"
+            autoComplete="tel"
+          />
+        </div>
+      </div>
+      <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+        We’ll send a magic link to your email so you can sign in without a password.
       </div>
       <div className="flex flex-wrap gap-3">
-        <Button onClick={() => handleAuth("password")} disabled={isLoading}>
-          {isLoading
-            ? "Working…"
-            : mode === "signup"
-              ? "Create account"
-              : "Sign in"}
-        </Button>
-        <Button
-          onClick={() => handleAuth("magic")}
-          disabled={isLoading}
-          className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
-        >
-          {isLoading ? "Sending…" : "Email me a login link"}
+        <Button onClick={handleAuth} disabled={isLoading}>
+          {isLoading ? "Sending…" : mode === "signup" ? "Send signup link" : "Send login link"}
         </Button>
       </div>
       {error ? (

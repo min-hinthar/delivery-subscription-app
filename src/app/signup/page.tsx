@@ -23,9 +23,15 @@ export default function SignupPage() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       <div className="space-y-2">
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+          <span className="text-2xl" role="img" aria-label="Smiling bowl">
+            🍜
+          </span>
+          <span className="text-sm font-medium uppercase tracking-wide">Start your plan</span>
+        </div>
         <h1 className="text-3xl font-semibold text-foreground">Create your account</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Start a weekly subscription and schedule your first delivery.
+          Share your email and phone to get a signup link and schedule deliveries.
         </p>
       </div>
       <Card className="space-y-4">

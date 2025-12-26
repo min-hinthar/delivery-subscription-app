@@ -55,6 +55,7 @@ export default async function AppGuard({ children }: AppGuardProps) {
         data.user.user_metadata?.full_name ??
         data.user.user_metadata?.name ??
         null,
+      phone: data.user.user_metadata?.phone ?? null,
     });
   }
 

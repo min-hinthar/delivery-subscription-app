@@ -33,9 +33,24 @@ export default async function PricingPage() {
           </p>
         </div>
         <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-          <li>• Saturday or Sunday delivery windows</li>
-          <li>• Pause or cancel anytime in the billing portal</li>
-          <li>• Manage deliveries from your account dashboard</li>
+          <li className="flex items-center gap-2">
+            <span role="img" aria-label="Calendar">
+              📆
+            </span>
+            Saturday or Sunday delivery windows
+          </li>
+          <li className="flex items-center gap-2">
+            <span role="img" aria-label="Pause">
+              ⏸️
+            </span>
+            Pause or cancel anytime in the billing portal
+          </li>
+          <li className="flex items-center gap-2">
+            <span role="img" aria-label="Box">
+              📦
+            </span>
+            Manage deliveries from your account dashboard
+          </li>
         </ul>
         <div className="flex flex-col gap-3">
           {user ? (

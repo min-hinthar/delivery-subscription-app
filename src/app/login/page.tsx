@@ -23,9 +23,15 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       <div className="space-y-2">
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+          <span className="text-2xl" role="img" aria-label="Sparkles">
+            ✨
+          </span>
+          <span className="text-sm font-medium uppercase tracking-wide">Welcome back</span>
+        </div>
         <h1 className="text-3xl font-semibold text-foreground">Login</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Sign in with your email and password or request a magic link.
+          Enter your email and phone to get a magic link.
         </p>
       </div>
       <Card className="space-y-4">
