@@ -4,15 +4,17 @@ set -euo pipefail
 echo "==> Enabling corepack + pnpm"
 corepack enable
 
+if [ ! -f package.json ]; then
+  echo "==> No package.json found. Scaffolding Next.js app in repo root..."
+  pnpm dlx create-next-app@latest . \
+    --ts --tailwind --eslint --app --src-dir --use-pnpm --yes
+fi
+
 echo "==> Installing dependencies"
-pnpm install --frozen-lockfile
+pnpm install --frozen-lockfile || pnpm install
 
-echo "==> Basic sanity checks"
-pnpm -v
+echo "==> Sanity"
 node -v
-
-echo "==> Optional: generate types if project already has supabase types tooling"
-# If you later add a supabase types script, keep it non-fatal:
-# pnpm supabase:types || true
+pnpm -v
 
 echo "==> Done"
