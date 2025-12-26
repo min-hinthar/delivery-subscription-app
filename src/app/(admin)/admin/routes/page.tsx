@@ -1,4 +1,6 @@
 import { RouteBuilder } from "@/components/admin/route-builder";
+import { LogoutButton } from "@/components/auth/logout-button";
+import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -42,14 +44,31 @@ function formatWindow(window: {
 export default async function AdminRoutesPage({
   searchParams,
 }: {
-  searchParams?: { week_of?: string };
+  searchParams?: Promise<{ week_of?: string }>;
 }) {
+  const hasSupabaseConfig =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  if (!hasSupabaseConfig) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Supabase not configured</h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to load
+          route planning.
+        </p>
+      </div>
+    );
+  }
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const supabase = await createSupabaseServerClient();
   const weekOptions = getUpcomingWeekStarts(4).map((date) =>
     formatDateYYYYMMDD(date),
   );
-  const selectedWeek = weekOptions.includes(searchParams?.week_of ?? "")
-    ? (searchParams?.week_of as string)
+  const selectedWeek = weekOptions.includes(resolvedSearchParams?.week_of ?? "")
+    ? (resolvedSearchParams?.week_of as string)
     : weekOptions[0];
 
   if (!selectedWeek) {
@@ -92,10 +111,26 @@ export default async function AdminRoutesPage({
   );
 
   return (
-    <RouteBuilder
-      weekOptions={weekOptions}
-      selectedWeek={selectedWeek}
-      appointments={formattedAppointments}
-    />
+    <div className="space-y-6">
+      <Card className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 dark:from-slate-950 dark:via-slate-900/70 dark:to-blue-950/30">
+        <div className="space-y-2">
+          <div className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-300">
+            Operations
+          </div>
+          <h1 className="text-2xl font-semibold">Route planning</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Build delivery routes, assign stops, and sync driver directions.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <LogoutButton />
+        </div>
+      </Card>
+      <RouteBuilder
+        weekOptions={weekOptions}
+        selectedWeek={selectedWeek}
+        appointments={formattedAppointments}
+      />
+    </div>
   );
 }
