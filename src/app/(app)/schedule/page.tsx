@@ -34,8 +34,9 @@ function formatCutoff(date: Date) {
 export default async function SchedulePage({
   searchParams,
 }: {
-  searchParams?: { week_of?: string };
+  searchParams?: Promise<{ week_of?: string }>;
 }) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -80,7 +81,7 @@ export default async function SchedulePage({
   }));
 
   const selectedWeek =
-    weekOptions.find((option) => option.value === searchParams?.week_of)?.value ??
+    weekOptions.find((option) => option.value === resolvedSearchParams?.week_of)?.value ??
     weekOptions[0]?.value;
 
   if (!selectedWeek) {
