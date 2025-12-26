@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { RouteMap } from "@/components/maps/route-map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -19,6 +20,14 @@ type RouteBuilderProps = {
   appointments: Appointment[];
 };
 
+type RouteSummary = {
+  id: string;
+  status: string;
+  polyline: string | null;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+};
+
 export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteBuilderProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -31,6 +40,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
   });
   const [status, setStatus] = useState<string | null>(null);
   const [routeName, setRouteName] = useState("Weekend Route");
+  const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
 
   const orderedStops = useMemo(() => {
     return appointments
@@ -46,6 +56,14 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     startTransition(() => {
       router.replace(`/admin/routes?week_of=${value}`);
     });
+  }
+
+  async function fetchRouteSummary(weekOf: string, onUpdate: (data: RouteSummary | null) => void) {
+    const response = await fetch(`/api/admin/routes/summary?week_of=${weekOf}`);
+    const payload = await response.json();
+    if (payload.ok) {
+      onUpdate(payload.data.route);
+    }
   }
 
   async function handleBuild() {
@@ -69,7 +87,23 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     }
 
     setStatus("Route created and directions synced.");
+    await fetchRouteSummary(selectedWeek, setRouteSummary);
   }
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await fetchRouteSummary(selectedWeek, (data) => {
+        if (active) {
+          setRouteSummary(data);
+        }
+      });
+    };
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [selectedWeek]);
 
   return (
     <div className="space-y-6">
@@ -117,6 +151,25 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
           <div className="flex items-end">
             {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}
           </div>
+        </div>
+      </Card>
+
+      <Card className="space-y-4 p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold">Route map</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Directions sync after routes are built.
+            </p>
+          </div>
+          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+            {routeSummary?.status ?? "Draft"}
+          </span>
+        </div>
+        <RouteMap polyline={routeSummary?.polyline ?? null} />
+        <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <span>Distance: {routeSummary?.distance_meters ?? 0} m</span>
+          <span>Duration: {routeSummary?.duration_seconds ?? 0} s</span>
         </div>
       </Card>
 

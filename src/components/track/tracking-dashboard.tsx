@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { RouteMap } from "@/components/maps/route-map";
 
 type Stop = {
   id: string;
@@ -27,28 +28,6 @@ type TrackingDashboardProps = {
 export function TrackingDashboard({ route, initialStops }: TrackingDashboardProps) {
   const [stops, setStops] = useState<Stop[]>(initialStops);
   const [status, setStatus] = useState<string | null>(null);
-  const polyline = route?.polyline ?? null;
-
-  const mapImage = useMemo(() => {
-    if (!polyline) {
-      return null;
-    }
-
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
-    if (!apiKey) {
-      return null;
-    }
-
-    const url = new URL("https://maps.googleapis.com/maps/api/staticmap");
-    url.searchParams.set("size", "640x360");
-    url.searchParams.set("scale", "2");
-    url.searchParams.set("maptype", "roadmap");
-    url.searchParams.set("path", `weight:4|color:0x3b82f6|enc:${polyline}`);
-    url.searchParams.set("key", apiKey);
-
-    return url.toString();
-  }, [polyline]);
-
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.stop_order - b.stop_order),
     [stops],
@@ -134,16 +113,8 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
             {sortedStops.length} stops
           </span>
         </div>
-        <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
-          {mapImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={mapImage} alt="Delivery route map" className="h-full w-full" />
-          ) : (
-            <div className="flex h-56 items-center justify-center text-xs text-slate-500 dark:text-slate-400">
-              Map preview unavailable. Add NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY and build
-              routes.
-            </div>
-          )}
+        <div className="mt-3">
+          <RouteMap polyline={route?.polyline ?? null} />
         </div>
       </div>
 
