@@ -2,8 +2,18 @@ import Link from "next/link";
 
 import { BillingActionButton } from "@/components/billing/billing-action-button";
 import { Card } from "@/components/ui/card";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const hasSupabaseConfig =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  const supabase = hasSupabaseConfig ? await createSupabaseServerClient() : null;
+  const {
+    data: { user },
+  } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
+
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
       <div className="space-y-2">
@@ -28,11 +38,20 @@ export default function PricingPage() {
           <li>• Manage deliveries from your account dashboard</li>
         </ul>
         <div className="flex flex-col gap-3">
-          <BillingActionButton
-            endpoint="/api/subscriptions/checkout"
-            label="Subscribe"
-            loadingLabel="Redirecting to Stripe…"
-          />
+          {user ? (
+            <BillingActionButton
+              endpoint="/api/subscriptions/checkout"
+              label="Subscribe"
+              loadingLabel="Redirecting to Stripe…"
+            />
+          ) : (
+            <Link
+              href="/login"
+              className="text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
+            >
+              Sign in to subscribe
+            </Link>
+          )}
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Already subscribed?{" "}
             <Link
