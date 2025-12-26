@@ -15,7 +15,7 @@ const geocodeSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { data: auth, error: authError } = await supabase.auth.getUser();
 
   if (authError || !auth.user) {

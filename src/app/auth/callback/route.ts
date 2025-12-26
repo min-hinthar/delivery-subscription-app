@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/login", url.origin));
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {

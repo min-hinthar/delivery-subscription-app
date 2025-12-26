@@ -3,9 +3,16 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 import { getSupabaseConfig } from "./env";
 
-export async function createSupabaseServerClient() {
+type SupabaseServerOptions = {
+  allowSetCookies?: boolean;
+};
+
+export async function createSupabaseServerClient(
+  options: SupabaseServerOptions = {},
+) {
   const { url, anonKey } = getSupabaseConfig();
   const cookieStore = await cookies();
+  const allowSetCookies = options.allowSetCookies ?? false;
 
   return createServerClient(url, anonKey, {
     cookies: {
@@ -22,6 +29,10 @@ export async function createSupabaseServerClient() {
           options: CookieOptions;
         }>,
       ) {
+        if (!allowSetCookies) {
+          return;
+        }
+
         cookiesToSet.forEach(({ name, value, options }) => {
           cookieStore.set({ name, value, ...options });
         });
