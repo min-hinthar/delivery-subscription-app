@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AppGuardProps = {
@@ -43,6 +44,18 @@ export default async function AppGuard({ children }: AppGuardProps) {
         </div>
       </div>
     );
+  }
+
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const adminClient = createSupabaseAdminClient();
+    await adminClient.from("profiles").upsert({
+      id: data.user.id,
+      email: data.user.email,
+      full_name:
+        data.user.user_metadata?.full_name ??
+        data.user.user_metadata?.name ??
+        null,
+    });
   }
 
   return children;
