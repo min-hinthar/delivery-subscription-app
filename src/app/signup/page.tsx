@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AuthForm } from "@/components/auth/auth-form";
 import { Card } from "@/components/ui/card";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default function SignupPage() {
+export default async function SignupPage() {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
@@ -18,6 +20,15 @@ export default function SignupPage() {
         </p>
       </div>
     );
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect("/account");
   }
 
   return (

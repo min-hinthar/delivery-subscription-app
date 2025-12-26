@@ -70,6 +70,19 @@ export default async function AccountPage() {
     .eq("user_id", user.id)
     .limit(1);
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, phone, email")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const { data: address } = await supabase
+    .from("addresses")
+    .select("line1, line2, city, state, postal_code, country, instructions, is_primary")
+    .eq("user_id", user.id)
+    .eq("is_primary", true)
+    .maybeSingle();
+
   const subscription = subscriptionRows?.[0] ?? null;
   const hasStripeCustomer = Boolean(customerRows?.length);
   const statusLabel = subscription?.status
@@ -131,6 +144,73 @@ export default async function AccountPage() {
           </Link>
         </div>
       </Card>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+            <span role="img" aria-label="Profile">
+              🧑‍🍳
+            </span>
+            Profile details
+          </div>
+          <div className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+            <p className="text-slate-500 dark:text-slate-400">Name</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100">
+              {profile?.full_name ?? "Add your name in onboarding"}
+            </p>
+          </div>
+          <div className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+            <p className="text-slate-500 dark:text-slate-400">Phone</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100">
+              {profile?.phone ?? "Add your phone for delivery updates"}
+            </p>
+          </div>
+          <div className="space-y-1 text-sm text-slate-600 dark:text-slate-300">
+            <p className="text-slate-500 dark:text-slate-400">Email</p>
+            <p className="font-medium text-slate-900 dark:text-slate-100">
+              {profile?.email ?? user.email ?? "Add an email address"}
+            </p>
+          </div>
+          <Link
+            href="/onboarding"
+            className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
+          >
+            Update profile details
+          </Link>
+        </Card>
+        <Card className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+            <span role="img" aria-label="Home">
+              🏡
+            </span>
+            Primary delivery address
+          </div>
+          {address ? (
+            <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <p className="font-medium text-slate-900 dark:text-slate-100">{address.line1}</p>
+              {address.line2 ? <p>{address.line2}</p> : null}
+              <p>
+                {address.city}, {address.state} {address.postal_code}
+              </p>
+              <p>{address.country}</p>
+              {address.instructions ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Notes: {address.instructions}
+                </p>
+              ) : null}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Add a delivery address to start scheduling.
+            </p>
+          )}
+          <Link
+            href="/onboarding"
+            className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
+          >
+            Update delivery address
+          </Link>
+        </Card>
+      </div>
     </div>
   );
 }
