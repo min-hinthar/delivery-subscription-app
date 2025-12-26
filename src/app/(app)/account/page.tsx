@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { BillingActionButton } from "@/components/billing/billing-action-button";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -130,6 +131,7 @@ export default async function AccountPage() {
               View plans
             </Link>
           )}
+          <LogoutButton />
           <Link
             href="/schedule"
             className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"

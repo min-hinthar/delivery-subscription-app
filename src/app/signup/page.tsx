@@ -42,7 +42,7 @@ export default async function SignupPage() {
         </div>
         <h1 className="text-3xl font-semibold text-foreground">Create your account</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Share your email and phone to get a signup link and schedule deliveries.
+          Share your email to get a signup link and schedule deliveries.
         </p>
       </div>
       <Card className="space-y-4">

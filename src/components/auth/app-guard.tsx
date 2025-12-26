@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -57,6 +58,23 @@ export default async function AppGuard({ children }: AppGuardProps) {
         null,
       phone: data.user.user_metadata?.phone ?? null,
     });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", data.user.id)
+    .maybeSingle();
+
+  const { data: primaryAddress } = await supabase
+    .from("addresses")
+    .select("id")
+    .eq("user_id", data.user.id)
+    .eq("is_primary", true)
+    .maybeSingle();
+
+  if (!profile?.full_name || !primaryAddress?.id) {
+    redirect("/onboarding");
   }
 
   return children;

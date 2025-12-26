@@ -42,7 +42,7 @@ export default async function LoginPage() {
         </div>
         <h1 className="text-3xl font-semibold text-foreground">Login</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Enter your email and phone to get a magic link.
+          Enter your email to get a magic link.
         </p>
       </div>
       <Card className="space-y-4">
