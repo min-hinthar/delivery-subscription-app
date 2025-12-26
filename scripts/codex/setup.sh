@@ -7,7 +7,7 @@ corepack enable
 if [ ! -f package.json ]; then
   echo "==> No package.json found. Scaffolding Next.js app into a temp dir (repo is not empty)..."
 
-  tmp=".codex_next_scaffold"
+  tmp="codex_next_scaffold"
   rm -rf "$tmp"
   mkdir -p "$tmp"
 
