@@ -27,6 +27,27 @@ type TrackingDashboardProps = {
 export function TrackingDashboard({ route, initialStops }: TrackingDashboardProps) {
   const [stops, setStops] = useState<Stop[]>(initialStops);
   const [status, setStatus] = useState<string | null>(null);
+  const polyline = route?.polyline ?? null;
+
+  const mapImage = useMemo(() => {
+    if (!polyline) {
+      return null;
+    }
+
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
+    if (!apiKey) {
+      return null;
+    }
+
+    const url = new URL("https://maps.googleapis.com/maps/api/staticmap");
+    url.searchParams.set("size", "640x360");
+    url.searchParams.set("scale", "2");
+    url.searchParams.set("maptype", "roadmap");
+    url.searchParams.set("path", `weight:4|color:0x3b82f6|enc:${polyline}`);
+    url.searchParams.set("key", apiKey);
+
+    return url.toString();
+  }, [polyline]);
 
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.stop_order - b.stop_order),
@@ -78,7 +99,7 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
+        <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 p-4 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:from-slate-950 dark:via-slate-900/70 dark:to-blue-950/30">
           <p className="font-medium">Route overview</p>
           <p className="text-slate-500 dark:text-slate-400">
             Status: {route?.status ?? "Pending"}
@@ -89,17 +110,40 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           <p className="text-slate-500 dark:text-slate-400">
             Duration: {route?.duration_seconds ? `${route.duration_seconds} s` : "TBD"}
           </p>
-          {route?.polyline ? (
-            <p className="mt-2 break-all text-xs text-slate-400">
-              Polyline: {route.polyline}
-            </p>
-          ) : null}
+          <p className="mt-2 text-xs text-slate-400">
+            {route?.polyline ? "Live route synced from operations." : "Waiting for route build."}
+          </p>
         </div>
-        <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
+        <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-white via-amber-50/80 to-rose-50/70 p-4 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:from-slate-950 dark:via-amber-950/30 dark:to-rose-950/30">
           <p className="font-medium">Realtime updates</p>
           <p className="text-slate-500 dark:text-slate-400">
             {status ?? "Waiting for driver updates."}
           </p>
+          <p className="mt-2 text-xs text-slate-400">
+            We&apos;ll refresh ETAs as each stop status changes.
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/40">
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
+            Delivery map
+          </p>
+          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+            {sortedStops.length} stops
+          </span>
+        </div>
+        <div className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">
+          {mapImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={mapImage} alt="Delivery route map" className="h-full w-full" />
+          ) : (
+            <div className="flex h-56 items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+              Map preview unavailable. Add NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY and build
+              routes.
+            </div>
+          )}
         </div>
       </div>
 

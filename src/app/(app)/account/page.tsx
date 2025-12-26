@@ -1,7 +1,11 @@
 import Link from "next/link";
 
-import { BillingActionButton } from "@/components/billing/billing-action-button";
+import {
+  AppointmentsCard,
+  type ScheduledAppointment,
+} from "@/components/account/appointments-card";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { BillingActionButton } from "@/components/billing/billing-action-button";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -84,6 +88,15 @@ export default async function AccountPage() {
     .eq("is_primary", true)
     .maybeSingle();
 
+  const { data: appointments } = await supabase
+    .from("delivery_appointments")
+    .select(
+      "id, week_of, status, delivery_window:delivery_windows(day_of_week,start_time,end_time)",
+    )
+    .eq("user_id", user.id)
+    .order("week_of", { ascending: true })
+    .limit(3);
+
   const subscription = subscriptionRows?.[0] ?? null;
   const hasStripeCustomer = Boolean(customerRows?.length);
   const statusLabel = subscription?.status
@@ -99,7 +112,7 @@ export default async function AccountPage() {
           Manage your profile, addresses, and subscription status.
         </p>
       </div>
-      <Card className="space-y-4">
+      <Card className="space-y-4 bg-gradient-to-br from-white via-amber-50/80 to-rose-50/70 dark:from-slate-950 dark:via-slate-900/80 dark:to-rose-950/30">
         <div className="space-y-1">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Subscription status
@@ -146,8 +159,11 @@ export default async function AccountPage() {
           </Link>
         </div>
       </Card>
+      <AppointmentsCard
+        appointments={(appointments ?? []) as unknown as ScheduledAppointment[]}
+      />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="space-y-3">
+        <Card className="space-y-3 bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/30">
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
             <span role="img" aria-label="Profile">
               🧑‍🍳
@@ -179,7 +195,7 @@ export default async function AccountPage() {
             Update profile details
           </Link>
         </Card>
-        <Card className="space-y-3">
+        <Card className="space-y-3 bg-gradient-to-br from-white via-slate-50 to-sky-50/60 dark:from-slate-950 dark:via-slate-900/70 dark:to-sky-950/30">
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
             <span role="img" aria-label="Home">
               🏡

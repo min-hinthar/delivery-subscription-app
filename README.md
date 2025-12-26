@@ -126,6 +126,7 @@ Enable APIs:
 Set:
 - GOOGLE_MAPS_API_KEY (server)
 - NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID (client map styling)
+- NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY (client map rendering)
 
 ### 7) Run dev
 pnpm dev
