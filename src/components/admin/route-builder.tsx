@@ -12,6 +12,7 @@ type Appointment = {
   customer: string;
   window: string;
   address: string;
+  hasAddress: boolean;
 };
 
 type RouteBuilderProps = {
@@ -51,6 +52,16 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
       .filter((stop) => stop.order > 0)
       .sort((a, b) => a.order - b.order);
   }, [appointments, stopOrders]);
+
+  const missingAddressCount = useMemo(
+    () => appointments.filter((appointment) => !appointment.hasAddress).length,
+    [appointments],
+  );
+
+  const hasDuplicateOrders = useMemo(() => {
+    const values = orderedStops.map((stop) => stop.order);
+    return new Set(values).size !== values.length;
+  }, [orderedStops]);
 
   function handleWeekChange(value: string) {
     startTransition(() => {
@@ -144,7 +155,10 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             />
           </label>
           <div className="flex items-end">
-            <Button onClick={handleBuild} disabled={orderedStops.length < 2}>
+            <Button
+              onClick={handleBuild}
+              disabled={orderedStops.length < 2 || hasDuplicateOrders || missingAddressCount > 0}
+            >
               Build directions
             </Button>
           </div>
@@ -152,6 +166,16 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}
           </div>
         </div>
+        {missingAddressCount > 0 ? (
+          <p className="text-xs text-rose-600">
+            Add a delivery address for every appointment before building a route.
+          </p>
+        ) : null}
+        {hasDuplicateOrders ? (
+          <p className="text-xs text-amber-600">
+            Stop order values must be unique.
+          </p>
+        ) : null}
       </Card>
 
       <Card className="space-y-4 p-6">
@@ -186,8 +210,14 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {appointment.window}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {appointment.address}
+                <p
+                  className={`text-xs ${
+                    appointment.hasAddress
+                      ? "text-slate-500 dark:text-slate-400"
+                      : "text-rose-600"
+                  }`}
+                >
+                  {appointment.hasAddress ? appointment.address : "Missing address"}
                 </p>
               </div>
               <label className="flex items-center gap-2 text-xs font-medium">

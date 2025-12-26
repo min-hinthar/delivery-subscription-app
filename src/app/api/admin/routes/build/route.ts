@@ -45,7 +45,17 @@ export async function POST(request: Request) {
   }
 
   const orderedStops = [...parsed.data.stop_order].sort((a, b) => a.order - b.order);
+  const orderValues = orderedStops.map((stop) => stop.order);
+  const uniqueOrders = new Set(orderValues);
+  if (uniqueOrders.size !== orderedStops.length) {
+    return bad("Stop order values must be unique.", { status: 422 });
+  }
+
   const appointmentIds = orderedStops.map((stop) => stop.appointment_id);
+  const uniqueAppointments = new Set(appointmentIds);
+  if (uniqueAppointments.size !== appointmentIds.length) {
+    return bad("Stop appointments must be unique.", { status: 422 });
+  }
 
   const { data: existingRoute } = await supabase
     .from("delivery_routes")
@@ -99,7 +109,12 @@ export async function POST(request: Request) {
   const { data: appointments } = await supabase
     .from("delivery_appointments")
     .select("id, address:addresses(line1,line2,city,state,postal_code)")
+    .eq("week_of", parsed.data.week_of)
     .in("id", appointmentIds);
+  const appointmentIdsFromWeek = appointments?.map((appointment) => appointment.id) ?? [];
+  if (appointmentIdsFromWeek.length !== appointmentIds.length) {
+    return bad("Some appointments are missing for this week.", { status: 422 });
+  }
 
   const addressMap = new Map(
     ((appointments ?? []) as unknown as AppointmentRow[]).map((appointment) => [
@@ -145,6 +160,12 @@ export async function POST(request: Request) {
           eta: new Date(now + cumulativeSeconds * 1000).toISOString(),
         };
       });
+
+      await supabase
+        .from("delivery_stops")
+        .update({ eta: new Date(now).toISOString() })
+        .eq("route_id", route.id)
+        .eq("appointment_id", orderedStops[0]?.appointment_id ?? "");
 
       for (const update of etaUpdates) {
         await supabase

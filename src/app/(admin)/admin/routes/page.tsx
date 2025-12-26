@@ -85,28 +85,29 @@ export default async function AdminRoutesPage({
 
   const formattedAppointments = ((appointments ?? []) as unknown as AppointmentRow[]).map(
     (appointment) => ({
-    id: appointment.id,
-    customer: appointment.profile?.full_name ?? "Unnamed subscriber",
-    window: formatWindow(
-      appointment.delivery_window ?? {
-        day_of_week: null,
-        start_time: null,
-        end_time: null,
-      },
-    ),
-    address: [
-      appointment.address?.line1,
-      appointment.address?.line2,
-      [
-        appointment.address?.city,
-        appointment.address?.state,
-        appointment.address?.postal_code,
+      id: appointment.id,
+      customer: appointment.profile?.full_name ?? "Unnamed subscriber",
+      window: formatWindow(
+        appointment.delivery_window ?? {
+          day_of_week: null,
+          start_time: null,
+          end_time: null,
+        },
+      ),
+      address: [
+        appointment.address?.line1,
+        appointment.address?.line2,
+        [
+          appointment.address?.city,
+          appointment.address?.state,
+          appointment.address?.postal_code,
+        ]
+          .filter(Boolean)
+          .join(" "),
       ]
         .filter(Boolean)
-        .join(" "),
-    ]
-      .filter(Boolean)
-      .join(", "),
+        .join(", "),
+      hasAddress: Boolean(appointment.address?.line1),
     }),
   );
 
