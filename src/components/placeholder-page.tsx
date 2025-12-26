@@ -25,7 +25,7 @@ export function PlaceholderPage({ title, description, actions }: PlaceholderPage
               <Link
                 key={action.href}
                 href={action.href}
-                className="text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
+                className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
               >
                 {action.label}
               </Link>

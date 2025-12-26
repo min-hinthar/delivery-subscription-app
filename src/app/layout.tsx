@@ -30,13 +30,13 @@ export default function RootLayout({
                 <div className="flex items-center gap-3 text-sm">
                   <Link
                     href="/pricing"
-                    className="text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                    className="text-slate-500 transition hover:-translate-y-0.5 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                   >
                     Pricing
                   </Link>
                   <Link
                     href="/account"
-                    className="text-slate-500 transition hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                    className="text-slate-500 transition hover:-translate-y-0.5 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                   >
                     Account
                   </Link>
