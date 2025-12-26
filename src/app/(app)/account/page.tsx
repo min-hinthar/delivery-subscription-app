@@ -73,7 +73,7 @@ export default async function AccountPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, phone, email")
+    .select("full_name, phone, email, onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 

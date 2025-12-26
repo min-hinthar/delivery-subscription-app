@@ -86,6 +86,7 @@ export function OnboardingForm({ userId, initialProfile, primaryAddress }: Onboa
         full_name: fullName,
         phone,
         email,
+        onboarding_completed: true,
       });
 
       if (profileError) {
@@ -113,7 +114,8 @@ export function OnboardingForm({ userId, initialProfile, primaryAddress }: Onboa
         throw addressError;
       }
 
-      setMessage("Profile saved! You can now schedule your delivery.");
+      setMessage("Profile saved! Redirecting to your account…");
+      router.push("/account");
       router.refresh();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Unable to save your details.");
