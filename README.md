@@ -107,6 +107,11 @@ STRIPE_SECRET_KEY
 STRIPE_WEBHOOK_SECRET (from Stripe CLI or dashboard endpoint)
 NEXT_PUBLIC_STRIPE_PRICE_WEEKLY (Price ID)
 
+Webhook events handled:
+- checkout.session.completed (customer mapping)
+- customer.subscription.created/updated/deleted (subscription cache)
+- invoice.payment_succeeded / invoice.payment_failed (payment cache)
+
 ### 5) Webhooks (local)
 Use Stripe CLI to forward events to:
 - POST /api/stripe/webhook
