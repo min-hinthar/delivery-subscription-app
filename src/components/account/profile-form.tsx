@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { addressInputSchema, onboardingInputSchema } from "@/lib/api/types";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type ProfileFormProps = {
-  userId: string;
   profile?: {
     full_name: string | null;
     phone: string | null;
@@ -26,7 +24,7 @@ type ProfileFormProps = {
   } | null;
 };
 
-export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProps) {
+export function ProfileForm({ profile, primaryAddress }: ProfileFormProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
@@ -74,38 +72,29 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
     setIsSaving(true);
 
     try {
-      const supabase = createSupabaseBrowserClient();
-
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: userId,
-        full_name: fullName,
-        phone,
-        email: profile?.email ?? null,
+      const response = await fetch("/api/account/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          phone,
+          address: {
+            id: primaryAddress?.id ?? null,
+            line1: addressParsed.data.line1,
+            line2: addressParsed.data.line2,
+            city: addressParsed.data.city,
+            state: addressParsed.data.state,
+            postal_code: addressParsed.data.postalCode,
+            country: addressParsed.data.country,
+            instructions: addressParsed.data.instructions,
+          },
+        }),
       });
 
-      if (profileError) {
-        throw profileError;
-      }
+      const payload = await response.json();
 
-      const addressPayload = {
-        id: primaryAddress?.id,
-        user_id: userId,
-        line1: addressParsed.data.line1,
-        line2: addressParsed.data.line2,
-        city: addressParsed.data.city,
-        state: addressParsed.data.state,
-        postal_code: addressParsed.data.postalCode,
-        country: addressParsed.data.country,
-        instructions: addressParsed.data.instructions,
-        is_primary: true,
-      };
-
-      const { error: addressError } = await supabase
-        .from("addresses")
-        .upsert(addressPayload, { onConflict: "id" });
-
-      if (addressError) {
-        throw addressError;
+      if (!payload.ok) {
+        throw new Error(payload.error?.message ?? "Unable to save your details.");
       }
 
       setMessage("Profile updated!");

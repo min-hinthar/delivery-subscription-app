@@ -110,6 +110,7 @@ NEXT_PUBLIC_STRIPE_PRICE_WEEKLY (Price ID)
 Webhook events handled:
 - checkout.session.completed (customer mapping)
 - customer.subscription.created/updated/deleted (subscription cache)
+- invoice.paid (subscription cache refresh)
 - invoice.payment_succeeded / invoice.payment_failed (payment cache)
 
 ### 5) Webhooks (local)

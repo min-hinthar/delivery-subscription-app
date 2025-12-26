@@ -60,7 +60,7 @@ export default async function ProfilePage() {
         </p>
       </div>
       <Card>
-        <ProfileForm userId={user.id} profile={profile} primaryAddress={address} />
+        <ProfileForm profile={profile} primaryAddress={address} />
       </Card>
     </div>
   );

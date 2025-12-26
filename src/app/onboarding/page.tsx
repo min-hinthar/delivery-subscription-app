@@ -62,7 +62,7 @@ export default async function OnboardingPage() {
         </p>
       </div>
       <Card>
-        <OnboardingForm userId={user.id} initialProfile={profile} primaryAddress={address} />
+        <OnboardingForm initialProfile={profile} primaryAddress={address} />
       </Card>
     </div>
   );
