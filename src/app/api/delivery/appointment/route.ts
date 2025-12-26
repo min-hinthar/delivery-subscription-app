@@ -62,6 +62,16 @@ export async function POST(request: Request) {
     return bad("Selected delivery window is full.", { status: 409 });
   }
 
+  const addressId =
+    parsed.data.address_id ??
+    (await supabase
+      .from("addresses")
+      .select("id")
+      .eq("user_id", auth.user.id)
+      .eq("is_primary", true)
+      .maybeSingle()).data?.id ??
+    null;
+
   const { data: appointment, error } = await supabase
     .from("delivery_appointments")
     .upsert(
@@ -69,7 +79,7 @@ export async function POST(request: Request) {
         user_id: auth.user.id,
         week_of: parsed.data.week_of,
         delivery_window_id: parsed.data.delivery_window_id,
-        address_id: parsed.data.address_id ?? null,
+        address_id: addressId,
         notes: parsed.data.notes ?? null,
         updated_at: new Date().toISOString(),
       },
