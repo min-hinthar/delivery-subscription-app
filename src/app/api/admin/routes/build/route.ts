@@ -47,18 +47,40 @@ export async function POST(request: Request) {
   const orderedStops = [...parsed.data.stop_order].sort((a, b) => a.order - b.order);
   const appointmentIds = orderedStops.map((stop) => stop.appointment_id);
 
-  const { data: route, error: routeError } = await supabase
+  const { data: existingRoute } = await supabase
     .from("delivery_routes")
-    .insert({
-      week_of: parsed.data.week_of,
-      name: parsed.data.name ?? "Weekend Route",
-      status: "planned",
-    })
-    .select("id, week_of, name")
+    .select("id")
+    .eq("week_of", parsed.data.week_of)
+    .order("created_at", { ascending: false })
+    .limit(1)
     .maybeSingle();
+
+  const routePayload = {
+    week_of: parsed.data.week_of,
+    name: parsed.data.name ?? "Weekend Route",
+    status: "planned",
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: route, error: routeError } = existingRoute?.id
+    ? await supabase
+        .from("delivery_routes")
+        .update(routePayload)
+        .eq("id", existingRoute.id)
+        .select("id, week_of, name")
+        .maybeSingle()
+    : await supabase
+        .from("delivery_routes")
+        .insert(routePayload)
+        .select("id, week_of, name")
+        .maybeSingle();
 
   if (routeError || !route) {
     return bad("Failed to create route.", { status: 500 });
+  }
+
+  if (existingRoute?.id) {
+    await supabase.from("delivery_stops").delete().eq("route_id", route.id);
   }
 
   const stopRows = orderedStops.map((stop) => ({
@@ -100,6 +122,10 @@ export async function POST(request: Request) {
     )
     .filter((value) => value.length > 0);
 
+  if (addressList.length !== orderedStops.length) {
+    return bad("Missing addresses for one or more stops.", { status: 422 });
+  }
+
   if (addressList.length >= 2) {
     try {
       const directions = await directionsRoute({
@@ -107,6 +133,26 @@ export async function POST(request: Request) {
         destination: addressList[addressList.length - 1],
         waypoints: addressList.slice(1, -1),
       });
+
+      const now = Date.now();
+      let cumulativeSeconds = 0;
+
+      const etaUpdates = directions.legs.map((leg, index) => {
+        cumulativeSeconds += leg.durationSeconds;
+        const targetStop = orderedStops[index + 1];
+        return {
+          appointment_id: targetStop.appointment_id,
+          eta: new Date(now + cumulativeSeconds * 1000).toISOString(),
+        };
+      });
+
+      for (const update of etaUpdates) {
+        await supabase
+          .from("delivery_stops")
+          .update({ eta: update.eta })
+          .eq("route_id", route.id)
+          .eq("appointment_id", update.appointment_id);
+      }
 
       await supabase
         .from("delivery_routes")
