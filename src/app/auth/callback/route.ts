@@ -30,5 +30,20 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  if (next.startsWith("/admin")) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+      .maybeSingle();
+
+    if (!profile?.is_admin) {
+      const redirectUrl = new URL("/account", url.origin);
+      redirectUrl.searchParams.set("error", "insufficient_access");
+      redirectUrl.searchParams.set("message", "Admin access required.");
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
   return NextResponse.redirect(new URL(next, url.origin));
 }
