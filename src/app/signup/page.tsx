@@ -6,10 +6,16 @@ import { AuthForm } from "@/components/auth/auth-form";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-export default async function SignupPage() {
+export default async function SignupPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ next?: string }>;
+}) {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
   if (!hasSupabaseConfig) {
     return (
@@ -29,7 +35,7 @@ export default async function SignupPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/account");
+    redirect(resolvedSearchParams?.next ?? "/account");
   }
 
   return (
@@ -48,7 +54,7 @@ export default async function SignupPage() {
       </div>
       <Card className="space-y-4">
         <AuthAlert />
-        <AuthForm mode="signup" />
+        <AuthForm mode="signup" redirectPath={resolvedSearchParams?.next} />
         <div className="text-sm text-slate-500 dark:text-slate-400">
           Already have an account?{" "}
           <Link

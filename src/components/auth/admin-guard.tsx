@@ -35,7 +35,7 @@ export default async function AdminGuard({ children }: AdminGuardProps) {
         </p>
         <div className="flex justify-center">
           <Link
-            href="/login"
+            href="/login?next=/admin"
             className="text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
           >
             Go to login
