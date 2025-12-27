@@ -189,5 +189,20 @@ export async function POST(request: Request) {
     }
   }
 
-  return ok({ route_id: route.id });
+  const { data: updatedRoute } = await supabase
+    .from("delivery_routes")
+    .select("id, week_of, status, polyline, distance_meters, duration_seconds")
+    .eq("id", route.id)
+    .maybeSingle();
+
+  return ok({
+    route: updatedRoute ?? {
+      id: route.id,
+      week_of: parsed.data.week_of,
+      status: "planned",
+      polyline: null,
+      distance_meters: null,
+      duration_seconds: null,
+    },
+  });
 }

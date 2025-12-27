@@ -98,6 +98,11 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     }
 
     setStatus("Route created and directions synced.");
+    if (payload.data?.route) {
+      setRouteSummary(payload.data.route);
+    } else {
+      await fetchRouteSummary(selectedWeek, setRouteSummary);
+    }
     await fetchRouteSummary(selectedWeek, setRouteSummary);
   }
 
