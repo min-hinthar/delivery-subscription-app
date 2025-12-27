@@ -18,8 +18,15 @@ type Appointment = {
   } | null;
 };
 
+type RouteSummary = {
+  polyline: string | null;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+};
+
 type AppointmentsCardProps = {
   appointments: Appointment[];
+  route?: RouteSummary | null;
 };
 
 function formatWeek(date: string) {
@@ -55,7 +62,7 @@ function formatWindow(window: Appointment["delivery_window"]) {
   return `${window.day_of_week} ${window.start_time}–${window.end_time}`;
 }
 
-export function AppointmentsCard({ appointments }: AppointmentsCardProps) {
+export function AppointmentsCard({ appointments, route }: AppointmentsCardProps) {
   return (
     <Card className="space-y-4 bg-gradient-to-br from-white/90 via-white to-rose-50/60 dark:from-slate-900 dark:via-slate-950 dark:to-rose-950/20">
       <div className="flex items-center justify-between">
@@ -103,6 +110,12 @@ export function AppointmentsCard({ appointments }: AppointmentsCardProps) {
           ))
         )}
       </div>
+      {route ? (
+        <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <span>Route distance: {route.distance_meters ?? 0} m</span>
+          <span>Route duration: {route.duration_seconds ?? 0} s</span>
+        </div>
+      ) : null}
       <p className="text-xs text-slate-400">
         Cutoff times are calculated in Pacific Time and lock at Friday 5:00 PM PT.
       </p>

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { RouteMap } from "@/components/maps/route-map";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { KITCHEN_ORIGIN } from "@/lib/maps/route";
 
 type Appointment = {
   id: string;
@@ -63,7 +64,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     return new Set(values).size !== values.length;
   }, [orderedStops]);
 
-  const canBuild = orderedStops.length >= 2 && !hasDuplicateOrders && missingAddressCount === 0;
+  const canBuild = orderedStops.length >= 1 && !hasDuplicateOrders && missingAddressCount === 0;
 
   function handleWeekChange(value: string) {
     startTransition(() => {
@@ -81,8 +82,8 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
 
   async function handleBuild() {
     if (!canBuild) {
-      if (orderedStops.length < 2) {
-        setStatus("Add at least two stops to build directions.");
+      if (orderedStops.length < 1) {
+        setStatus("Add at least one stop to build directions.");
       } else if (hasDuplicateOrders) {
         setStatus("Stop order values must be unique.");
       } else if (missingAddressCount > 0) {
@@ -191,6 +192,9 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             Stop order values must be unique.
           </p>
         ) : null}
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Routes always start from {KITCHEN_ORIGIN}.
+        </p>
       </Card>
 
       <Card className="space-y-4 p-6">
@@ -207,6 +211,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
         </div>
         <RouteMap polyline={routeSummary?.polyline ?? null} />
         <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <span>Origin: {KITCHEN_ORIGIN}</span>
           <span>Distance: {routeSummary?.distance_meters ?? 0} m</span>
           <span>Duration: {routeSummary?.duration_seconds ?? 0} s</span>
         </div>

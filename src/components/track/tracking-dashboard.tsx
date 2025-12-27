@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RouteMap } from "@/components/maps/route-map";
+import { KITCHEN_ORIGIN } from "@/lib/maps/route";
 
 type Stop = {
   id: string;
@@ -115,6 +116,11 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
         </div>
         <div className="mt-3">
           <RouteMap polyline={route?.polyline ?? null} />
+        </div>
+        <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <span>Origin: {KITCHEN_ORIGIN}</span>
+          <span>Distance: {route?.distance_meters ?? 0} m</span>
+          <span>Duration: {route?.duration_seconds ?? 0} s</span>
         </div>
       </div>
 

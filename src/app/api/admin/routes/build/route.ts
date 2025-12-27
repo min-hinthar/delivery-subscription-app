@@ -3,6 +3,7 @@ import { z } from "zod";
 import { bad, ok } from "@/lib/api/response";
 import { requireAdmin } from "@/lib/auth/admin";
 import { directionsRoute, toPrintableAddress } from "@/lib/maps/google";
+import { KITCHEN_ORIGIN } from "@/lib/maps/route";
 
 const buildRouteSchema = z.object({
   week_of: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -14,7 +15,7 @@ const buildRouteSchema = z.object({
         order: z.number().int().min(1),
       }),
     )
-    .min(2),
+    .min(1),
 });
 
 type Address = {
@@ -141,12 +142,12 @@ export async function POST(request: Request) {
     return bad("Missing addresses for one or more stops.", { status: 422 });
   }
 
-  if (addressList.length >= 2) {
+  if (addressList.length >= 1) {
     try {
       const directions = await directionsRoute({
-        origin: addressList[0],
+        origin: KITCHEN_ORIGIN,
         destination: addressList[addressList.length - 1],
-        waypoints: addressList.slice(1, -1),
+        waypoints: addressList.length > 1 ? addressList.slice(0, -1) : undefined,
       });
 
       const now = Date.now();
@@ -154,18 +155,12 @@ export async function POST(request: Request) {
 
       const etaUpdates = directions.legs.map((leg, index) => {
         cumulativeSeconds += leg.durationSeconds;
-        const targetStop = orderedStops[index + 1];
+        const targetStop = orderedStops[index];
         return {
           appointment_id: targetStop.appointment_id,
           eta: new Date(now + cumulativeSeconds * 1000).toISOString(),
         };
       });
-
-      await supabase
-        .from("delivery_stops")
-        .update({ eta: new Date(now).toISOString() })
-        .eq("route_id", route.id)
-        .eq("appointment_id", orderedStops[0]?.appointment_id ?? "");
 
       for (const update of etaUpdates) {
         await supabase

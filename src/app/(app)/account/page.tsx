@@ -97,6 +97,13 @@ export default async function AccountPage() {
     .order("week_of", { ascending: true })
     .limit(3);
 
+  const { data: recentRoute } = await supabase
+    .from("delivery_routes")
+    .select("polyline, distance_meters, duration_seconds")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
   const subscription = subscriptionRows?.[0] ?? null;
   const hasStripeCustomer = Boolean(customerRows?.length);
   const statusLabel = subscription?.status
@@ -161,6 +168,7 @@ export default async function AccountPage() {
       </Card>
       <AppointmentsCard
         appointments={(appointments ?? []) as unknown as ScheduledAppointment[]}
+        route={recentRoute}
       />
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="space-y-3 bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/30">
