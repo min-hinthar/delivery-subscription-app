@@ -63,6 +63,8 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     return new Set(values).size !== values.length;
   }, [orderedStops]);
 
+  const canBuild = orderedStops.length >= 2 && !hasDuplicateOrders && missingAddressCount === 0;
+
   function handleWeekChange(value: string) {
     startTransition(() => {
       router.replace(`/admin/routes?week_of=${value}`);
@@ -78,6 +80,17 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
   }
 
   async function handleBuild() {
+    if (!canBuild) {
+      if (orderedStops.length < 2) {
+        setStatus("Add at least two stops to build directions.");
+      } else if (hasDuplicateOrders) {
+        setStatus("Stop order values must be unique.");
+      } else if (missingAddressCount > 0) {
+        setStatus("Add delivery addresses for all stops before building.");
+      }
+      return;
+    }
+
     setStatus(null);
 
     const response = await fetch("/api/admin/routes/build", {
@@ -160,10 +173,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             />
           </label>
           <div className="flex items-end">
-            <Button
-              onClick={handleBuild}
-              disabled={orderedStops.length < 2 || hasDuplicateOrders || missingAddressCount > 0}
-            >
+            <Button onClick={handleBuild} disabled={!canBuild}>
               Build directions
             </Button>
           </div>
