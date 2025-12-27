@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthAlert } from "@/components/auth/auth-alert";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -46,6 +47,7 @@ export default async function SignupPage() {
         </p>
       </div>
       <Card className="space-y-4">
+        <AuthAlert />
         <AuthForm mode="signup" />
         <div className="text-sm text-slate-500 dark:text-slate-400">
           Already have an account?{" "}

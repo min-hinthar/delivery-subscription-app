@@ -29,6 +29,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const handleEmailAuth = async () => {
     setError(null);
@@ -66,6 +67,41 @@ export function AuthForm({ mode }: AuthFormProps) {
       setError(caught instanceof Error ? caught.message : "Authentication failed.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setError(null);
+    setMessage(null);
+
+    if (!email) {
+      setError(DEFAULT_ERRORS.missingEmail);
+      return;
+    }
+
+    setIsResending(true);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const redirectPath = EMAIL_REDIRECTS[mode];
+
+      const { error: otpError } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectPath}`,
+          shouldCreateUser: mode === "signup",
+        },
+      });
+
+      if (otpError) {
+        throw otpError;
+      }
+
+      setMessage("Fresh login link sent. Check your email.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Unable to resend link.");
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -110,6 +146,13 @@ export function AuthForm({ mode }: AuthFormProps) {
             : mode === "signup"
               ? "Email me a signup link"
               : "Email me a login link"}
+        </Button>
+        <Button
+          onClick={handleResend}
+          disabled={isResending || isLoading}
+          className="bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+        >
+          {isResending ? "Resending…" : "Resend link"}
         </Button>
       </div>
       {error ? (
