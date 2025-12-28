@@ -105,6 +105,26 @@ export function RouteBuilder({
       });
   }, [appointments, routeStops.length, routeSummary]);
 
+  const shareUrl = useMemo(() => {
+    if (!routeSummary || routeStops.length === 0) {
+      return null;
+    }
+
+    const sortedStops = [...routeStops].sort((a, b) => a.stop_order - b.stop_order);
+    const origin = encodeURIComponent(KITCHEN_ORIGIN);
+    const destination = encodeURIComponent(sortedStops[sortedStops.length - 1].address);
+    const waypointAddresses = sortedStops
+      .slice(0, -1)
+      .map((stop) => stop.address)
+      .filter(Boolean);
+
+    const waypointParam = waypointAddresses.length
+      ? `&waypoints=${encodeURIComponent(waypointAddresses.join("|"))}`
+      : "";
+
+    return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypointParam}`;
+  }, [routeStops, routeSummary]);
+
   const missingAddressCount = useMemo(
     () => appointments.filter((appointment) => !appointment.hasAddress).length,
     [appointments],
@@ -220,6 +240,38 @@ export function RouteBuilder({
     } catch (error) {
       console.error(error);
       setStatus("Unable to build route. Check server logs for details.");
+    }
+  }
+
+  async function handleDeleteRoute() {
+    if (!selectedRouteId) {
+      return;
+    }
+
+    const confirmed = window.confirm("Delete this saved route? This cannot be undone.");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/routes/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ route_id: selectedRouteId }),
+      });
+      const payload = await response.json();
+      if (!payload.ok) {
+        setStatus(payload.error?.message ?? "Unable to delete route.");
+        return;
+      }
+      setRoutes((prev) => prev.filter((route) => route.id !== selectedRouteId));
+      setSelectedRouteId(null);
+      setRouteSummary(null);
+      setRouteStops([]);
+      setStatus("Route deleted.");
+    } catch (error) {
+      console.error(error);
+      setStatus("Unable to delete route. Check server logs for details.");
     }
   }
 
@@ -349,6 +401,25 @@ export function RouteBuilder({
           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
             {routeSummary?.status ?? "Draft"}
           </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <Button
+            onClick={handleDeleteRoute}
+            disabled={!selectedRouteId}
+            className="bg-rose-100 text-rose-700 hover:bg-rose-200 dark:bg-rose-900/40 dark:text-rose-200"
+          >
+            Delete saved route
+          </Button>
+          {shareUrl ? (
+            <a
+              href={shareUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-slate-600 underline-offset-4 hover:underline dark:text-slate-300"
+            >
+              Share Google Maps trip
+            </a>
+          ) : null}
         </div>
         <RouteMap
           polyline={routeSummary?.polyline ?? null}
