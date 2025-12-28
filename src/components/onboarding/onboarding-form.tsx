@@ -40,13 +40,20 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   const [instructions, setInstructions] = useState(primaryAddress?.instructions ?? "");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const email = useMemo(() => initialProfile?.email ?? "", [initialProfile?.email]);
 
   const handleSubmit = async () => {
     setError(null);
     setMessage(null);
+
+    if (!verifiedAddress) {
+      setError("Verify your address before saving.");
+      return;
+    }
 
     const profileParsed = onboardingInputSchema.safeParse({
       fullName,
@@ -110,6 +117,41 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       setError(caught instanceof Error ? caught.message : "Unable to save your details.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleVerifyAddress = async () => {
+    setError(null);
+    setMessage(null);
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch("/api/maps/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          line1,
+          line2: line2 || null,
+          city,
+          state,
+          postal_code: postalCode,
+          country,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!payload.ok) {
+        throw new Error(payload.error?.message ?? "Unable to verify address.");
+      }
+
+      setVerifiedAddress(payload.data.formatted_address);
+      setMessage("Address verified. You can save your profile.");
+    } catch (caught) {
+      setVerifiedAddress(null);
+      setError(caught instanceof Error ? caught.message : "Unable to verify address.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -177,7 +219,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             Address line 1
             <input
               value={line1}
-              onChange={(event) => setLine1(event.target.value)}
+              onChange={(event) => {
+                setLine1(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="123 Golden Lantern Ave"
             />
@@ -186,7 +231,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             Address line 2
             <input
               value={line2}
-              onChange={(event) => setLine2(event.target.value)}
+              onChange={(event) => {
+                setLine2(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="Apartment, suite, unit"
             />
@@ -195,7 +243,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             City
             <input
               value={city}
-              onChange={(event) => setCity(event.target.value)}
+              onChange={(event) => {
+                setCity(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="Covina"
             />
@@ -204,7 +255,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             State
             <input
               value={state}
-              onChange={(event) => setState(event.target.value)}
+              onChange={(event) => {
+                setState(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="CA"
             />
@@ -213,7 +267,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             Postal code
             <input
               value={postalCode}
-              onChange={(event) => setPostalCode(event.target.value)}
+              onChange={(event) => {
+                setPostalCode(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="91723"
             />
@@ -222,7 +279,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             Country
             <input
               value={country}
-              onChange={(event) => setCountry(event.target.value)}
+              onChange={(event) => {
+                setCountry(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="US"
             />
@@ -243,6 +303,13 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
           {isSaving ? "Saving…" : "Save profile"}
         </Button>
         <Button
+          onClick={handleVerifyAddress}
+          disabled={isVerifying || isSaving}
+          className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
+        >
+          {isVerifying ? "Verifying…" : "Verify address"}
+        </Button>
+        <Button
           onClick={() => router.push("/schedule")}
           disabled={isSaving}
           className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
@@ -253,6 +320,11 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       {error ? (
         <p className="text-sm text-red-500" role="alert">
           {error}
+        </p>
+      ) : null}
+      {verifiedAddress ? (
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Verified address: {verifiedAddress}
         </p>
       ) : null}
       {message ? (
