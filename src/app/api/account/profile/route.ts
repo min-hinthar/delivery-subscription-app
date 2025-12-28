@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { bad, ok } from "@/lib/api/response";
-import { applyCanonicalAddress, geocodeAddress } from "@/lib/maps/google";
+import { applyCanonicalAddress, assertValidAddress, geocodeAddress } from "@/lib/maps/google";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const profileUpdateSchema = z.object({
@@ -52,6 +52,7 @@ export async function POST(request: Request) {
 
   try {
     const geocode = await geocodeAddress(addressString);
+    assertValidAddress(geocode);
     canonical = applyCanonicalAddress(geocode);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to validate address.";

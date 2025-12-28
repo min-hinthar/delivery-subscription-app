@@ -137,6 +137,16 @@ export async function geocodeAddress(address: string) {
   return parseGeocodeResult(data.results[0]);
 }
 
+export function assertValidAddress(result: GeocodeResult) {
+  const { components } = result;
+  if (!components.streetNumber || !components.route) {
+    throw new Error("Address must include a street number and street name.");
+  }
+  if (!components.locality || !components.administrativeArea || !components.postalCode) {
+    throw new Error("Address must include city, state, and postal code.");
+  }
+}
+
 type DirectionsApiLeg = {
   distance?: { value?: number };
   duration?: { value?: number };
