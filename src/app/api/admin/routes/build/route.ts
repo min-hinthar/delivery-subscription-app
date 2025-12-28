@@ -136,12 +136,30 @@ export async function POST(request: Request) {
 
   if (addressList.length >= 1) {
     try {
-      const directions = await directionsRoute({
+      const waypoints = addressList.length > 1 ? addressList.slice(0, -1) : undefined;
+      const optimizeWaypoints = parsed.data.optimize ?? true;
+
+      const optimizedDirections = await directionsRoute({
         origin: KITCHEN_ORIGIN,
         destination: addressList[addressList.length - 1],
-        waypoints: addressList.length > 1 ? addressList.slice(0, -1) : undefined,
-        optimizeWaypoints: parsed.data.optimize ?? true,
+        waypoints,
+        optimizeWaypoints,
       });
+
+      const fallbackDirections =
+        optimizeWaypoints && waypoints && waypoints.length > 1
+          ? await directionsRoute({
+              origin: KITCHEN_ORIGIN,
+              destination: addressList[addressList.length - 1],
+              waypoints,
+              optimizeWaypoints: false,
+            })
+          : null;
+
+      const directions =
+        fallbackDirections && fallbackDirections.durationSeconds < optimizedDirections.durationSeconds
+          ? fallbackDirections
+          : optimizedDirections;
 
       const now = Date.now();
       let cumulativeSeconds = 0;
