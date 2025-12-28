@@ -30,6 +30,17 @@ type AppointmentRow = {
   profile: Profile | null;
 };
 
+type RouteRow = {
+  id: string;
+  week_of: string;
+  name: string | null;
+  status: string;
+  polyline: string | null;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+  created_at: string;
+};
+
 function formatWindow(window: {
   day_of_week: string | null;
   start_time: string | null;
@@ -83,21 +94,31 @@ export default async function AdminRoutesPage({
     address: string;
     hasAddress: boolean;
   }> = [];
+  let availableRoutes: RouteRow[] = [];
 
   try {
-    const { data: appointments } = await withTimeout(
-      supabase
-        .from("delivery_appointments")
-        .select(
-          "id, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name)",
-        )
-        .eq("week_of", selectedWeek)
-        .order("created_at", { ascending: true }),
+    const [appointmentsResult, routesResult] = await withTimeout(
+      Promise.all([
+        supabase
+          .from("delivery_appointments")
+          .select(
+            "id, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name)",
+          )
+          .eq("week_of", selectedWeek)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("delivery_routes")
+          .select(
+            "id, week_of, name, status, polyline, distance_meters, duration_seconds, created_at",
+          )
+          .eq("week_of", selectedWeek)
+          .order("created_at", { ascending: false }),
+      ]),
       10000,
       "Timed out loading route appointments.",
     );
 
-    formattedAppointments = ((appointments ?? []) as unknown as AppointmentRow[]).map(
+    formattedAppointments = ((appointmentsResult.data ?? []) as unknown as AppointmentRow[]).map(
       (appointment) => ({
         id: appointment.id,
         customer: appointment.profile?.full_name ?? "Unnamed subscriber",
@@ -120,10 +141,11 @@ export default async function AdminRoutesPage({
             .join(" "),
         ]
           .filter(Boolean)
-          .join(", "),
+        .join(", "),
         hasAddress: Boolean(appointment.address?.line1),
       }),
     );
+    availableRoutes = (routesResult.data ?? []) as unknown as RouteRow[];
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to load route appointments.";
@@ -155,6 +177,7 @@ export default async function AdminRoutesPage({
         weekOptions={weekOptions}
         selectedWeek={selectedWeek}
         appointments={formattedAppointments}
+        initialRoutes={availableRoutes}
       />
     </div>
   );

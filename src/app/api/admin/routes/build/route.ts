@@ -59,14 +59,6 @@ export async function POST(request: Request) {
     return bad("Stop appointments must be unique.", { status: 422 });
   }
 
-  const { data: existingRoute } = await supabase
-    .from("delivery_routes")
-    .select("id")
-    .eq("week_of", parsed.data.week_of)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
   const routePayload = {
     week_of: parsed.data.week_of,
     name: parsed.data.name ?? "Weekend Route",
@@ -74,25 +66,14 @@ export async function POST(request: Request) {
     updated_at: new Date().toISOString(),
   };
 
-  const { data: route, error: routeError } = existingRoute?.id
-    ? await supabase
-        .from("delivery_routes")
-        .update(routePayload)
-        .eq("id", existingRoute.id)
-        .select("id, week_of, name")
-        .maybeSingle()
-    : await supabase
-        .from("delivery_routes")
-        .insert(routePayload)
-        .select("id, week_of, name")
-        .maybeSingle();
+  const { data: route, error: routeError } = await supabase
+    .from("delivery_routes")
+    .insert(routePayload)
+    .select("id, week_of, name")
+    .maybeSingle();
 
   if (routeError || !route) {
     return bad("Failed to create route.", { status: 500 });
-  }
-
-  if (existingRoute?.id) {
-    await supabase.from("delivery_stops").delete().eq("route_id", route.id);
   }
 
   const { data: appointments } = await supabase
@@ -211,7 +192,7 @@ export async function POST(request: Request) {
 
   const { data: updatedRoute } = await supabase
     .from("delivery_routes")
-    .select("id, week_of, status, polyline, distance_meters, duration_seconds")
+    .select("id, week_of, name, status, polyline, distance_meters, duration_seconds, created_at")
     .eq("id", route.id)
     .maybeSingle();
 
