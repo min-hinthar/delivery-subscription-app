@@ -120,21 +120,6 @@ export function RouteBuilder({
     });
   }
 
-  async function fetchRouteSummary(
-    weekOf: string,
-    onUpdate: (data: RouteSummary | null) => void,
-  ) {
-    try {
-      const response = await fetch(`/api/admin/routes/summary?week_of=${weekOf}`);
-      const payload = await response.json();
-      if (payload.ok) {
-        onUpdate(payload.data.route);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   async function fetchRouteStops(routeId: string) {
     try {
       const response = await fetch(`/api/admin/routes/stops?route_id=${routeId}`);
@@ -208,10 +193,10 @@ export function RouteBuilder({
           });
           setStopOrders(reordered);
         }
+        await fetchRouteStops(payload.data.route.id);
       } else {
-        await fetchRouteSummary(selectedWeek, setRouteSummary);
+        setStatus("Route saved, but details are unavailable.");
       }
-      await fetchRouteSummary(selectedWeek, setRouteSummary);
     } catch (error) {
       console.error(error);
       setStatus("Unable to build route. Check server logs for details.");
@@ -335,7 +320,8 @@ export function RouteBuilder({
               <option value="">Select a saved route</option>
               {routes.map((route) => (
                 <option key={route.id} value={route.id}>
-                  {route.name ?? "Weekend Route"} · {route.status}
+                  {route.name ?? "Weekend Route"} ·{" "}
+                  {route.created_at ? new Date(route.created_at).toLocaleString() : route.status}
                 </option>
               ))}
             </select>

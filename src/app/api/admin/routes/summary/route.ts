@@ -10,18 +10,23 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const weekOf = url.searchParams.get("week_of");
+  const routeId = url.searchParams.get("route_id");
 
-  if (!weekOf) {
-    return bad("Missing week_of.", { status: 422 });
+  if (!weekOf && !routeId) {
+    return bad("Missing week_of or route_id.", { status: 422 });
   }
 
-  const { data: route } = await supabase
+  const routeQuery = supabase
     .from("delivery_routes")
-    .select("id, week_of, status, polyline, distance_meters, duration_seconds")
-    .eq("week_of", weekOf)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .select("id, week_of, name, status, polyline, distance_meters, duration_seconds, created_at");
+
+  const { data: route } = routeId
+    ? await routeQuery.eq("id", routeId).maybeSingle()
+    : await routeQuery
+        .eq("week_of", weekOf)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
   return ok({ route });
 }
