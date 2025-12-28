@@ -5,6 +5,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils/async";
 
 type DeliveryWindow = {
   day_of_week: string | null;
@@ -80,7 +81,7 @@ export default async function AdminDeliveriesPage({
   }
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const weekOptions = getUpcomingWeekStarts(4).map((date) =>
     formatDateYYYYMMDD(date),
   );
@@ -93,26 +94,49 @@ export default async function AdminDeliveriesPage({
     return null;
   }
 
-  const appointmentsQuery = supabase
-    .from("delivery_appointments")
-    .select(
-      "id, week_of, status, notes, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name,phone,email)",
-    )
-    .eq("week_of", selectedWeek)
-    .order("created_at", { ascending: true });
+  let appointments: AppointmentRow[] = [];
+  let orders: OrderRow[] = [];
 
-  const { data: appointments } = statusFilter
-    ? await appointmentsQuery.eq("status", statusFilter)
-    : await appointmentsQuery;
+  try {
+    const appointmentsQuery = supabase
+      .from("delivery_appointments")
+      .select(
+        "id, week_of, status, notes, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name,phone,email)",
+      )
+      .eq("week_of", selectedWeek)
+      .order("created_at", { ascending: true });
 
-  const { data: orders } = await supabase
-    .from("orders")
-    .select("id, order_items(quantity, meal_item:meal_items(name))")
-    .eq("week_of", selectedWeek);
+    const appointmentsPromise = statusFilter
+      ? appointmentsQuery.eq("status", statusFilter)
+      : appointmentsQuery;
+
+    const [appointmentsResult, ordersResult] = await withTimeout(
+      Promise.all([
+        appointmentsPromise,
+        supabase
+          .from("orders")
+          .select("id, order_items(quantity, meal_item:meal_items(name))")
+          .eq("week_of", selectedWeek),
+      ]),
+      10000,
+      "Timed out loading deliveries data.",
+    );
+
+    appointments = (appointmentsResult.data ?? []) as unknown as AppointmentRow[];
+    orders = (ordersResult.data ?? []) as unknown as OrderRow[];
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to load deliveries data.";
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Deliveries unavailable</h1>
+        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+      </div>
+    );
+  }
 
   const prepTotals = new Map<string, number>();
-  const typedOrders = (orders ?? []) as unknown as OrderRow[];
-  for (const order of typedOrders) {
+  for (const order of orders ?? []) {
     for (const item of order.order_items ?? []) {
       const name = item.meal_item?.name ?? "Unknown item";
       prepTotals.set(name, (prepTotals.get(name) ?? 0) + item.quantity);
@@ -157,11 +181,11 @@ export default async function AdminDeliveriesPage({
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
             <p className="text-slate-500 dark:text-slate-400">Appointments</p>
-        <p className="text-xl font-semibold">{appointments?.length ?? 0}</p>
+            <p className="text-xl font-semibold">{appointments.length}</p>
           </div>
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
             <p className="text-slate-500 dark:text-slate-400">Orders</p>
-            <p className="text-xl font-semibold">{orders?.length ?? 0}</p>
+            <p className="text-xl font-semibold">{orders.length}</p>
           </div>
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
             <p className="text-slate-500 dark:text-slate-400">Prep items</p>
@@ -191,7 +215,7 @@ export default async function AdminDeliveriesPage({
       <Card className="space-y-4 p-6">
         <h2 className="text-lg font-semibold">Appointments</h2>
         <div className="space-y-3">
-          {((appointments ?? []) as unknown as AppointmentRow[]).map((appointment) => (
+          {appointments.map((appointment) => (
             <div
               key={appointment.id}
               className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800"
@@ -242,7 +266,7 @@ export default async function AdminDeliveriesPage({
               ) : null}
             </div>
           ))}
-          {(appointments ?? []).length === 0 ? (
+          {appointments.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               No appointments scheduled for this week.
             </p>

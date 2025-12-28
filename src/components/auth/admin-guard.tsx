@@ -24,7 +24,7 @@ export default async function AdminGuard({ children }: AdminGuardProps) {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) {

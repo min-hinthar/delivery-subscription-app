@@ -4,6 +4,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils/async";
 
 export default async function AdminHomePage() {
   const hasSupabaseConfig =
@@ -22,29 +23,53 @@ export default async function AdminHomePage() {
     );
   }
 
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const [weekStart] = getUpcomingWeekStarts(1);
   const weekOf = weekStart ? formatDateYYYYMMDD(weekStart) : null;
 
-  const { count: deliveriesCount } = weekOf
-    ? await supabase
-        .from("delivery_appointments")
-        .select("id", { count: "exact", head: true })
-        .eq("week_of", weekOf)
-    : { count: 0 };
+  let deliveriesCount = 0;
+  let routesCount = 0;
+  let mealsCount = 0;
+  let subscriptionsCount = 0;
 
-  const { count: routesCount } = await supabase
-    .from("delivery_routes")
-    .select("id", { count: "exact", head: true });
+  try {
+    const [
+      deliveriesResult,
+      routesResult,
+      mealsResult,
+      subscriptionsResult,
+    ] = await withTimeout(
+      Promise.all([
+        weekOf
+          ? supabase
+              .from("delivery_appointments")
+              .select("id", { count: "exact", head: true })
+              .eq("week_of", weekOf)
+          : Promise.resolve({ count: 0 }),
+        supabase.from("delivery_routes").select("id", { count: "exact", head: true }),
+        supabase
+          .from("meal_items")
+          .select("id", { count: "exact", head: true })
+          .eq("is_active", true),
+        supabase.from("subscriptions").select("id", { count: "exact", head: true }),
+      ]),
+      10000,
+      "Timed out loading admin stats.",
+    );
 
-  const { count: mealsCount } = await supabase
-    .from("meal_items")
-    .select("id", { count: "exact", head: true })
-    .eq("is_active", true);
-
-  const { count: subscriptionsCount } = await supabase
-    .from("subscriptions")
-    .select("id", { count: "exact", head: true });
+    deliveriesCount = deliveriesResult.count ?? 0;
+    routesCount = routesResult.count ?? 0;
+    mealsCount = mealsResult.count ?? 0;
+    subscriptionsCount = subscriptionsResult.count ?? 0;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to load admin stats.";
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Admin data unavailable</h1>
+        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

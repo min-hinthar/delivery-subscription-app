@@ -3,6 +3,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { withTimeout } from "@/lib/utils/async";
 
 type DeliveryWindow = {
   day_of_week: string | null;
@@ -63,7 +64,7 @@ export default async function AdminRoutesPage({
   }
 
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const weekOptions = getUpcomingWeekStarts(4).map((date) =>
     formatDateYYYYMMDD(date),
   );
@@ -75,41 +76,64 @@ export default async function AdminRoutesPage({
     return null;
   }
 
-  const { data: appointments } = await supabase
-    .from("delivery_appointments")
-    .select(
-      "id, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name)",
-    )
-    .eq("week_of", selectedWeek)
-    .order("created_at", { ascending: true });
+  let formattedAppointments: Array<{
+    id: string;
+    customer: string;
+    window: string;
+    address: string;
+    hasAddress: boolean;
+  }> = [];
 
-  const formattedAppointments = ((appointments ?? []) as unknown as AppointmentRow[]).map(
-    (appointment) => ({
-      id: appointment.id,
-      customer: appointment.profile?.full_name ?? "Unnamed subscriber",
-      window: formatWindow(
-        appointment.delivery_window ?? {
-          day_of_week: null,
-          start_time: null,
-          end_time: null,
-        },
-      ),
-      address: [
-        appointment.address?.line1,
-        appointment.address?.line2,
-        [
-          appointment.address?.city,
-          appointment.address?.state,
-          appointment.address?.postal_code,
+  try {
+    const { data: appointments } = await withTimeout(
+      supabase
+        .from("delivery_appointments")
+        .select(
+          "id, delivery_window:delivery_windows(day_of_week,start_time,end_time), address:addresses(line1,line2,city,state,postal_code), profile:profiles(full_name)",
+        )
+        .eq("week_of", selectedWeek)
+        .order("created_at", { ascending: true }),
+      10000,
+      "Timed out loading route appointments.",
+    );
+
+    formattedAppointments = ((appointments ?? []) as unknown as AppointmentRow[]).map(
+      (appointment) => ({
+        id: appointment.id,
+        customer: appointment.profile?.full_name ?? "Unnamed subscriber",
+        window: formatWindow(
+          appointment.delivery_window ?? {
+            day_of_week: null,
+            start_time: null,
+            end_time: null,
+          },
+        ),
+        address: [
+          appointment.address?.line1,
+          appointment.address?.line2,
+          [
+            appointment.address?.city,
+            appointment.address?.state,
+            appointment.address?.postal_code,
+          ]
+            .filter(Boolean)
+            .join(" "),
         ]
           .filter(Boolean)
-          .join(" "),
-      ]
-        .filter(Boolean)
-        .join(", "),
-      hasAddress: Boolean(appointment.address?.line1),
-    }),
-  );
+          .join(", "),
+        hasAddress: Boolean(appointment.address?.line1),
+      }),
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to load route appointments.";
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Routes unavailable</h1>
+        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
