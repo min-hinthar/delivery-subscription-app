@@ -63,6 +63,14 @@ function formatWindow(window: Appointment["delivery_window"]) {
 }
 
 export function AppointmentsCard({ appointments, route }: AppointmentsCardProps) {
+  const distanceMiles = route?.distance_meters
+    ? (route.distance_meters / 1609.34).toFixed(1)
+    : "0";
+  const durationSeconds = route?.duration_seconds ?? 0;
+  const durationHours = Math.floor(durationSeconds / 3600);
+  const durationMinutes = Math.round((durationSeconds % 3600) / 60);
+  const durationLabel = durationHours > 0 ? `${durationHours}h ${durationMinutes}m` : `${durationMinutes}m`;
+
   return (
     <Card className="space-y-4 bg-gradient-to-br from-white/90 via-white to-rose-50/60 dark:from-slate-900 dark:via-slate-950 dark:to-rose-950/20">
       <div className="flex items-center justify-between">
@@ -112,8 +120,8 @@ export function AppointmentsCard({ appointments, route }: AppointmentsCardProps)
       </div>
       {route ? (
         <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <span>Route distance: {route.distance_meters ?? 0} m</span>
-          <span>Route duration: {route.duration_seconds ?? 0} s</span>
+          <span>Route distance: {distanceMiles} mi</span>
+          <span>Route duration: {durationLabel}</span>
         </div>
       ) : null}
       <p className="text-xs text-slate-400">

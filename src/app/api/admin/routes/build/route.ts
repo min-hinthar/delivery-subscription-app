@@ -8,6 +8,7 @@ import { KITCHEN_ORIGIN } from "@/lib/maps/route";
 const buildRouteSchema = z.object({
   week_of: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   name: z.string().max(120).optional().nullable(),
+  optimize: z.boolean().optional().default(true),
   stop_order: z
     .array(
       z.object({
@@ -94,19 +95,6 @@ export async function POST(request: Request) {
     await supabase.from("delivery_stops").delete().eq("route_id", route.id);
   }
 
-  const stopRows = orderedStops.map((stop) => ({
-    route_id: route.id,
-    appointment_id: stop.appointment_id,
-    stop_order: stop.order,
-    status: "pending",
-  }));
-
-  const { error: stopsError } = await supabase.from("delivery_stops").insert(stopRows);
-
-  if (stopsError) {
-    return bad("Failed to create route stops.", { status: 500 });
-  }
-
   const { data: appointments } = await supabase
     .from("delivery_appointments")
     .select("id, address:addresses(line1,line2,city,state,postal_code)")
@@ -142,20 +130,42 @@ export async function POST(request: Request) {
     return bad("Missing addresses for one or more stops.", { status: 422 });
   }
 
+  let finalStops = orderedStops;
+
   if (addressList.length >= 1) {
     try {
       const directions = await directionsRoute({
         origin: KITCHEN_ORIGIN,
         destination: addressList[addressList.length - 1],
         waypoints: addressList.length > 1 ? addressList.slice(0, -1) : undefined,
+        optimizeWaypoints: parsed.data.optimize ?? true,
       });
 
       const now = Date.now();
       let cumulativeSeconds = 0;
 
+      if (directions.waypointOrder && directions.waypointOrder.length > 0) {
+        const waypointStops = orderedStops.slice(0, -1);
+        const reorderedWaypoints = directions.waypointOrder.map((index) => waypointStops[index]);
+        finalStops = [...reorderedWaypoints, orderedStops[orderedStops.length - 1]];
+      }
+
+      const stopRows = finalStops.map((stop, index) => ({
+        route_id: route.id,
+        appointment_id: stop.appointment_id,
+        stop_order: index + 1,
+        status: "pending",
+      }));
+
+      const { error: stopsError } = await supabase.from("delivery_stops").insert(stopRows);
+
+      if (stopsError) {
+        return bad("Failed to create route stops.", { status: 500 });
+      }
+
       const etaUpdates = directions.legs.map((leg, index) => {
         cumulativeSeconds += leg.durationSeconds;
-        const targetStop = orderedStops[index];
+        const targetStop = finalStops[index];
         return {
           appointment_id: targetStop.appointment_id,
           eta: new Date(now + cumulativeSeconds * 1000).toISOString(),
@@ -177,10 +187,24 @@ export async function POST(request: Request) {
           distance_meters: directions.distanceMeters,
           duration_seconds: directions.durationSeconds,
           updated_at: new Date().toISOString(),
+          status: "built",
         })
         .eq("id", route.id);
     } catch {
       return bad("Route created, but directions failed.", { status: 502 });
+    }
+  } else {
+    const stopRows = orderedStops.map((stop, index) => ({
+      route_id: route.id,
+      appointment_id: stop.appointment_id,
+      stop_order: index + 1,
+      status: "pending",
+    }));
+
+    const { error: stopsError } = await supabase.from("delivery_stops").insert(stopRows);
+
+    if (stopsError) {
+      return bad("Failed to create route stops.", { status: 500 });
     }
   }
 
@@ -199,5 +223,6 @@ export async function POST(request: Request) {
       distance_meters: null,
       duration_seconds: null,
     },
+    ordered_stop_ids: finalStops.map((stop) => stop.appointment_id),
   });
 }

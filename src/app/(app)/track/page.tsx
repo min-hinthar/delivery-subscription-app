@@ -59,7 +59,9 @@ export default async function TrackPage() {
 
   const { data: stops } = await supabase
     .from("delivery_stops")
-    .select("id, stop_order, status, eta, route_id")
+    .select(
+      "id, stop_order, status, eta, route_id, appointment:delivery_appointments(address:addresses(line1,line2,city,state,postal_code))",
+    )
     .eq("appointment_id", appointment.id)
     .order("stop_order", { ascending: true });
 
@@ -76,5 +78,42 @@ export default async function TrackPage() {
     route = routeRow ?? null;
   }
 
-  return <TrackingDashboard route={route} initialStops={stops ?? []} />;
+  const formattedStops =
+    ((stops ?? []) as Array<{
+      id: string;
+      stop_order: number;
+      status: string;
+      eta: string | null;
+      route_id: string;
+      appointment: {
+        address: {
+          line1: string | null;
+          line2: string | null;
+          city: string | null;
+          state: string | null;
+          postal_code: string | null;
+        } | null;
+      } | null;
+    }>).map((stop) => ({
+      id: stop.id,
+      stop_order: stop.stop_order,
+      status: stop.status,
+      eta: stop.eta,
+      route_id: stop.route_id,
+      address: [
+        stop.appointment?.address?.line1,
+        stop.appointment?.address?.line2,
+        [
+          stop.appointment?.address?.city,
+          stop.appointment?.address?.state,
+          stop.appointment?.address?.postal_code,
+        ]
+          .filter(Boolean)
+          .join(" "),
+      ]
+        .filter(Boolean)
+        .join(", "),
+    })) ?? [];
+
+  return <TrackingDashboard route={route} initialStops={formattedStops} />;
 }

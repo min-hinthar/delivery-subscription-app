@@ -19,6 +19,13 @@ type GoogleMaps = {
     Polyline: new (
       options: Record<string, unknown>,
     ) => { setMap: (map: { fitBounds: (bounds: unknown, padding?: number) => void }) => void };
+    Marker: new (options: Record<string, unknown>) => unknown;
+    Geocoder: new () => {
+      geocode: (
+        request: { address: string },
+        callback: (results: Array<{ geometry?: { location?: unknown } }> | null, status: string) => void,
+      ) => void;
+    };
   };
 };
 
@@ -60,9 +67,10 @@ function loadGoogleMaps(apiKey: string, mapId?: string) {
 type RouteMapProps = {
   polyline: string | null;
   className?: string;
+  stops?: Array<{ label: string; address: string }>;
 };
 
-export function RouteMap({ polyline, className }: RouteMapProps) {
+export function RouteMap({ polyline, className, stops }: RouteMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
@@ -109,11 +117,29 @@ export function RouteMap({ polyline, className }: RouteMapProps) {
 
         routePath.setMap(map);
         map.fitBounds(bounds, 40);
+
+        if (stops && stops.length > 0 && googleMaps.maps.Geocoder) {
+          const geocoder = new googleMaps.maps.Geocoder();
+          stops.forEach((stop) => {
+            if (!stop.address) {
+              return;
+            }
+            geocoder.geocode({ address: stop.address }, (results, status) => {
+              if (status === "OK" && results?.[0]?.geometry?.location) {
+                new googleMaps.maps.Marker({
+                  map,
+                  position: results[0].geometry.location,
+                  label: stop.label,
+                });
+              }
+            });
+          });
+        }
       })
       .catch((caught) => {
         console.error(caught);
       });
-  }, [apiKey, mapId, polyline]);
+  }, [apiKey, mapId, polyline, stops]);
 
   if (!polyline) {
     return (

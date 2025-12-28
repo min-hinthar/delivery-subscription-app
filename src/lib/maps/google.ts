@@ -37,6 +37,7 @@ type DirectionsResult = {
     startAddress: string;
     endAddress: string;
   }>;
+  waypointOrder?: number[];
 };
 
 function getGoogleMapsKey() {
@@ -124,6 +125,7 @@ type DirectionsApiLeg = {
 type DirectionsApiRoute = {
   overview_polyline?: { points?: string };
   legs?: DirectionsApiLeg[];
+  waypoint_order?: number[];
 };
 
 type DirectionsApiResponse = {
@@ -136,6 +138,7 @@ export async function directionsRoute(options: {
   origin: string;
   destination: string;
   waypoints?: string[];
+  optimizeWaypoints?: boolean;
 }) {
   const apiKey = getGoogleMapsKey();
   const url = new URL("https://maps.googleapis.com/maps/api/directions/json");
@@ -144,7 +147,8 @@ export async function directionsRoute(options: {
   url.searchParams.set("key", apiKey);
 
   if (options.waypoints && options.waypoints.length > 0) {
-    url.searchParams.set("waypoints", options.waypoints.join("|"));
+    const waypointPrefix = options.optimizeWaypoints ? "optimize:true|" : "";
+    url.searchParams.set("waypoints", `${waypointPrefix}${options.waypoints.join("|")}`);
   }
 
   const response = await fetch(url.toString());
@@ -169,6 +173,7 @@ export async function directionsRoute(options: {
     distanceMeters,
     durationSeconds,
     legs,
+    waypointOrder: route.waypoint_order,
   };
 
   return result;

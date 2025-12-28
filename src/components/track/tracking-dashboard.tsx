@@ -13,6 +13,10 @@ type Stop = {
   eta: string | null;
 };
 
+type StopDetail = Stop & {
+  address: string;
+};
+
 type RouteSummary = {
   id: string;
   status: string;
@@ -23,16 +27,33 @@ type RouteSummary = {
 
 type TrackingDashboardProps = {
   route: RouteSummary | null;
-  initialStops: Stop[];
+  initialStops: StopDetail[];
 };
 
 export function TrackingDashboard({ route, initialStops }: TrackingDashboardProps) {
-  const [stops, setStops] = useState<Stop[]>(initialStops);
+  const [stops, setStops] = useState<StopDetail[]>(initialStops);
   const [status, setStatus] = useState<string | null>(null);
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.stop_order - b.stop_order),
     [stops],
   );
+
+  const mapStops = useMemo(
+    () =>
+      sortedStops.map((stop, index) => ({
+        label: String.fromCharCode(65 + index),
+        address: stop.address,
+      })),
+    [sortedStops],
+  );
+
+  const distanceMiles = route?.distance_meters
+    ? (route.distance_meters / 1609.34).toFixed(1)
+    : "0";
+  const durationSeconds = route?.duration_seconds ?? 0;
+  const durationHours = Math.floor(durationSeconds / 3600);
+  const durationMinutes = Math.round((durationSeconds % 3600) / 60);
+  const durationLabel = durationHours > 0 ? `${durationHours}h ${durationMinutes}m` : `${durationMinutes}m`;
 
   useEffect(() => {
     if (!route?.id) {
@@ -115,26 +136,27 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           </span>
         </div>
         <div className="mt-3">
-          <RouteMap polyline={route?.polyline ?? null} />
+          <RouteMap polyline={route?.polyline ?? null} stops={mapStops} />
         </div>
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
           <span>Origin: {KITCHEN_ORIGIN}</span>
-          <span>Distance: {route?.distance_meters ?? 0} m</span>
-          <span>Duration: {route?.duration_seconds ?? 0} s</span>
+          <span>Distance: {distanceMiles} mi</span>
+          <span>Duration: {durationLabel}</span>
         </div>
       </div>
 
       <div className="space-y-3">
-        {sortedStops.map((stop) => (
+        {sortedStops.map((stop, index) => (
           <div
             key={stop.id}
             className="flex items-center justify-between rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800"
           >
             <div>
-              <p className="font-medium">Stop {stop.stop_order}</p>
+              <p className="font-medium">Stop {String.fromCharCode(65 + index)}</p>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Status: {stop.status}
               </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{stop.address}</p>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">
               ETA: {stop.eta ? new Date(stop.eta).toLocaleTimeString() : "TBD"}

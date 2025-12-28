@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { bad, ok } from "@/lib/api/response";
+import { applyCanonicalAddress, geocodeAddress } from "@/lib/maps/google";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const profileUpdateSchema = z.object({
@@ -81,6 +82,37 @@ export async function POST(request: Request) {
 
   if (addressError) {
     return bad("Failed to update address.", { status: 500 });
+  }
+
+  const addressString = [
+    address.line1,
+    address.line2,
+    address.city,
+    address.state,
+    address.postal_code,
+    address.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  try {
+    const geocode = await geocodeAddress(addressString);
+    const canonical = applyCanonicalAddress(geocode);
+    await supabase
+      .from("addresses")
+      .update({
+        line1: canonical.line1 ?? address.line1,
+        city: canonical.city ?? address.city,
+        state: canonical.state ?? address.state,
+        postal_code: canonical.postal_code ?? address.postal_code,
+        country: canonical.country ?? address.country,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("user_id", auth.user.id)
+      .eq("is_primary", true);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to validate address.";
+    return bad(message, { status: 422 });
   }
 
   return ok({ updated: true });

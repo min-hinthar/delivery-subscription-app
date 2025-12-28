@@ -43,6 +43,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
   const [status, setStatus] = useState<string | null>(null);
   const [routeName, setRouteName] = useState("Weekend Route");
   const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
+  const [optimizeRoute, setOptimizeRoute] = useState(true);
 
   const orderedStops = useMemo(() => {
     return appointments
@@ -53,6 +54,18 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
       .filter((stop) => stop.order > 0)
       .sort((a, b) => a.order - b.order);
   }, [appointments, stopOrders]);
+
+  const stopLabels = useMemo(() => {
+    const addressById = new Map(appointments.map((appointment) => [appointment.id, appointment]));
+    return orderedStops.map((stop, index) => {
+      const appointment = addressById.get(stop.appointment_id);
+      const label = String.fromCharCode(65 + index);
+      return {
+        label,
+        address: appointment?.address ?? "",
+      };
+    });
+  }, [appointments, orderedStops]);
 
   const missingAddressCount = useMemo(
     () => appointments.filter((appointment) => !appointment.hasAddress).length,
@@ -65,6 +78,14 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
   }, [orderedStops]);
 
   const canBuild = orderedStops.length >= 1 && !hasDuplicateOrders && missingAddressCount === 0;
+
+  const distanceMiles = routeSummary?.distance_meters
+    ? (routeSummary.distance_meters / 1609.34).toFixed(1)
+    : "0";
+  const durationSeconds = routeSummary?.duration_seconds ?? 0;
+  const durationHours = Math.floor(durationSeconds / 3600);
+  const durationMinutes = Math.round((durationSeconds % 3600) / 60);
+  const durationLabel = durationHours > 0 ? `${durationHours}h ${durationMinutes}m` : `${durationMinutes}m`;
 
   function handleWeekChange(value: string) {
     startTransition(() => {
@@ -100,6 +121,7 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
       body: JSON.stringify({
         week_of: selectedWeek,
         name: routeName,
+        optimize: optimizeRoute,
         stop_order: orderedStops,
       }),
     });
@@ -114,6 +136,13 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
     setStatus("Route created and directions synced.");
     if (payload.data?.route) {
       setRouteSummary(payload.data.route);
+      if (payload.data?.ordered_stop_ids) {
+        const reordered: Record<string, number> = {};
+        payload.data.ordered_stop_ids.forEach((id: string, index: number) => {
+          reordered[id] = index + 1;
+        });
+        setStopOrders(reordered);
+      }
     } else {
       await fetchRouteSummary(selectedWeek, setRouteSummary);
     }
@@ -182,6 +211,14 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}
           </div>
         </div>
+        <label className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <input
+            type="checkbox"
+            checked={optimizeRoute}
+            onChange={(event) => setOptimizeRoute(event.target.checked)}
+          />
+          Recommend fastest order (Google Maps optimization)
+        </label>
         {missingAddressCount > 0 ? (
           <p className="text-xs text-rose-600">
             Add a delivery address for every appointment before building a route.
@@ -209,11 +246,11 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
             {routeSummary?.status ?? "Draft"}
           </span>
         </div>
-        <RouteMap polyline={routeSummary?.polyline ?? null} />
+        <RouteMap polyline={routeSummary?.polyline ?? null} stops={stopLabels} />
         <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
           <span>Origin: {KITCHEN_ORIGIN}</span>
-          <span>Distance: {routeSummary?.distance_meters ?? 0} m</span>
-          <span>Duration: {routeSummary?.duration_seconds ?? 0} s</span>
+          <span>Distance: {distanceMiles} mi</span>
+          <span>Duration: {durationLabel}</span>
         </div>
       </Card>
 
@@ -226,7 +263,10 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
               className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800"
             >
               <div>
-                <p className="font-medium">{appointment.customer}</p>
+                <p className="font-medium">
+                  {String.fromCharCode(65 + (stopOrders[appointment.id] ?? 1) - 1)} ·{" "}
+                  {appointment.customer}
+                </p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {appointment.window}
                 </p>
