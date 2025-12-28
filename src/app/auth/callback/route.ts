@@ -30,11 +30,14 @@ export async function GET(request: Request) {
     return NextResponse.redirect(redirectUrl);
   }
 
+  const { data: authData } = await supabase.auth.getUser();
+  const userId = authData.user?.id ?? "";
+
   if (next.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("is_admin")
-      .eq("id", (await supabase.auth.getUser()).data.user?.id ?? "")
+      .eq("id", userId)
       .maybeSingle();
 
     if (!profile?.is_admin) {
@@ -42,6 +45,16 @@ export async function GET(request: Request) {
       redirectUrl.searchParams.set("error", "insufficient_access");
       redirectUrl.searchParams.set("message", "Admin access required.");
       return NextResponse.redirect(redirectUrl);
+    }
+  } else if (next === "/account" && userId) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("is_admin")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (profile?.is_admin) {
+      return NextResponse.redirect(new URL("/admin", url.origin));
     }
   }
 

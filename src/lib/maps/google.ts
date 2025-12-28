@@ -99,13 +99,35 @@ type GeocodeApiResponse = {
   results: GeocodeApiResult[];
 };
 
+const DEFAULT_TIMEOUT_MS = 10000;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit & { timeoutMs?: number } = {},
+) {
+  const { timeoutMs = DEFAULT_TIMEOUT_MS, ...requestInit } = options;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    return await fetch(url, { ...requestInit, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Request to Google Maps timed out.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 export async function geocodeAddress(address: string) {
   const apiKey = getGoogleMapsKey();
   const url = new URL("https://maps.googleapis.com/maps/api/geocode/json");
   url.searchParams.set("address", address);
   url.searchParams.set("key", apiKey);
 
-  const response = await fetch(url.toString());
+  const response = await fetchWithTimeout(url.toString());
   const data = (await response.json()) as GeocodeApiResponse;
 
   if (data.status !== "OK" || !data.results?.length) {
@@ -151,7 +173,7 @@ export async function directionsRoute(options: {
     url.searchParams.set("waypoints", `${waypointPrefix}${options.waypoints.join("|")}`);
   }
 
-  const response = await fetch(url.toString());
+  const response = await fetchWithTimeout(url.toString());
   const data = (await response.json()) as DirectionsApiResponse;
 
   if (data.status !== "OK" || !data.routes?.length) {

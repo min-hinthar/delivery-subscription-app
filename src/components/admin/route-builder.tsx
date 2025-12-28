@@ -94,10 +94,14 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
   }
 
   async function fetchRouteSummary(weekOf: string, onUpdate: (data: RouteSummary | null) => void) {
-    const response = await fetch(`/api/admin/routes/summary?week_of=${weekOf}`);
-    const payload = await response.json();
-    if (payload.ok) {
-      onUpdate(payload.data.route);
+    try {
+      const response = await fetch(`/api/admin/routes/summary?week_of=${weekOf}`);
+      const payload = await response.json();
+      if (payload.ok) {
+        onUpdate(payload.data.route);
+      }
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -115,38 +119,43 @@ export function RouteBuilder({ weekOptions, selectedWeek, appointments }: RouteB
 
     setStatus(null);
 
-    const response = await fetch("/api/admin/routes/build", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        week_of: selectedWeek,
-        name: routeName,
-        optimize: optimizeRoute,
-        stop_order: orderedStops,
-      }),
-    });
+    try {
+      const response = await fetch("/api/admin/routes/build", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          week_of: selectedWeek,
+          name: routeName,
+          optimize: optimizeRoute,
+          stop_order: orderedStops,
+        }),
+      });
 
-    const payload = await response.json();
+      const payload = await response.json();
 
-    if (!payload.ok) {
-      setStatus(payload.error?.message ?? "Unable to build route.");
-      return;
-    }
-
-    setStatus("Route created and directions synced.");
-    if (payload.data?.route) {
-      setRouteSummary(payload.data.route);
-      if (payload.data?.ordered_stop_ids) {
-        const reordered: Record<string, number> = {};
-        payload.data.ordered_stop_ids.forEach((id: string, index: number) => {
-          reordered[id] = index + 1;
-        });
-        setStopOrders(reordered);
+      if (!payload.ok) {
+        setStatus(payload.error?.message ?? "Unable to build route.");
+        return;
       }
-    } else {
+
+      setStatus("Route created and directions synced.");
+      if (payload.data?.route) {
+        setRouteSummary(payload.data.route);
+        if (payload.data?.ordered_stop_ids) {
+          const reordered: Record<string, number> = {};
+          payload.data.ordered_stop_ids.forEach((id: string, index: number) => {
+            reordered[id] = index + 1;
+          });
+          setStopOrders(reordered);
+        }
+      } else {
+        await fetchRouteSummary(selectedWeek, setRouteSummary);
+      }
       await fetchRouteSummary(selectedWeek, setRouteSummary);
+    } catch (error) {
+      console.error(error);
+      setStatus("Unable to build route. Check server logs for details.");
     }
-    await fetchRouteSummary(selectedWeek, setRouteSummary);
   }
 
   useEffect(() => {

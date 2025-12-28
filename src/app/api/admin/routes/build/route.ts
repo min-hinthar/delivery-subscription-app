@@ -190,8 +190,9 @@ export async function POST(request: Request) {
           status: "built",
         })
         .eq("id", route.id);
-    } catch {
-      return bad("Route created, but directions failed.", { status: 502 });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Route created, but directions failed.";
+      return bad(message, { status: 502 });
     }
   } else {
     const stopRows = orderedStops.map((stop, index) => ({
