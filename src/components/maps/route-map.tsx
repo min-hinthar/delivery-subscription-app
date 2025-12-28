@@ -82,11 +82,15 @@ export function RouteMap({ polyline, className, stops }: RouteMapProps) {
   }, [apiKey]);
 
   useEffect(() => {
-    if (!polyline || !mapRef.current) {
+    if (!mapRef.current) {
       return;
     }
 
     if (!apiKey) {
+      return;
+    }
+
+    if (!polyline && (!stops || stops.length === 0)) {
       return;
     }
 
@@ -98,25 +102,27 @@ export function RouteMap({ polyline, className, stops }: RouteMapProps) {
           return;
         }
 
-        const path = googleMaps.maps.geometry.encoding.decodePath(polyline);
-        const bounds = new googleMaps.maps.LatLngBounds();
-        path.forEach((point) => bounds.extend(point));
-
         const map = new googleMaps.maps.Map(mapRef.current, {
           mapId,
           disableDefaultUI: true,
           zoomControl: true,
         });
 
-        const routePath = new googleMaps.maps.Polyline({
-          path,
-          strokeColor: "#2563eb",
-          strokeOpacity: 0.9,
-          strokeWeight: 5,
-        });
+        const bounds = new googleMaps.maps.LatLngBounds();
 
-        routePath.setMap(map);
-        map.fitBounds(bounds, 40);
+        if (polyline) {
+          const path = googleMaps.maps.geometry.encoding.decodePath(polyline);
+          path.forEach((point) => bounds.extend(point));
+
+          const routePath = new googleMaps.maps.Polyline({
+            path,
+            strokeColor: "#2563eb",
+            strokeOpacity: 0.9,
+            strokeWeight: 5,
+          });
+
+          routePath.setMap(map);
+        }
 
         if (stops && stops.length > 0 && googleMaps.maps.Geocoder) {
           const geocoder = new googleMaps.maps.Geocoder();
@@ -126,14 +132,22 @@ export function RouteMap({ polyline, className, stops }: RouteMapProps) {
             }
             geocoder.geocode({ address: stop.address }, (results, status) => {
               if (status === "OK" && results?.[0]?.geometry?.location) {
+                bounds.extend(
+                  results[0].geometry.location as { lat: () => number; lng: () => number },
+                );
                 new googleMaps.maps.Marker({
                   map,
                   position: results[0].geometry.location,
                   label: stop.label,
                 });
+                map.fitBounds(bounds, 40);
               }
             });
           });
+        }
+
+        if (polyline) {
+          map.fitBounds(bounds, 40);
         }
       })
       .catch((caught) => {
@@ -141,7 +155,7 @@ export function RouteMap({ polyline, className, stops }: RouteMapProps) {
       });
   }, [apiKey, mapId, polyline, stops]);
 
-  if (!polyline) {
+  if (!polyline && (!stops || stops.length === 0)) {
     return (
       <div className={cn(
         "flex h-64 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900",

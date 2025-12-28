@@ -6,6 +6,22 @@ type StopRow = {
   appointment_id: string;
   stop_order: number;
   appointment: {
+    id: string;
+    profile: { full_name: string | null } | null;
+    address: {
+      line1: string | null;
+      line2: string | null;
+      city: string | null;
+      state: string | null;
+      postal_code: string | null;
+    } | null;
+  } | null;
+};
+
+type AppointmentStopRow = {
+  id: string;
+  profile: { full_name: string | null } | null;
+  appointment: {
     address: {
       line1: string | null;
       line2: string | null;
@@ -33,7 +49,7 @@ export async function GET(request: Request) {
   const { data: stops, error } = await supabase
     .from("delivery_stops")
     .select(
-      "appointment_id, stop_order, appointment:delivery_appointments(address:addresses(line1,line2,city,state,postal_code))",
+      "appointment_id, stop_order, appointment:delivery_appointments(id, profile:profiles(full_name), address:addresses(line1,line2,city,state,postal_code))",
     )
     .eq("route_id", routeId)
     .order("stop_order", { ascending: true });
@@ -45,6 +61,7 @@ export async function GET(request: Request) {
   const formattedStops = ((stops ?? []) as unknown as StopRow[])
     .map((stop) => ({
       appointment_id: stop.appointment_id,
+      name: stop.appointment?.profile?.full_name ?? "Stop",
       stop_order: stop.stop_order,
       address: stop.appointment?.address
         ? toPrintableAddress({

@@ -59,9 +59,30 @@ export async function POST(request: Request) {
     return bad("Stop appointments must be unique.", { status: 422 });
   }
 
+  const baseRouteName = parsed.data.name ?? "Weekend Route";
+  const { data: existingNames } = await supabase
+    .from("delivery_routes")
+    .select("name")
+    .eq("week_of", parsed.data.week_of)
+    .like("name", `${baseRouteName}%`);
+
+  const normalizedNames = new Set(
+    (existingNames ?? [])
+      .map((row) => row.name)
+      .filter((name): name is string => Boolean(name)),
+  );
+  let routeName = baseRouteName;
+  if (normalizedNames.has(routeName)) {
+    let suffix = 2;
+    while (normalizedNames.has(`${baseRouteName} (${suffix})`)) {
+      suffix += 1;
+    }
+    routeName = `${baseRouteName} (${suffix})`;
+  }
+
   const routePayload = {
     week_of: parsed.data.week_of,
-    name: parsed.data.name ?? "Weekend Route",
+    name: routeName,
     status: "planned",
     updated_at: new Date().toISOString(),
   };

@@ -53,7 +53,7 @@ export function RouteBuilder({
   );
   const [optimizeRoute, setOptimizeRoute] = useState(true);
   const [routeStops, setRouteStops] = useState<
-    Array<{ appointment_id: string; stop_order: number; address: string }>
+    Array<{ appointment_id: string; stop_order: number; address: string; name: string }>
   >([]);
 
   const orderedStops = useMemo(() => {
@@ -67,23 +67,43 @@ export function RouteBuilder({
   }, [appointments, stopOrders]);
 
   const stopLabels = useMemo(() => {
-    if (!routeSummary?.polyline || routeStops.length === 0) {
+    if (routeStops.length === 0) {
       return [];
     }
-    return routeStops.map((stop, index) => ({
-      label: String.fromCharCode(65 + index),
+    return routeStops.map((stop) => ({
+      label: String(stop.stop_order),
       address: stop.address,
     }));
-  }, [routeStops, routeSummary?.polyline]);
+  }, [routeStops]);
 
   const stopLabelByAppointment = useMemo(() => {
-    if (!routeSummary?.polyline || routeStops.length === 0) {
+    if (routeStops.length === 0) {
       return new Map<string, string>();
     }
     return new Map(
-      routeStops.map((stop, index) => [stop.appointment_id, String.fromCharCode(65 + index)]),
+      routeStops.map((stop) => [stop.appointment_id, String(stop.stop_order)]),
     );
-  }, [routeStops, routeSummary?.polyline]);
+  }, [routeStops]);
+
+  const prebuildStops = useMemo(() => {
+    if (routeSummary || routeStops.length > 0) {
+      return [];
+    }
+    return appointments
+      .filter((appointment) => appointment.address)
+      .map((appointment) => {
+        const initials = appointment.customer
+          .split(" ")
+          .filter(Boolean)
+          .slice(0, 2)
+          .map((part) => part[0]?.toUpperCase())
+          .join("");
+        return {
+          label: initials || "S",
+          address: appointment.address,
+        };
+      });
+  }, [appointments, routeStops.length, routeSummary]);
 
   const missingAddressCount = useMemo(
     () => appointments.filter((appointment) => !appointment.hasAddress).length,
@@ -332,7 +352,7 @@ export function RouteBuilder({
         </div>
         <RouteMap
           polyline={routeSummary?.polyline ?? null}
-          stops={routeSummary?.polyline ? stopLabels : undefined}
+          stops={stopLabels.length > 0 ? stopLabels : prebuildStops}
         />
         <div className="flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
           <span>Origin: {KITCHEN_ORIGIN}</span>
