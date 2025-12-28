@@ -37,6 +37,27 @@ export async function POST(request: Request) {
 
   const { full_name, phone, onboarding_completed, address } = parsed.data;
 
+  const addressString = [
+    address.line1,
+    address.line2,
+    address.city,
+    address.state,
+    address.postal_code,
+    address.country,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  let canonical: ReturnType<typeof applyCanonicalAddress>;
+
+  try {
+    const geocode = await geocodeAddress(addressString);
+    canonical = applyCanonicalAddress(geocode);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unable to validate address.";
+    return bad(message, { status: 422 });
+  }
+
   const { error: authUpdateError } = await supabase.auth.updateUser({
     data: {
       full_name,
@@ -67,12 +88,12 @@ export async function POST(request: Request) {
       {
         id: address.id ?? undefined,
         user_id: auth.user.id,
-        line1: address.line1,
+        line1: canonical.line1 ?? address.line1,
         line2: address.line2 ?? null,
-        city: address.city,
-        state: address.state,
-        postal_code: address.postal_code,
-        country: address.country,
+        city: canonical.city ?? address.city,
+        state: canonical.state ?? address.state,
+        postal_code: canonical.postal_code ?? address.postal_code,
+        country: canonical.country ?? address.country,
         instructions: address.instructions ?? null,
         is_primary: true,
         updated_at: new Date().toISOString(),
@@ -82,37 +103,6 @@ export async function POST(request: Request) {
 
   if (addressError) {
     return bad("Failed to update address.", { status: 500 });
-  }
-
-  const addressString = [
-    address.line1,
-    address.line2,
-    address.city,
-    address.state,
-    address.postal_code,
-    address.country,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  try {
-    const geocode = await geocodeAddress(addressString);
-    const canonical = applyCanonicalAddress(geocode);
-    await supabase
-      .from("addresses")
-      .update({
-        line1: canonical.line1 ?? address.line1,
-        city: canonical.city ?? address.city,
-        state: canonical.state ?? address.state,
-        postal_code: canonical.postal_code ?? address.postal_code,
-        country: canonical.country ?? address.country,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("user_id", auth.user.id)
-      .eq("is_primary", true);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to validate address.";
-    return bad(message, { status: 422 });
   }
 
   return ok({ updated: true });
