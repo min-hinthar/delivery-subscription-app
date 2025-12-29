@@ -39,6 +39,21 @@ function formatDate(value?: string | null) {
   });
 }
 
+function maskLine1(value?: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const [first, ...rest] = trimmed.split(" ");
+  const maskedFirst = /\d/.test(first) ? "••••" : first;
+  return [maskedFirst, ...rest].join(" ");
+}
+
 export default async function AccountPage() {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -116,6 +131,11 @@ export default async function AccountPage() {
   const hasActiveSubscription = subscription?.status
     ? ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status)
     : false;
+  const maskedLine1 = maskLine1(address?.line1 ?? null);
+  const cityState = [address?.city, address?.state].filter(Boolean).join(", ");
+  const postalHint = address?.postal_code
+    ? `ZIP ••${address.postal_code.slice(-2)}`
+    : null;
 
   const subscriptionNote = (() => {
     switch (subscription?.status) {
@@ -323,15 +343,20 @@ export default async function AccountPage() {
           </div>
           {address ? (
             <div className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
-              <p className="font-medium text-slate-900 dark:text-slate-100">{address.line1}</p>
-              {address.line2 ? <p>{address.line2}</p> : null}
-              <p>
-                {address.city}, {address.state} {address.postal_code}
+              <p className="font-medium text-slate-900 dark:text-slate-100">
+                {maskedLine1 ?? "Address on file"}
               </p>
-              <p>{address.country}</p>
+              {address.line2 ? (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Unit details on file
+                </p>
+              ) : null}
+              {cityState ? <p>{cityState}</p> : null}
+              {!cityState && postalHint ? <p>{postalHint}</p> : null}
+              {address.country ? <p>{address.country}</p> : null}
               {address.instructions ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Notes: {address.instructions}
+                  Delivery notes on file
                 </p>
               ) : null}
             </div>

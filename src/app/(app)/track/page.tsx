@@ -10,11 +10,27 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
 export default async function TrackPage() {
+  const hasSupabaseConfig =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  if (!hasSupabaseConfig) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Supabase not configured</h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable
+          tracking.
+        </p>
+      </div>
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
   const { data: auth } = await supabase.auth.getUser();
 
   if (!auth.user) {
-    redirect("/login?reason=auth");
+    redirect(`/login?reason=auth&next=${encodeURIComponent("/track")}`);
   }
 
   const { data: subscriptionRows } = await supabase
@@ -104,8 +120,8 @@ export default async function TrackPage() {
     route = routeRow ?? null;
   }
 
-  const formattedStops =
-    ((stops ?? []) as unknown as Array<{
+  const formattedStops = (
+    (stops ?? []) as unknown as Array<{
       id: string;
       stop_order: number;
       status: string;
@@ -120,26 +136,29 @@ export default async function TrackPage() {
           postal_code: string | null;
         } | null;
       } | null;
-    }>).map((stop) => ({
+    }>
+  ).map((stop) => {
+    const address = stop.appointment?.address;
+    const cityState = [address?.city, address?.state].filter(Boolean).join(", ");
+    const displayAddress = cityState ? `Near ${cityState}` : "Address on file";
+    const mapAddress = [
+      address?.line1,
+      address?.line2,
+      [address?.city, address?.state, address?.postal_code].filter(Boolean).join(" "),
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    return {
       id: stop.id,
       stop_order: stop.stop_order,
       status: stop.status,
       eta: stop.eta,
       route_id: stop.route_id,
-      address: [
-        stop.appointment?.address?.line1,
-        stop.appointment?.address?.line2,
-        [
-          stop.appointment?.address?.city,
-          stop.appointment?.address?.state,
-          stop.appointment?.address?.postal_code,
-        ]
-          .filter(Boolean)
-          .join(" "),
-      ]
-        .filter(Boolean)
-        .join(", "),
-    })) ?? [];
+      displayAddress,
+      mapAddress,
+    };
+  });
 
   const isRoutePending = !route && formattedStops.length === 0;
 
