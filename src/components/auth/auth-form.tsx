@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const DEFAULT_ERRORS = {
@@ -45,12 +46,14 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const redirectTarget = redirectPath ?? EMAIL_REDIRECTS[mode];
+      const redirectTarget = getSafeRedirectPath(redirectPath, EMAIL_REDIRECTS[mode]);
 
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTarget}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+            redirectTarget,
+          )}`,
           shouldCreateUser: mode === "signup",
         },
       });
@@ -84,12 +87,14 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const redirectTarget = redirectPath ?? EMAIL_REDIRECTS[mode];
+      const redirectTarget = getSafeRedirectPath(redirectPath, EMAIL_REDIRECTS[mode]);
 
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback?next=${redirectTarget}`,
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+            redirectTarget,
+          )}`,
           shouldCreateUser: mode === "signup",
         },
       });

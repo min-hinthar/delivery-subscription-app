@@ -4,12 +4,13 @@ import { redirect } from "next/navigation";
 import { AuthAlert } from "@/components/auth/auth-alert";
 import { AuthForm } from "@/components/auth/auth-form";
 import { Card } from "@/components/ui/card";
+import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ next?: string }>;
+  searchParams?: Promise<{ next?: string; reason?: string }>;
 }) {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -35,7 +36,7 @@ export default async function LoginPage({
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(resolvedSearchParams?.next ?? "/account");
+    redirect(getSafeRedirectPath(resolvedSearchParams?.next, "/account"));
   }
 
   return (
@@ -54,7 +55,10 @@ export default async function LoginPage({
       </div>
       <Card className="space-y-4">
         <AuthAlert />
-        <AuthForm mode="login" redirectPath={resolvedSearchParams?.next} />
+        <AuthForm
+          mode="login"
+          redirectPath={getSafeRedirectPath(resolvedSearchParams?.next, "/account")}
+        />
         <div className="text-sm text-slate-500 dark:text-slate-400">
           New here?{" "}
           <Link

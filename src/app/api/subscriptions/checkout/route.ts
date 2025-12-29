@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const successUrl = normalizeReturnUrl(request.url, parsed.data.successUrl, "/account");
+  const successUrl = normalizeReturnUrl(request.url, parsed.data.successUrl, "/subscribe/success");
   const cancelUrl = normalizeReturnUrl(request.url, parsed.data.cancelUrl, "/pricing");
 
   const session = await stripe.checkout.sessions.create({

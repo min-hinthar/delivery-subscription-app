@@ -6,6 +6,7 @@ import {
 } from "@/components/account/appointments-card";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { BillingActionButton } from "@/components/billing/billing-action-button";
+import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -17,6 +18,8 @@ const STATUS_LABELS: Record<string, string> = {
   unpaid: "Unpaid",
   paused: "Paused",
 };
+
+const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
 function formatDate(value?: string | null) {
   if (!value) {
@@ -110,15 +113,48 @@ export default async function AccountPage() {
     ? STATUS_LABELS[subscription.status] ?? subscription.status
     : "Not subscribed";
   const renewalDate = formatDate(subscription?.current_period_end ?? null);
+  const hasActiveSubscription = subscription?.status
+    ? ACTIVE_SUBSCRIPTION_STATUSES.has(subscription.status)
+    : false;
+
+  const subscriptionNote = (() => {
+    switch (subscription?.status) {
+      case "past_due":
+        return "Payment issue — update your payment method to keep deliveries on schedule.";
+      case "canceled":
+        return "Subscription canceled — resubscribe to keep receiving deliveries.";
+      case "paused":
+        return "Subscription paused — resume in billing to restart deliveries.";
+      case "unpaid":
+        return "Payment required — update billing to resume deliveries.";
+      default:
+        return null;
+    }
+  })();
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-semibold text-foreground">Account</h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Manage your profile, addresses, and subscription status.
-        </p>
-      </div>
+      <PageHeader
+        title="Account"
+        description="Manage your profile, addresses, and subscription status."
+        cta={
+          hasActiveSubscription ? (
+            <Link
+              href="/schedule"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
+            >
+              Schedule delivery
+            </Link>
+          ) : (
+            <Link
+              href="/pricing"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
+            >
+              View plans
+            </Link>
+          )
+        }
+      />
       <Card className="space-y-4 bg-gradient-to-br from-white via-amber-50/80 to-rose-50/70 dark:from-slate-950 dark:via-slate-900/80 dark:to-rose-950/30">
         <div className="space-y-1">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -134,6 +170,9 @@ export default async function AccountPage() {
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Next renewal {renewalDate}
             </p>
+          ) : null}
+          {subscriptionNote ? (
+            <p className="text-sm text-rose-600 dark:text-rose-300">{subscriptionNote}</p>
           ) : null}
         </div>
         <div className="flex flex-wrap gap-3">
@@ -166,6 +205,78 @@ export default async function AccountPage() {
           </Link>
         </div>
       </Card>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="space-y-3">
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Billing overview
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Keep payment methods up to date and manage your subscription status.
+          </p>
+          {hasStripeCustomer ? (
+            <BillingActionButton
+              endpoint="/api/subscriptions/portal"
+              label="Open billing portal"
+              loadingLabel="Opening portal…"
+            />
+          ) : (
+            <Link
+              href="/pricing"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-slate-200 px-4 text-sm font-medium text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+            >
+              View plans
+            </Link>
+          )}
+        </Card>
+        <Card className="space-y-3">
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Schedule next delivery
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Choose your weekend window before the Friday 5 PM cutoff.
+          </p>
+          <Link
+            href="/schedule"
+            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:focus-visible:ring-slate-100 ${
+              hasActiveSubscription
+                ? "border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:text-slate-100"
+                : "pointer-events-none border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-500"
+            }`}
+            aria-disabled={!hasActiveSubscription}
+          >
+            {hasActiveSubscription ? "Pick a window" : "Subscription required"}
+          </Link>
+          {!hasActiveSubscription ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Subscribe to unlock scheduling.
+            </p>
+          ) : null}
+        </Card>
+        <Card className="space-y-3">
+          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+            Track your driver
+          </p>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Real-time updates appear after your appointment is assigned to a route.
+          </p>
+          <Link
+            href="/track"
+            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:focus-visible:ring-slate-100 ${
+              hasActiveSubscription
+                ? "border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:text-slate-100"
+                : "pointer-events-none border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-500"
+            }`}
+            aria-disabled={!hasActiveSubscription}
+          >
+            {hasActiveSubscription ? "Open tracking" : "Subscription required"}
+          </Link>
+          {!hasActiveSubscription ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Activate your subscription to track deliveries.
+            </p>
+          ) : null}
+        </Card>
+      </div>
       <AppointmentsCard
         appointments={(appointments ?? []) as unknown as ScheduledAppointment[]}
         route={recentRoute}
