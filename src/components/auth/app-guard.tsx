@@ -30,7 +30,7 @@ export default async function AppGuard({ children }: AppGuardProps) {
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) {
-    const requestHeaders = headers();
+    const requestHeaders = await headers();
     const headerPath =
       requestHeaders.get("x-pathname") ??
       requestHeaders.get("x-next-url") ??

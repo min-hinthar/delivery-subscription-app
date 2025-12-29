@@ -1,10 +1,12 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
+import { parseApiResponse } from "@/lib/api/client";
 
 type WeekOption = {
   value: string;
@@ -51,6 +53,9 @@ export function SchedulePlanner({
     appointment?.delivery_window_id ?? windows[0]?.id ?? "",
   );
   const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const windowRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const isInteractionDisabled = isSchedulingDisabled || isPending;
   const selected = useMemo(
@@ -59,8 +64,12 @@ export function SchedulePlanner({
   );
 
   const isFull = selected ? selected.available <= 0 : false;
+  const availableWindows = windows.filter((window) => window.available > 0);
+  const alternativeWindows = availableWindows.filter((window) => window.id !== selectedWindow);
 
   function handleWeekChange(value: string) {
+    setError(null);
+    setStatus(null);
     const params = new URLSearchParams();
     params.set("week_of", value);
     startTransition(() => {
@@ -69,29 +78,63 @@ export function SchedulePlanner({
   }
 
   async function handleSubmit() {
+    if (isSaving) {
+      return;
+    }
+
     if (!selectedWindow) {
+      setError("Select a delivery window to continue.");
+      const firstAvailable = availableWindows[0];
+      if (firstAvailable) {
+        windowRefs.current[firstAvailable.id]?.focus();
+      }
       return;
     }
 
     setStatus(null);
+    setError(null);
+    setIsSaving(true);
 
-    const response = await fetch("/api/delivery/appointment", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        week_of: selectedWeek,
-        delivery_window_id: selectedWindow,
-      }),
-    });
+    try {
+      const response = await fetch("/api/delivery/appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          week_of: selectedWeek,
+          delivery_window_id: selectedWindow,
+        }),
+      });
 
-    const payload = await response.json();
+      const result = await parseApiResponse<{ appointment: unknown }>(response);
 
-    if (!payload.ok) {
-      setStatus(payload.error?.message ?? "Unable to save appointment.");
-      return;
+      if (!result.ok) {
+        setError(result.message);
+        setStatus(null);
+        toast({
+          title: "Unable to save appointment",
+          description: result.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setStatus("Appointment saved!");
+      toast({
+        title: "Appointment saved",
+        description: "Your delivery window is confirmed.",
+      });
+    } catch (caught) {
+      const message =
+        caught instanceof Error ? caught.message : "Unable to save appointment.";
+      setError(message);
+      toast({
+        title: "Unable to save appointment",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
-
-    setStatus("Appointment saved!");
   }
 
   return (
@@ -176,10 +219,19 @@ export function SchedulePlanner({
                     name="delivery_window"
                     value={window.id}
                     checked={isSelected}
-                    onChange={() => setSelectedWindow(window.id)}
+                    onChange={() => {
+                      setSelectedWindow(window.id);
+                      setError(null);
+                    }}
                     disabled={isUnavailable || isSchedulingDisabled}
+                    ref={(element) => {
+                      windowRefs.current[window.id] = element;
+                    }}
                   />
                 </div>
+                {isUnavailable ? (
+                  <span className="text-xs font-semibold text-rose-600">Full</span>
+                ) : null}
                 <span className="text-xs text-slate-500 dark:text-slate-400">
                   {window.available} of {window.capacity} slots remaining
                 </span>
@@ -190,13 +242,36 @@ export function SchedulePlanner({
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleSubmit}
-            disabled={!selectedWindow || isFull || isCutoffPassed || isSchedulingDisabled}
+            disabled={
+              !selectedWindow || isFull || isCutoffPassed || isSchedulingDisabled || isSaving
+            }
           >
-            {appointment ? "Update appointment" : "Confirm appointment"}
+            {isSaving ? "Saving…" : appointment ? "Update appointment" : "Confirm appointment"}
           </Button>
           {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}
+          {error ? (
+            <p className="text-sm text-rose-600" role="alert">
+              {error}
+            </p>
+          ) : null}
           {isFull ? (
-            <p className="text-xs text-rose-600">Selected window is full.</p>
+            <p className="text-xs text-rose-600">
+              Selected window is full. Try{" "}
+              {alternativeWindows.length > 0
+                ? alternativeWindows
+                    .map(
+                      (window) => `${window.day_of_week} ${window.start_time}–${window.end_time}`,
+                    )
+                    .join(", ")
+                : "another week"}{" "}
+              instead.
+            </p>
+          ) : null}
+          {isCutoffPassed ? (
+            <p className="text-xs text-rose-600">
+              This week is locked after the Friday cutoff. Pick a future weekend or contact
+              support.
+            </p>
           ) : null}
         </div>
       </Card>

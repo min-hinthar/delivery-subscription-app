@@ -174,6 +174,7 @@ export default async function AdminRoutesPage({
         </div>
       </Card>
       <RouteBuilder
+        key={selectedWeek}
         weekOptions={weekOptions}
         selectedWeek={selectedWeek}
         appointments={formattedAppointments}

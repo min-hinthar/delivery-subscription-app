@@ -105,7 +105,7 @@ export default async function TrackPage() {
   }
 
   const formattedStops =
-    ((stops ?? []) as Array<{
+    ((stops ?? []) as unknown as Array<{
       id: string;
       stop_order: number;
       status: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { RouteMap } from "@/components/maps/route-map";
@@ -45,16 +45,19 @@ export function RouteBuilder({
   const [status, setStatus] = useState<string | null>(null);
   const [routeName, setRouteName] = useState("Weekend Route");
   const [routes, setRoutes] = useState<RouteSummary[]>(() => initialRoutes ?? []);
-  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(
-    initialRoutes?.[0]?.id ?? null,
-  );
-  const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(
-    initialRoutes?.[0] ?? null,
-  );
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [optimizeRoute, setOptimizeRoute] = useState(true);
   const [routeStops, setRouteStops] = useState<
     Array<{ appointment_id: string; stop_order: number; address: string; name: string }>
   >([]);
+  const routeSummary = useMemo(
+    () => routes.find((route) => route.id === selectedRouteId) ?? null,
+    [routes, selectedRouteId],
+  );
+  const activeRouteStops = useMemo(
+    () => (routeSummary ? routeStops : []),
+    [routeStops, routeSummary],
+  );
 
   const orderedStops = useMemo(() => {
     return appointments
@@ -67,26 +70,26 @@ export function RouteBuilder({
   }, [appointments, stopOrders]);
 
   const stopLabels = useMemo(() => {
-    if (routeStops.length === 0) {
+    if (activeRouteStops.length === 0) {
       return [];
     }
-    return routeStops.map((stop) => ({
+    return activeRouteStops.map((stop) => ({
       label: String(stop.stop_order),
       address: stop.address,
     }));
-  }, [routeStops]);
+  }, [activeRouteStops]);
 
   const stopLabelByAppointment = useMemo(() => {
-    if (routeStops.length === 0) {
+    if (activeRouteStops.length === 0) {
       return new Map<string, string>();
     }
     return new Map(
-      routeStops.map((stop) => [stop.appointment_id, String(stop.stop_order)]),
+      activeRouteStops.map((stop) => [stop.appointment_id, String(stop.stop_order)]),
     );
-  }, [routeStops]);
+  }, [activeRouteStops]);
 
   const prebuildStops = useMemo(() => {
-    if (routeSummary || routeStops.length > 0) {
+    if (routeSummary || activeRouteStops.length > 0) {
       return [];
     }
     return appointments
@@ -103,14 +106,14 @@ export function RouteBuilder({
           address: appointment.address,
         };
       });
-  }, [appointments, routeStops.length, routeSummary]);
+  }, [appointments, activeRouteStops.length, routeSummary]);
 
   const shareUrl = useMemo(() => {
-    if (!routeSummary || routeStops.length === 0) {
+    if (!routeSummary || activeRouteStops.length === 0) {
       return null;
     }
 
-    const sortedStops = [...routeStops].sort((a, b) => a.stop_order - b.stop_order);
+    const sortedStops = [...activeRouteStops].sort((a, b) => a.stop_order - b.stop_order);
     const origin = encodeURIComponent(KITCHEN_ORIGIN);
     const destination = encodeURIComponent(sortedStops[sortedStops.length - 1].address);
     const waypointAddresses = sortedStops
@@ -123,7 +126,7 @@ export function RouteBuilder({
       : "";
 
     return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypointParam}`;
-  }, [routeStops, routeSummary]);
+  }, [activeRouteStops, routeSummary]);
 
   const missingAddressCount = useMemo(
     () => appointments.filter((appointment) => !appointment.hasAddress).length,
@@ -224,7 +227,6 @@ export function RouteBuilder({
       if (payload.data?.route) {
         setRoutes((prev) => [payload.data.route, ...prev]);
         setSelectedRouteId(payload.data.route.id);
-        setRouteSummary(payload.data.route);
         setRouteStops([]);
         if (payload.data?.ordered_stop_ids) {
           const reordered: Record<string, number> = {};
@@ -266,7 +268,6 @@ export function RouteBuilder({
       }
       setRoutes((prev) => prev.filter((route) => route.id !== selectedRouteId));
       setSelectedRouteId(null);
-      setRouteSummary(null);
       setRouteStops([]);
       setStatus("Route deleted.");
     } catch (error) {
@@ -275,29 +276,14 @@ export function RouteBuilder({
     }
   }
 
-  useEffect(() => {
-    setRoutes(initialRoutes ?? []);
-    setSelectedRouteId(initialRoutes?.[0]?.id ?? null);
-    setRouteSummary(initialRoutes?.[0] ?? null);
+  function handleSelectRoute(routeId: string | null) {
+    setSelectedRouteId(routeId);
     setRouteStops([]);
     setStopOrders({});
-  }, [initialRoutes]);
-
-  useEffect(() => {
-    if (!selectedRouteId) {
-      setRouteSummary(null);
-      setRouteStops([]);
-      return;
+    if (routeId) {
+      void fetchRouteStops(routeId);
     }
-
-    const route = routes.find((item) => item.id === selectedRouteId) ?? null;
-    setRouteSummary(route);
-    if (route?.id) {
-      void fetchRouteStops(route.id);
-    } else {
-      setRouteStops([]);
-    }
-  }, [routes, selectedRouteId]);
+  }
 
   return (
     <div className="space-y-6">
@@ -387,7 +373,7 @@ export function RouteBuilder({
             <select
               className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950"
               value={selectedRouteId ?? ""}
-              onChange={(event) => setSelectedRouteId(event.target.value || null)}
+              onChange={(event) => handleSelectRoute(event.target.value || null)}
             >
               <option value="">Select a saved route</option>
               {routes.map((route) => (

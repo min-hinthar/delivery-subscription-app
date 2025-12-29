@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { parseApiResponse } from "@/lib/api/client";
 import { addressInputSchema, onboardingInputSchema } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
@@ -47,20 +49,33 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   const [postalCode, setPostalCode] = useState(primaryAddress?.postal_code ?? "");
   const [country, setCountry] = useState(primaryAddress?.country ?? "US");
   const [instructions, setInstructions] = useState(primaryAddress?.instructions ?? "");
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [step, setStep] = useState<StepId>("profile");
+  const fullNameRef = useRef<HTMLInputElement | null>(null);
+  const phoneRef = useRef<HTMLInputElement | null>(null);
+  const line1Ref = useRef<HTMLInputElement | null>(null);
+  const line2Ref = useRef<HTMLInputElement | null>(null);
+  const cityRef = useRef<HTMLInputElement | null>(null);
+  const stateRef = useRef<HTMLInputElement | null>(null);
+  const postalCodeRef = useRef<HTMLInputElement | null>(null);
+  const countryRef = useRef<HTMLInputElement | null>(null);
+  const instructionsRef = useRef<HTMLInputElement | null>(null);
 
   const email = useMemo(() => initialProfile?.email ?? "", [initialProfile?.email]);
   const stepIndex = STEPS.findIndex((item) => item.id === step);
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
+  const clearFieldError = (key: string) =>
+    setFieldErrors((prev) => ({ ...prev, [key]: "" }));
 
   const handleNextFromProfile = () => {
-    setError(null);
+    setFormError(null);
     setMessage(null);
+    setFieldErrors({});
 
     const profileParsed = onboardingInputSchema.safeParse({
       fullName,
@@ -68,7 +83,18 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
     });
 
     if (!profileParsed.success) {
-      setError(profileParsed.error.errors[0]?.message ?? "Check your profile details.");
+      const flattened = profileParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        fullName: flattened.fullName?.[0] ?? "",
+        phone: flattened.phone?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Please fix the highlighted fields and try again.");
+      if (nextErrors.fullName) {
+        fullNameRef.current?.focus();
+      } else if (nextErrors.phone) {
+        phoneRef.current?.focus();
+      }
       return;
     }
 
@@ -76,11 +102,16 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   };
 
   const handleSubmit = async () => {
-    setError(null);
+    if (isSaving) {
+      return;
+    }
+
+    setFormError(null);
     setMessage(null);
+    setFieldErrors({});
 
     if (!verifiedAddress) {
-      setError("Verify your address before saving.");
+      setFormError("Verify your address before saving.");
       return;
     }
 
@@ -90,7 +121,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
     });
 
     if (!profileParsed.success) {
-      setError(profileParsed.error.errors[0]?.message ?? "Check your profile details.");
+      const flattened = profileParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        fullName: flattened.fullName?.[0] ?? "",
+        phone: flattened.phone?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Please fix the highlighted fields and try again.");
+      setStep("profile");
+      if (nextErrors.fullName) {
+        fullNameRef.current?.focus();
+      } else if (nextErrors.phone) {
+        phoneRef.current?.focus();
+      }
       return;
     }
 
@@ -106,7 +149,33 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
     });
 
     if (!addressParsed.success) {
-      setError(addressParsed.error.errors[0]?.message ?? "Check your address details.");
+      const flattened = addressParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        line1: flattened.line1?.[0] ?? "",
+        line2: flattened.line2?.[0] ?? "",
+        city: flattened.city?.[0] ?? "",
+        state: flattened.state?.[0] ?? "",
+        postalCode: flattened.postalCode?.[0] ?? "",
+        country: flattened.country?.[0] ?? "",
+        instructions: flattened.instructions?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Please fix the highlighted fields and try again.");
+      if (nextErrors.line1) {
+        line1Ref.current?.focus();
+      } else if (nextErrors.line2) {
+        line2Ref.current?.focus();
+      } else if (nextErrors.city) {
+        cityRef.current?.focus();
+      } else if (nextErrors.state) {
+        stateRef.current?.focus();
+      } else if (nextErrors.postalCode) {
+        postalCodeRef.current?.focus();
+      } else if (nextErrors.country) {
+        countryRef.current?.focus();
+      } else if (nextErrors.instructions) {
+        instructionsRef.current?.focus();
+      }
       return;
     }
 
@@ -133,25 +202,84 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
         }),
       });
 
-      const payload = await response.json();
+      const result = await parseApiResponse<{ updated: boolean }>(response);
 
-      if (!payload.ok) {
-        throw new Error(payload.error?.message ?? "Unable to save your details.");
+      if (!result.ok) {
+        throw new Error(result.message);
       }
 
       setMessage("Profile saved! You're ready to schedule your first delivery.");
+      toast({
+        title: "Profile saved",
+        description: "Your delivery details are ready for scheduling.",
+      });
       setStep("done");
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to save your details.");
+      const message =
+        caught instanceof Error ? caught.message : "Unable to save your details.";
+      setFormError(message);
+      toast({
+        title: "Unable to save profile",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleVerifyAddress = async () => {
-    setError(null);
+    if (isVerifying) {
+      return;
+    }
+
+    setFormError(null);
     setMessage(null);
+    setFieldErrors({});
+
+    const addressParsed = addressInputSchema.safeParse({
+      line1,
+      line2: line2 || null,
+      city,
+      state,
+      postalCode,
+      country,
+      instructions: instructions || null,
+      isPrimary: true,
+    });
+
+    if (!addressParsed.success) {
+      const flattened = addressParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        line1: flattened.line1?.[0] ?? "",
+        line2: flattened.line2?.[0] ?? "",
+        city: flattened.city?.[0] ?? "",
+        state: flattened.state?.[0] ?? "",
+        postalCode: flattened.postalCode?.[0] ?? "",
+        country: flattened.country?.[0] ?? "",
+        instructions: flattened.instructions?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Fix the highlighted address fields before verifying.");
+      if (nextErrors.line1) {
+        line1Ref.current?.focus();
+      } else if (nextErrors.line2) {
+        line2Ref.current?.focus();
+      } else if (nextErrors.city) {
+        cityRef.current?.focus();
+      } else if (nextErrors.state) {
+        stateRef.current?.focus();
+      } else if (nextErrors.postalCode) {
+        postalCodeRef.current?.focus();
+      } else if (nextErrors.country) {
+        countryRef.current?.focus();
+      } else if (nextErrors.instructions) {
+        instructionsRef.current?.focus();
+      }
+      return;
+    }
+
     setIsVerifying(true);
 
     try {
@@ -168,21 +296,35 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
         }),
       });
 
-      const payload = await response.json();
+      const result = await parseApiResponse<{ formatted_address: string }>(response);
 
-      if (!payload.ok) {
-        throw new Error(payload.error?.message ?? "Unable to verify address.");
+      if (!result.ok) {
+        throw new Error(result.message);
       }
 
-      setVerifiedAddress(payload.data.formatted_address);
+      setVerifiedAddress(result.data.formatted_address);
       setMessage("Address verified. You can save your profile.");
+      toast({
+        title: "Address verified",
+        description: "You can continue to save your profile.",
+      });
     } catch (caught) {
       setVerifiedAddress(null);
-      setError(caught instanceof Error ? caught.message : "Unable to verify address.");
+      const message =
+        caught instanceof Error ? caught.message : "Unable to verify address.";
+      setFormError(message);
+      toast({
+        title: "Address verification failed",
+        description: message,
+        variant: "destructive",
+      });
     } finally {
       setIsVerifying(false);
     }
   };
+
+  const visibleErrors = Object.values(fieldErrors).filter(Boolean);
+  const showSummary = visibleErrors.length > 1;
 
   return (
     <div className="space-y-6">
@@ -218,6 +360,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
 
       {step === "profile" ? (
         <div className="space-y-6">
+          {showSummary ? (
+            <div
+              className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200"
+              role="alert"
+            >
+              <p className="font-semibold">Please fix the highlighted fields:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-xs">
+                {visibleErrors.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="space-y-3 rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
               <span role="img" aria-label="Profile">
@@ -230,19 +385,41 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                 Full name
                 <input
                   value={fullName}
-                  onChange={(event) => setFullName(event.target.value)}
+                  onChange={(event) => {
+                    setFullName(event.target.value);
+                    clearFieldError("fullName");
+                  }}
+                  ref={fullNameRef}
+                  aria-invalid={Boolean(fieldErrors.fullName)}
+                  aria-describedby={fieldErrors.fullName ? "onboarding-full-name-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="Aung Lin"
                 />
+                {fieldErrors.fullName ? (
+                  <span id="onboarding-full-name-error" className="text-xs text-rose-600">
+                    {fieldErrors.fullName}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 Phone
                 <input
                   value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
+                  onChange={(event) => {
+                    setPhone(event.target.value);
+                    clearFieldError("phone");
+                  }}
+                  ref={phoneRef}
+                  aria-invalid={Boolean(fieldErrors.phone)}
+                  aria-describedby={fieldErrors.phone ? "onboarding-phone-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="(555) 123-4567"
                 />
+                {fieldErrors.phone ? (
+                  <span id="onboarding-phone-error" className="text-xs text-rose-600">
+                    {fieldErrors.phone}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 Email
@@ -278,6 +455,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
 
       {step === "address" ? (
         <div className="space-y-6">
+          {showSummary ? (
+            <div
+              className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200"
+              role="alert"
+            >
+              <p className="font-semibold">Please fix the highlighted fields:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-xs">
+                {visibleErrors.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="space-y-3 rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
               <span role="img" aria-label="Home">
@@ -293,10 +483,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setLine1(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("line1");
                   }}
+                  ref={line1Ref}
+                  aria-invalid={Boolean(fieldErrors.line1)}
+                  aria-describedby={fieldErrors.line1 ? "onboarding-line1-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="123 Golden Lantern Ave"
                 />
+                {fieldErrors.line1 ? (
+                  <span id="onboarding-line1-error" className="text-xs text-rose-600">
+                    {fieldErrors.line1}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200 md:col-span-2">
                 Address line 2
@@ -305,10 +504,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setLine2(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("line2");
                   }}
+                  ref={line2Ref}
+                  aria-invalid={Boolean(fieldErrors.line2)}
+                  aria-describedby={fieldErrors.line2 ? "onboarding-line2-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="Apartment, suite, unit"
                 />
+                {fieldErrors.line2 ? (
+                  <span id="onboarding-line2-error" className="text-xs text-rose-600">
+                    {fieldErrors.line2}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 City
@@ -317,10 +525,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setCity(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("city");
                   }}
+                  ref={cityRef}
+                  aria-invalid={Boolean(fieldErrors.city)}
+                  aria-describedby={fieldErrors.city ? "onboarding-city-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="Covina"
                 />
+                {fieldErrors.city ? (
+                  <span id="onboarding-city-error" className="text-xs text-rose-600">
+                    {fieldErrors.city}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 State
@@ -329,10 +546,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setState(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("state");
                   }}
+                  ref={stateRef}
+                  aria-invalid={Boolean(fieldErrors.state)}
+                  aria-describedby={fieldErrors.state ? "onboarding-state-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="CA"
                 />
+                {fieldErrors.state ? (
+                  <span id="onboarding-state-error" className="text-xs text-rose-600">
+                    {fieldErrors.state}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 Postal code
@@ -341,10 +567,21 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setPostalCode(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("postalCode");
                   }}
+                  ref={postalCodeRef}
+                  aria-invalid={Boolean(fieldErrors.postalCode)}
+                  aria-describedby={
+                    fieldErrors.postalCode ? "onboarding-postal-error" : undefined
+                  }
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="91723"
                 />
+                {fieldErrors.postalCode ? (
+                  <span id="onboarding-postal-error" className="text-xs text-rose-600">
+                    {fieldErrors.postalCode}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200">
                 Country
@@ -353,19 +590,41 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   onChange={(event) => {
                     setCountry(event.target.value);
                     setVerifiedAddress(null);
+                    clearFieldError("country");
                   }}
+                  ref={countryRef}
+                  aria-invalid={Boolean(fieldErrors.country)}
+                  aria-describedby={fieldErrors.country ? "onboarding-country-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="US"
                 />
+                {fieldErrors.country ? (
+                  <span id="onboarding-country-error" className="text-xs text-rose-600">
+                    {fieldErrors.country}
+                  </span>
+                ) : null}
               </label>
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200 md:col-span-2">
                 Delivery instructions
                 <input
                   value={instructions}
-                  onChange={(event) => setInstructions(event.target.value)}
+                  onChange={(event) => {
+                    setInstructions(event.target.value);
+                    clearFieldError("instructions");
+                  }}
+                  ref={instructionsRef}
+                  aria-invalid={Boolean(fieldErrors.instructions)}
+                  aria-describedby={
+                    fieldErrors.instructions ? "onboarding-instructions-error" : undefined
+                  }
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="Gate code, drop-off notes, or parking tips"
                 />
+                {fieldErrors.instructions ? (
+                  <span id="onboarding-instructions-error" className="text-xs text-rose-600">
+                    {fieldErrors.instructions}
+                  </span>
+                ) : null}
               </label>
             </div>
           </div>
@@ -381,7 +640,11 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
               {isVerifying ? "Verifying…" : "Verify address"}
             </Button>
             <Button
-              onClick={() => setStep("profile")}
+              onClick={() => {
+                setStep("profile");
+                setFieldErrors({});
+                setFormError(null);
+              }}
               disabled={isSaving}
               className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
             >
@@ -407,9 +670,9 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
         </div>
       ) : null}
 
-      {error ? (
+      {formError ? (
         <p className="text-sm text-red-500" role="alert">
-          {error}
+          {formError}
         </p>
       ) : null}
       {verifiedAddress ? (

@@ -33,6 +33,9 @@ type TrackingDashboardProps = {
 export function TrackingDashboard({ route, initialStops }: TrackingDashboardProps) {
   const [stops, setStops] = useState<StopDetail[]>(initialStops);
   const [status, setStatus] = useState<string | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<
+    "idle" | "connecting" | "connected" | "reconnecting" | "error"
+  >(route?.id ? "connecting" : "idle");
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.stop_order - b.stop_order),
     [stops],
@@ -77,13 +80,31 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           setStops((prev) => {
             const existing = prev.find((stop) => stop.id === updated.id);
             if (!existing) {
-              return [...prev, updated];
+              return [
+                ...prev,
+                {
+                  ...updated,
+                  address: "Address pending",
+                },
+              ];
             }
-            return prev.map((stop) => (stop.id === updated.id ? updated : stop));
+            return prev.map((stop) =>
+              stop.id === updated.id ? { ...stop, ...updated } : stop,
+            );
           });
         },
       )
-      .subscribe();
+      .subscribe((channelStatus) => {
+        if (channelStatus === "SUBSCRIBED") {
+          setConnectionStatus("connected");
+        } else if (channelStatus === "TIMED_OUT") {
+          setConnectionStatus("reconnecting");
+        } else if (channelStatus === "CHANNEL_ERROR") {
+          setConnectionStatus("error");
+        } else if (channelStatus === "CLOSED") {
+          setConnectionStatus("reconnecting");
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
@@ -118,6 +139,16 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           </p>
         </div>
       </div>
+      {connectionStatus === "reconnecting" ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+          Reconnecting to live updates. We&apos;ll keep retrying in the background.
+        </div>
+      ) : null}
+      {connectionStatus === "error" ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+          Live updates are temporarily unavailable. You can refresh this page to try again.
+        </div>
+      ) : null}
 
       <div className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/40">
         <div className="flex items-center justify-between">
@@ -157,9 +188,13 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           </div>
         ))}
         {sortedStops.length === 0 ? (
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            No tracking data available yet.
-          </p>
+          <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <p className="font-medium text-slate-700 dark:text-slate-200">Tracking isn’t live yet.</p>
+            <p className="mt-1">
+              We’ll show your driver route here as soon as your stop is assigned. Check back
+              closer to delivery day.
+            </p>
+          </div>
         ) : null}
       </div>
     </div>

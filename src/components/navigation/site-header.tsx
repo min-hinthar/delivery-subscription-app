@@ -42,12 +42,9 @@ function isActiveRoute(pathname: string, href: string) {
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
+  const [openPathname, setOpenPathname] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    setIsOpen(false);
-  }, [pathname]);
+  const isOpen = openPathname === pathname;
 
   useEffect(() => {
     if (!isOpen) {
@@ -58,7 +55,7 @@ export function SiteHeader() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        setOpenPathname(null);
       }
     };
 
@@ -101,7 +98,7 @@ export function SiteHeader() {
           <ThemeToggle />
         </nav>
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => setOpenPathname(pathname)}
           className="h-11 w-11 rounded-full border border-slate-200 bg-white p-0 text-slate-900 shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100 md:hidden"
           aria-label="Open navigation menu"
         >
@@ -119,14 +116,14 @@ export function SiteHeader() {
         <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
           <div
             className="absolute inset-0 bg-slate-900/50"
-            onClick={() => setIsOpen(false)}
+            onClick={() => setOpenPathname(null)}
             aria-hidden="true"
           />
           <div className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 bg-white p-6 shadow-xl dark:bg-slate-950">
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Menu</p>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => setOpenPathname(null)}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-200 dark:focus-visible:ring-slate-100"
                 aria-label="Close navigation menu"
                 ref={closeButtonRef}
@@ -146,7 +143,7 @@ export function SiteHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setOpenPathname(null)}
                   className={cn(
                     "flex h-11 items-center rounded-lg px-4 text-sm font-medium",
                     isActiveRoute(pathname, link.href)
