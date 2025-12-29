@@ -12,12 +12,17 @@ src/app/(admin)/layout.tsx
 src/app/(admin)/loading.tsx
 src/app/(app)/account/page.tsx
 src/app/(app)/account/profile/page.tsx
+src/app/(app)/appointment/[id]/page.tsx
+src/app/(app)/appointment/not-found.tsx
 src/app/(app)/billing/page.tsx
 src/app/(app)/error.tsx
 src/app/(app)/layout.tsx
 src/app/(app)/loading.tsx
 src/app/(app)/onboarding/loading.tsx
 src/app/(app)/onboarding/page.tsx
+src/app/(app)/schedule/@modal/(..)appointment/[id]/page.tsx
+src/app/(app)/schedule/@modal/default.tsx
+src/app/(app)/schedule/layout.tsx
 src/app/(app)/schedule/page.tsx
 src/app/(app)/track/page.tsx
 src/app/(auth)/auth/callback/route.ts
