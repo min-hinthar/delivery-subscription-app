@@ -14,7 +14,8 @@ type Stop = {
 };
 
 type StopDetail = Stop & {
-  address: string;
+  displayAddress: string;
+  mapAddress: string;
 };
 
 type RouteSummary = {
@@ -45,7 +46,7 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
     () =>
       sortedStops.map((stop, index) => ({
         label: String.fromCharCode(65 + index),
-        address: stop.address,
+        address: stop.mapAddress,
       })),
     [sortedStops],
   );
@@ -84,7 +85,8 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
                 ...prev,
                 {
                   ...updated,
-                  address: "Address pending",
+                  displayAddress: "Address pending",
+                  mapAddress: "",
                 },
               ];
             }
@@ -180,7 +182,9 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Status: {stop.status}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{stop.address}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {stop.displayAddress}
+              </p>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400">
               ETA: {stop.eta ? new Date(stop.eta).toLocaleTimeString() : "TBD"}

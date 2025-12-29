@@ -64,7 +64,10 @@ export default async function SchedulePage({
   const { data: auth } = await supabase.auth.getUser();
 
   if (!auth.user) {
-    redirect("/login?reason=auth");
+    const nextPath = resolvedSearchParams?.week_of
+      ? `/schedule?week_of=${encodeURIComponent(resolvedSearchParams.week_of)}`
+      : "/schedule";
+    redirect(`/login?reason=auth&next=${encodeURIComponent(nextPath)}`);
   }
 
   const { data: subscriptionRows } = await supabase
