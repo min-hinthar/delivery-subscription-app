@@ -1,54 +1,63 @@
 You are Codex working in this repo. Follow AGENTS.md and docs/BLUEPRINT.md.
 
-PR GOAL: Make customer flows feel production-grade by improving forms, validation, loading states,
-errors, and confirmations across customer pages.
+PRIMARY QA STANDARD: docs/QA_UX.md (2025/2026). Implement improvements so the customer flow meets that spec.
+
+PR GOAL (PR B): Make the customer flow feel production-grade by adding:
+- strong form validation UX
+- loading/pending states
+- success confirmations
+- recoverable error states
+- accessibility + interactive-motion compliance
 
 Hard constraints:
-- Do not change DB schema.
+- Do not change DB schema in this PR.
+- Do not weaken auth guards or RLS.
 - Do not add binary files.
 - Keep pnpm lint/typecheck/build passing.
-- Do not weaken auth guards or RLS.
 
 Scope:
 - src/app/(auth)/**
 - src/app/(app)/**
 - src/components/**
-- src/lib/api/** (response helpers / zod schemas usage)
-- minimal edits elsewhere only if required for UX.
+- src/lib/api/** (zod schemas + response helpers)
+- src/lib/** (only as needed to support better UX)
 
-Must implement:
+Must implement (map to QA_UX sections 2, 3, 5.3–5.6, 6):
 
-1) Form validation + UX:
-   - Use zod schemas already defined (or add missing ones) and surface field-level errors.
-   - Disable submit buttons while pending.
-   - Show inline helper text where needed.
-   - Ensure keyboard accessibility.
+1) Form UX best practices (2025/2026):
+   - Field-level validation errors (zod) shown at the field and summarized at top if multiple.
+   - Submit buttons show loading (spinner) and are disabled while pending.
+   - Prevent double-submit (dedupe).
+   - Preserve input values on error (no wiping forms).
+   - Keyboard accessibility: tab order, Enter submit, focus on first invalid field.
 
-2) Loading / error / empty states:
-   - Skeletons or loading indicators for pages that fetch user/subscription/appointments.
-   - Clear error messages (not raw stack traces).
-   - Empty states for no subscription / no appointment / no route.
+2) Onboarding improvements:
+   - Step 1: profile (name, phone) w/ helpful hints
+   - Step 2: address input + geocode validation
+   - Geocode failure: show actionable error + allow retry/edit + do not block permanently
 
-3) Success feedback:
-   - Toast or alert confirmations for:
-     - onboarding save
-     - address save/geocode
-     - appointment save
-   - On success, guide user to next step (e.g., onboarding → schedule)
+3) Scheduling UX improvements:
+   - Appointment save: pending + success toast/alert
+   - “window full” state: disable selection + suggest alternatives
+   - “after cutoff” state: show locked message and server error displayed nicely if attempted
 
-4) Resilience:
-   - If Google geocode fails, show actionable message and allow retry/edit.
-   - If subscription status is stale, prompt refresh (re-fetch) and show fallback.
+4) Tracking UX improvements:
+   - No route yet: friendly empty state with expectations
+   - Realtime failure (if applicable): show reconnecting banner and fallback messaging
 
-5) Update docs:
-   - Expand docs/QA_UX.md to include:
-     - “error cases” (bad address, network fail, not subscribed)
-     - “loading states” checks
+5) Global UX utilities:
+   - Add a consistent toast/alert system (shadcn Toaster pattern is fine)
+   - Standardize error mapping (422 shows validation errors; 401/403 show auth/access messages)
+   - Add lightweight skeleton components for common page shells
+
+6) Docs:
+   - Ensure docs/QA_UX.md edge cases can be performed with the current UI.
+   - Update docs/QA_UX.md only if you add concrete, testable requirements.
 
 Acceptance criteria:
-- No form submits silently without feedback.
-- All async actions show pending + success/error states.
-- User can recover from common errors without getting stuck.
+- No form submits silently; every async action has pending + success/error feedback.
+- Users can recover from geocode failure, subscription gating, cutoff lock.
+- a11y basics: labels, focus management for modals, interactive motion respected.
 - pnpm lint/typecheck/build pass.
 
-Now implement PR B.
+Stop after completing PR B.
