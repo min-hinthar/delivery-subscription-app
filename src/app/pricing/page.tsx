@@ -1,4 +1,12 @@
 import Link from "next/link";
+import {
+  CalendarCheck,
+  Clock,
+  CreditCard,
+  Package,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { BillingActionButton } from "@/components/billing/billing-action-button";
@@ -40,8 +48,9 @@ export default async function PricingPage() {
           hasActiveSubscription ? (
             <Link
               href="/account"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
             >
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               Go to account
             </Link>
           ) : null
@@ -59,27 +68,19 @@ export default async function PricingPage() {
         </div>
         <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
           <li className="flex items-center gap-2">
-            <span role="img" aria-label="Calendar">
-              📆
-            </span>
+            <CalendarCheck className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
             Saturday 11:00–19:00 PT or Sunday 11:00–15:00 PT
           </li>
           <li className="flex items-center gap-2">
-            <span role="img" aria-label="Cutoff">
-              ⏱️
-            </span>
+            <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
             Cutoff Friday 5:00 PM PT for upcoming weekend
           </li>
           <li className="flex items-center gap-2">
-            <span role="img" aria-label="Pause">
-              ⏸️
-            </span>
+            <CreditCard className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
             Pause or cancel anytime in the billing portal
           </li>
           <li className="flex items-center gap-2">
-            <span role="img" aria-label="Box">
-              📦
-            </span>
+            <Package className="h-4 w-4 text-slate-500 dark:text-slate-400" aria-hidden="true" />
             Manage deliveries from your account dashboard
           </li>
         </ul>
@@ -89,20 +90,31 @@ export default async function PricingPage() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <BillingActionButton
                   endpoint="/api/subscriptions/portal"
-                  label="Manage billing"
+                  label={
+                    <span className="inline-flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" aria-hidden="true" />
+                      Manage billing
+                    </span>
+                  }
                   loadingLabel="Opening portal…"
                 />
                 <Link
                   href="/schedule"
-                  className="inline-flex h-11 items-center justify-center rounded-md border border-slate-200 px-5 text-sm font-medium text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-slate-200 px-5 text-sm font-medium text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                 >
+                  <CalendarCheck className="h-4 w-4" aria-hidden="true" />
                   Schedule delivery
                 </Link>
               </div>
             ) : (
               <BillingActionButton
                 endpoint="/api/subscriptions/checkout"
-                label="Subscribe"
+                label={
+                  <span className="inline-flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                    Subscribe
+                  </span>
+                }
                 loadingLabel="Redirecting to Stripe…"
                 className="w-full sm:w-auto"
               />
@@ -110,8 +122,9 @@ export default async function PricingPage() {
           ) : (
             <Link
               href="/login"
-              className="text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
+              className="inline-flex items-center gap-2 text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
             >
+              <ShieldCheck className="h-4 w-4" aria-hidden="true" />
               Sign in to subscribe
             </Link>
           )}

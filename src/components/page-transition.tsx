@@ -3,20 +3,18 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
+import { getFadeMotion, getMotionTransition } from "@/lib/motion";
+
 type PageTransitionProps = {
   children: React.ReactNode;
 };
 
 export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
-  const shouldReduceMotion = useReducedMotion();
+  const shouldReduceMotion = useReducedMotion() ?? false;
 
-  const transition = shouldReduceMotion
-    ? { duration: 0 }
-    : { duration: 0.2, ease: "easeOut" };
-  const initial = shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 };
-  const animate = shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 };
-  const exit = shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -6 };
+  const transition = getMotionTransition(shouldReduceMotion);
+  const { initial, animate, exit } = getFadeMotion(shouldReduceMotion, { enterY: 6, exitY: -6 });
 
   return (
     <AnimatePresence mode="wait">
