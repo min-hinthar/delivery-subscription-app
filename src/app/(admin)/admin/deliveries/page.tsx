@@ -198,9 +198,20 @@ export default async function AdminDeliveriesPage({
         <h2 className="text-lg font-semibold">Prep totals</h2>
         <div className="grid gap-2 text-sm">
           {prepTotals.size === 0 ? (
-            <p className="text-slate-500 dark:text-slate-400">
-              No prep totals yet. Generate orders to populate this view.
-            </p>
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <p className="font-medium text-slate-700 dark:text-slate-200">
+                No prep totals yet.
+              </p>
+              <p className="mt-1">
+                Build a weekly template and generate orders to populate prep counts.
+              </p>
+              <Link
+                href="/admin/meals"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+              >
+                Review meal templates
+              </Link>
+            </div>
           ) : (
             Array.from(prepTotals.entries()).map(([name, quantity]) => (
               <div key={name} className="flex items-center justify-between">
@@ -267,9 +278,20 @@ export default async function AdminDeliveriesPage({
             </div>
           ))}
           {appointments.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No appointments scheduled for this week.
-            </p>
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <p className="font-medium text-slate-700 dark:text-slate-200">
+                No appointments scheduled for this week.
+              </p>
+              <p className="mt-1">
+                Invite subscribers to book a weekend window and check back for new orders.
+              </p>
+              <Link
+                href="/admin/subscriptions"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+              >
+                Review subscriptions
+              </Link>
+            </div>
           ) : null}
         </div>
       </Card>

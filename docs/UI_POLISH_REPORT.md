@@ -19,8 +19,8 @@
 | Landing | Placeholder scaffold messaging | Replaced with real product copy + icon CTAs | ✅ |
 | Pricing | Emoji bullets + CTA icon gaps | Swapped for Lucide icons across bullets + CTAs | ✅ |
 | Motion | No shared modal/sheet motion primitives | Added shared motion helpers + animated mobile sheet respecting reduced motion | ✅ |
+| Account/Schedule/Track/Admin | Empty states lacked next-step CTAs | Added instructive empty states with CTAs across customer + admin dashboards | ✅ |
 
 ## Remaining polish targets
-- Audit account/schedule/track/admin subpages for any additional placeholder copy or icon gaps.
 - Validate dark-mode contrast on custom gradients at all breakpoints.
 - Confirm reduced-motion behavior on any future modal/sheet components beyond the mobile nav.

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
@@ -465,9 +466,21 @@ export function RouteBuilder({
             </div>
           ))}
           {appointments.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No appointments scheduled yet.
-            </p>
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <p className="font-medium text-slate-700 dark:text-slate-200">
+                No appointments scheduled yet.
+              </p>
+              <p className="mt-1">
+                Ask customers to book a delivery window so routes can be created for this
+                week.
+              </p>
+              <Link
+                href="/admin/deliveries"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+              >
+                Review deliveries
+              </Link>
+            </div>
           ) : null}
         </div>
       </Card>

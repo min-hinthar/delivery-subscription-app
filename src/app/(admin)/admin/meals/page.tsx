@@ -74,7 +74,10 @@ export default async function AdminMealsPage() {
       </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card className="space-y-4 bg-gradient-to-br from-white via-slate-50 to-amber-50/40 dark:from-slate-950 dark:via-slate-900/70 dark:to-amber-950/20">
+        <Card
+          id="meal-items"
+          className="space-y-4 bg-gradient-to-br from-white via-slate-50 to-amber-50/40 dark:from-slate-950 dark:via-slate-900/70 dark:to-amber-950/20"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Meal items</h2>
             <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
@@ -83,9 +86,20 @@ export default async function AdminMealsPage() {
           </div>
           <div className="space-y-3">
             {mealRows.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                No meal items yet. Add menu items to build templates.
-              </p>
+              <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <p className="font-medium text-slate-700 dark:text-slate-200">
+                  No meal items yet.
+                </p>
+                <p className="mt-1">
+                  Add your first menu items to start planning weekly templates.
+                </p>
+                <Link
+                  href="/admin/subscriptions"
+                  className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+                >
+                  Check subscriber demand
+                </Link>
+              </div>
             ) : (
               mealRows.map((meal) => (
                 <div
@@ -109,7 +123,10 @@ export default async function AdminMealsPage() {
           </div>
         </Card>
 
-        <Card className="space-y-4 bg-gradient-to-br from-white via-slate-50 to-emerald-50/40 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/20">
+        <Card
+          id="meal-templates"
+          className="space-y-4 bg-gradient-to-br from-white via-slate-50 to-emerald-50/40 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/20"
+        >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Meal plan templates</h2>
             <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
@@ -118,9 +135,20 @@ export default async function AdminMealsPage() {
           </div>
           <div className="space-y-3">
             {templateRows.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                No templates yet. Create a weekly plan to generate orders.
-              </p>
+              <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <p className="font-medium text-slate-700 dark:text-slate-200">
+                  No templates yet.
+                </p>
+                <p className="mt-1">
+                  Build a weekly meal plan to generate upcoming delivery orders.
+                </p>
+                <Link
+                  href="#meal-items"
+                  className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+                >
+                  Add meal items
+                </Link>
+              </div>
             ) : (
               templateRows.map((template) => (
                 <div
