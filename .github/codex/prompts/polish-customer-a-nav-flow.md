@@ -1,61 +1,65 @@
 You are Codex working in this repo. Follow AGENTS.md and docs/BLUEPRINT.md.
 
-PR GOAL: Polish the CUSTOMER FLOW (Landing → Pricing → Subscribe → Onboarding → Schedule → Track)
-by improving navigation, page layout, and obvious next-step CTAs. This PR must not change core business logic.
+PRIMARY QA STANDARD: docs/QA_UX.md (2025/2026). Implement improvements so the customer flow meets that spec.
+
+PR GOAL (PR A): Fix the CUSTOMER JOURNEY and information architecture so the “happy path”
+Landing → Pricing → Subscribe → Onboarding → Schedule → Track is obvious, mobile-first, and has no dead ends.
 
 Hard constraints:
-- Do not change DB schema.
-- Do not change Stripe/Supabase behavior except minor bugfixes that unblock UI.
-- Do not add binary files (ico/png/jpg). Use SVG or code-generated icon only.
+- Do not change DB schema in this PR.
+- Do not change core billing/scheduling business logic except small bug fixes that unblock UX.
+- Do not add binary files (ico/png/jpg). Use SVG or code-generated icons only.
 - Keep pnpm lint/typecheck/build passing.
+- Respect a11y and prefers-reduced-motion.
 
-Scope (edit only these areas unless necessary):
+Scope:
 - src/app/(marketing)/**
 - src/app/(auth)/**
 - src/app/(app)/**
 - src/components/layout/**
-- src/components/navigation/** (create)
-- src/components/motion/** (if needed)
-- src/components/ui/** (shadcn usage is okay)
+- src/components/navigation/** (create/modify)
+- src/components/ui/** (shadcn)
+- src/components/motion/** (framer-motion)
 
-Must implement:
+Must implement (map to QA_UX sections 5 & 6):
 
-1) A consistent CUSTOMER NAVIGATION system:
+1) Consistent navigation + headers (mobile-first):
    - Public navbar: Logo, How it Works, Pricing, Login
-   - Authenticated navbar: Account, Schedule, Track, Billing, Logout
-   - Make nav responsive (mobile menu)
-   - Show active route styling
-   - Add consistent page headers (title + short description)
+   - Auth navbar: Account, Schedule, Track, Billing, Logout
+   - Active route highlighting
+   - Mobile menu (sheet/drawer), tap targets >= 44px
+   - Consistent page header pattern: title + short description + primary CTA
 
-2) A clear, guided CUSTOMER JOURNEY (every page has a “next action”):
-   - Landing (/): prominent CTA to “Check coverage” and “View plans”
-   - Pricing (/pricing): single plan card with bullets + “Subscribe” button
-   - After subscribe completion: direct user to onboarding (or schedule if already onboarded)
-   - Onboarding: step-based UI (Profile → Address → Done)
-   - Account: show current status + quick links (“Manage billing”, “Schedule delivery”, “Track delivery”)
-   - Schedule: highlight the next available week and best default window
-   - Track: show what user can expect (if no active route yet)
+2) Guided “next step” CTAs on every page:
+   - Landing (/): Check coverage + View plans
+   - Pricing: single plan card w/ bullets, prominent Subscribe CTA
+   - After subscribe success: route user to onboarding or schedule (based on profile completeness)
+   - Onboarding: step-based UI (Profile → Address → Done) with clear progress indicator
+   - Account: status cards + quick links to Billing / Schedule / Track
+   - Schedule: highlight next eligible week + clear Save CTA
+   - Track: clear empty state if no route yet
 
-3) Add “guardrails” messaging (no dead ends):
-   - If NOT logged in: protected pages redirect and show friendly message on login page
-   - If logged in but NO active subscription: show CTA to Pricing
-   - If subscribed but NO appointment: show CTA to Schedule
-   - If appointment set but NO route yet: show “We’ll update tracking when the driver is assigned”
+3) Guardrails / state-based messaging (no dead ends):
+   - If unauthenticated: protected pages redirect + login page shows friendly “please sign in”
+   - If logged-in but no active subscription: show CTA to Pricing and disable schedule/track actions with explanation
+   - If subscribed but no appointment: show CTA to Schedule
+   - If appointment exists but no route yet: show friendly “tracking will appear once assigned”
 
-4) UX polish standards:
-   - Use shadcn components consistently (Card, Button, Input, Badge, Alert, Separator)
-   - Provide sane empty states (friendly, actionable, not blank screens)
-   - Improve copy tone: short, friendly, confident
-   - Ensure dark mode looks good (contrast, borders, muted text)
+4) UX polish requirements:
+   - Avoid blank screens while data loads: show page-level skeleton shells (lightweight)
+   - No layout overflow on mobile
+   - Dark mode parity (contrast + borders + muted text)
+   - Add basic “trust cues” on marketing/pricing (delivery windows, cutoff time, support contact)
+   - Ensure no open redirects (only internal return paths)
 
-5) Update docs:
-   - Add/Update docs/QA_UX.md with a customer “happy path” checklist (step-by-step)
+5) Docs update:
+   - Update docs/QA_UX.md ONLY if you improved the checklist or found missing requirements.
+   - Otherwise, keep it unchanged and ensure UI aligns to it.
 
-Acceptance criteria (must meet before finishing):
-- A new user can clearly discover pricing and subscription CTA from landing.
-- A subscribed user can find Schedule and Billing in 1 click.
-- Every customer page has a clear next action (no dead ends).
-- Mobile navbar works without layout breakage.
-- pnpm lint, pnpm typecheck, pnpm build all pass.
+Acceptance criteria:
+- Customer happy path is discoverable and usable on 390x844 viewport.
+- Every customer page has an obvious next action and never traps the user.
+- Protected routes redirect correctly and explain why.
+- pnpm lint/typecheck/build pass.
 
-Now implement PR A.
+Stop after completing PR A.
