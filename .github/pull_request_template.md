@@ -1,0 +1,77 @@
+## Summary
+- What does this PR change?
+- Why is it needed?
+
+## Type of change
+- [ ] Feature
+- [ ] Bug fix
+- [ ] Refactor (no behavior change)
+- [ ] Security hardening
+- [ ] Performance improvement
+- [ ] Documentation only
+
+## Scope / Risk
+- Affected areas:
+- Risk level: [low / medium / high]
+- Rollback plan:
+
+## Screenshots / recordings (required for UI changes)
+- Desktop:
+- Mobile:
+
+## How to test (required)
+### Local gates
+- [ ] `bash scripts/codex/verify.sh` (lint/typecheck/build)
+
+### Manual QA (customer)
+- [ ] Follow `docs/QA_UX.md` “Happy path”
+- [ ] Verify edge cases relevant to this PR
+
+### Dev environment (hosted Supabase / Stripe test)
+- [ ] Auth works (login/logout)
+- [ ] Subscription state reflects Stripe webhook updates
+- [ ] Scheduling works (cutoff + capacity)
+- [ ] Tracking renders (empty state and live state)
+
+## Security checklist (required for any server/API/auth/billing changes)
+### Auth / Authorization
+- [ ] Protected routes require auth (no accidental public access)
+- [ ] No open redirects (only allow internal return paths)
+- [ ] IDOR check: cannot access other users’ resources by guessing IDs
+- [ ] Supabase RLS enforced for all user-owned tables (ownership policies)
+- [ ] Admin-only routes enforce `profiles.is_admin`
+
+### Input validation / API safety
+- [ ] All Route Handlers validate input (zod or equivalent)
+- [ ] Error responses do not leak secrets/PII
+- [ ] Rate limiting / abuse controls considered for public endpoints (maps, auth, webhook)
+
+### Stripe
+- [ ] Webhook signature verification is enforced
+- [ ] Webhook processing is idempotent (safe on retries / duplicates)
+- [ ] Client never sends trusted Stripe IDs (server derives from session/customer)
+
+### Headers / CSP (if touched)
+- [ ] Security headers updated via `next.config` headers
+- [ ] CSP updated/tested (Report-Only first if tightening)
+
+## Data & privacy checklist
+- [ ] No secrets committed; only `.env.example` updated
+- [ ] Logs avoid PII (full address, phone) unless explicitly needed
+- [ ] Any new analytics/tracking reviewed for consent and PII
+
+## DB changes
+- [ ] No schema changes
+OR
+- [ ] New migration added: `supabase/migrations/____.sql`
+- [ ] RLS updated & tested
+- [ ] Seed updated (idempotent)
+
+## Observability
+- [ ] Errors are actionable (not raw stack traces)
+- [ ] Key events logged (webhook received, cron ran) without PII
+
+## Codex metadata (if applicable)
+- Prompt file used:
+- Branch name:
+- Notes / follow-ups:
