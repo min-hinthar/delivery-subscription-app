@@ -18,20 +18,6 @@ type StopRow = {
   } | null;
 };
 
-type AppointmentStopRow = {
-  id: string;
-  profile: { full_name: string | null } | null;
-  appointment: {
-    address: {
-      line1: string | null;
-      line2: string | null;
-      city: string | null;
-      state: string | null;
-      postal_code: string | null;
-    } | null;
-  } | null;
-};
-
 export async function GET(request: Request) {
   const { supabase, isAdmin } = await requireAdmin();
 

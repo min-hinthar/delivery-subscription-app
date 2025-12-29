@@ -5,7 +5,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert } from "@/components/ui/alert";
 import type { AddressOption, DeliveryAppointmentDTO, DeliveryWindowOption } from "./types";
 
@@ -108,35 +107,36 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Delivery window</label>
-        <Select value={deliveryWindowId} onValueChange={setDeliveryWindowId} disabled={!canEdit || pending}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a delivery window" />
-          </SelectTrigger>
-          <SelectContent>
-            {windows.map((w) => (
-              <SelectItem key={w.id} value={w.id}>
-                {w.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          value={deliveryWindowId}
+          onChange={(event) => setDeliveryWindowId(event.target.value)}
+          disabled={!canEdit || pending}
+          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+        >
+          <option value="">Select a delivery window</option>
+          {windows.map((w) => (
+            <option key={w.id} value={w.id}>
+              {w.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">Delivery address</label>
-        <Select value={addressId ?? "__none__"} onValueChange={(v) => setAddressId(v === "__none__" ? null : v)} disabled={!canEdit || pending}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select an address" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="__none__">No address selected</SelectItem>
-            {addresses.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                {a.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          value={addressId ?? "__none__"}
+          onChange={(event) => setAddressId(event.target.value === "__none__" ? null : event.target.value)}
+          disabled={!canEdit || pending}
+          className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+        >
+          <option value="__none__">No address selected</option>
+          {addresses.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.label}
+            </option>
+          ))}
+        </select>
         <p className="text-xs text-muted-foreground">
           Tip: keep your primary address updated in Account.
         </p>

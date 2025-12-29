@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
 import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -29,16 +30,24 @@ const InputIcon = ({ children }: { children: React.ReactNode }) => (
 export function AuthForm({ mode, redirectPath }: AuthFormProps) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
+  const emailRef = useRef<HTMLInputElement | null>(null);
 
   const handleEmailAuth = async () => {
+    if (isLoading) {
+      return;
+    }
+
     setError(null);
+    setEmailError(null);
     setMessage(null);
 
     if (!email) {
-      setError(DEFAULT_ERRORS.missingEmail);
+      setEmailError(DEFAULT_ERRORS.missingEmail);
+      emailRef.current?.focus();
       return;
     }
 
@@ -62,24 +71,41 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
         throw otpError;
       }
 
-      setMessage(
+      const nextMessage =
         mode === "signup"
           ? "Check your email to confirm and finish your account setup."
-          : "Check your email for a login link.",
-      );
+          : "Check your email for a login link.";
+      setMessage(nextMessage);
+      toast({
+        title: "Check your email",
+        description: nextMessage,
+      });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Authentication failed.");
+      const nextError =
+        caught instanceof Error ? caught.message : "Authentication failed.";
+      setError(nextError);
+      toast({
+        title: "Authentication failed",
+        description: nextError,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleResend = async () => {
+    if (isResending) {
+      return;
+    }
+
     setError(null);
+    setEmailError(null);
     setMessage(null);
 
     if (!email) {
-      setError(DEFAULT_ERRORS.missingEmail);
+      setEmailError(DEFAULT_ERRORS.missingEmail);
+      emailRef.current?.focus();
       return;
     }
 
@@ -103,9 +129,20 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
         throw otpError;
       }
 
-      setMessage("Fresh login link sent. Check your email.");
+      const nextMessage = "Fresh login link sent. Check your email.";
+      setMessage(nextMessage);
+      toast({
+        title: "Login link sent",
+        description: nextMessage,
+      });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Unable to resend link.");
+      const nextError = caught instanceof Error ? caught.message : "Unable to resend link.";
+      setError(nextError);
+      toast({
+        title: "Unable to resend link",
+        description: nextError,
+        variant: "destructive",
+      });
     } finally {
       setIsResending(false);
     }
@@ -135,12 +172,23 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
             id="email"
             type="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              setEmailError(null);
+            }}
+            ref={emailRef}
+            aria-invalid={Boolean(emailError)}
+            aria-describedby={emailError ? "auth-email-error" : undefined}
             className="w-full rounded-md border border-slate-200 bg-white py-2 pl-12 pr-3 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
             placeholder="you@example.com"
             autoComplete="email"
           />
         </div>
+        {emailError ? (
+          <p id="auth-email-error" className="text-xs text-rose-600">
+            {emailError}
+          </p>
+        ) : null}
       </div>
       <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
         We’ll email you a magic link so you can sign in without a password.

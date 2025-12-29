@@ -5,6 +5,7 @@ import "./globals.css";
 import { PageTransition } from "@/components/page-transition";
 import { SiteHeader } from "@/components/navigation/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Morning Star Weekly Delivery",
@@ -28,6 +29,7 @@ export default function RootLayout({
               </div>
             </main>
           </div>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>
