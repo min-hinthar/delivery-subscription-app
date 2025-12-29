@@ -26,6 +26,31 @@ function getCustomerId(customer: string | Stripe.Customer | Stripe.DeletedCustom
   return customer.id;
 }
 
+async function upsertSubscription(
+  adminClient: ReturnType<typeof createSupabaseAdminClient>,
+  subscription: Stripe.Subscription,
+  userId: string,
+) {
+  const subscriptionItem = subscription.items.data[0];
+  const priceId = subscriptionItem?.price?.id ?? null;
+
+  return adminClient.from("subscriptions").upsert(
+    {
+      user_id: userId,
+      stripe_subscription_id: subscription.id,
+      stripe_price_id: priceId,
+      status: subscription.status,
+      current_period_start: toDateTime(subscriptionItem?.current_period_start),
+      current_period_end: toDateTime(subscriptionItem?.current_period_end),
+      cancel_at_period_end: subscription.cancel_at_period_end,
+      updated_at: new Date().toISOString(),
+    },
+    {
+      onConflict: "stripe_subscription_id",
+    },
+  );
+}
+
 async function resolveUserId(
   adminClient: ReturnType<typeof createSupabaseAdminClient>,
   stripeCustomerId: string | null,
@@ -127,24 +152,7 @@ export async function POST(request: Request) {
       return ok({ received: true });
     }
 
-    const subscriptionItem = subscription.items.data[0];
-    const priceId = subscriptionItem?.price?.id ?? null;
-
-    const { error } = await admin.from("subscriptions").upsert(
-      {
-        user_id: userId,
-        stripe_subscription_id: subscription.id,
-        stripe_price_id: priceId,
-        status: subscription.status,
-        current_period_start: toDateTime(subscriptionItem?.current_period_start),
-        current_period_end: toDateTime(subscriptionItem?.current_period_end),
-        cancel_at_period_end: subscription.cancel_at_period_end,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "stripe_subscription_id",
-      },
-    );
+    const { error } = await upsertSubscription(admin, subscription, userId);
 
     if (error) {
       return bad("Failed to sync subscription.", { status: 500 });
@@ -189,6 +197,36 @@ export async function POST(request: Request) {
 
     if (error) {
       return bad("Failed to sync payment.", { status: 500 });
+    }
+  }
+
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as Stripe.Invoice;
+    const stripeCustomerId = getCustomerId(invoice.customer ?? null);
+    const userId = await resolveUserId(
+      admin,
+      stripeCustomerId,
+      invoice.metadata?.supabase_user_id ?? null,
+    );
+
+    if (!userId) {
+      return ok({ received: true });
+    }
+
+    const subscriptionId = (
+      invoice as Stripe.Invoice & {
+        subscription?: string | Stripe.Subscription | null;
+      }
+    ).subscription;
+
+    if (typeof subscriptionId === "string") {
+      const stripe = getStripeClient();
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const { error } = await upsertSubscription(admin, subscription, userId);
+
+      if (error) {
+        return bad("Failed to sync subscription from invoice.", { status: 500 });
+      }
     }
   }
 

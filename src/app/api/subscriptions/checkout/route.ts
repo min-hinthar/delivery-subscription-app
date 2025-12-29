@@ -35,7 +35,7 @@ function normalizeReturnUrl(requestUrl: string, value: string | undefined, fallb
 }
 
 export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient();
+  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const {
     data: { user },
   } = await supabase.auth.getUser();

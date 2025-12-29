@@ -1,0 +1,14 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/generate-week",
+      "schedule": "*/15 * * * *",
+      "headers": [
+        {
+          "key": "Authorization",
+          "value": "Bearer ${CRON_SECRET}"
+        }
+      ]
+    }
+  ]
+}

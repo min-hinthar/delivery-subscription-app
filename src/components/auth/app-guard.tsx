@@ -62,7 +62,7 @@ export default async function AppGuard({ children }: AppGuardProps) {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, onboarding_completed")
+    .select("full_name, onboarding_completed, is_admin")
     .eq("id", data.user.id)
     .maybeSingle();
 
@@ -73,7 +73,7 @@ export default async function AppGuard({ children }: AppGuardProps) {
     .eq("is_primary", true)
     .maybeSingle();
 
-  if (!profile?.onboarding_completed || !primaryAddress?.id) {
+  if (!profile?.is_admin && (!profile?.onboarding_completed || !primaryAddress?.id)) {
     redirect("/onboarding");
   }
 

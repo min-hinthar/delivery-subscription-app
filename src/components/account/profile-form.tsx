@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { addressInputSchema, onboardingInputSchema } from "@/lib/api/types";
-import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type ProfileFormProps = {
-  userId: string;
   profile?: {
     full_name: string | null;
     phone: string | null;
@@ -26,7 +24,7 @@ type ProfileFormProps = {
   } | null;
 };
 
-export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProps) {
+export function ProfileForm({ profile, primaryAddress }: ProfileFormProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState(profile?.full_name ?? "");
   const [phone, setPhone] = useState(profile?.phone ?? "");
@@ -39,11 +37,18 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
   const [instructions, setInstructions] = useState(primaryAddress?.instructions ?? "");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
   const handleSubmit = async () => {
     setError(null);
     setMessage(null);
+
+    if (!verifiedAddress) {
+      setError("Verify your address before saving.");
+      return;
+    }
 
     const profileParsed = onboardingInputSchema.safeParse({
       fullName,
@@ -74,38 +79,29 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
     setIsSaving(true);
 
     try {
-      const supabase = createSupabaseBrowserClient();
-
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        id: userId,
-        full_name: fullName,
-        phone,
-        email: profile?.email ?? null,
+      const response = await fetch("/api/account/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          full_name: fullName,
+          phone,
+          address: {
+            id: primaryAddress?.id ?? null,
+            line1: addressParsed.data.line1,
+            line2: addressParsed.data.line2,
+            city: addressParsed.data.city,
+            state: addressParsed.data.state,
+            postal_code: addressParsed.data.postalCode,
+            country: addressParsed.data.country,
+            instructions: addressParsed.data.instructions,
+          },
+        }),
       });
 
-      if (profileError) {
-        throw profileError;
-      }
+      const payload = await response.json();
 
-      const addressPayload = {
-        id: primaryAddress?.id,
-        user_id: userId,
-        line1: addressParsed.data.line1,
-        line2: addressParsed.data.line2,
-        city: addressParsed.data.city,
-        state: addressParsed.data.state,
-        postal_code: addressParsed.data.postalCode,
-        country: addressParsed.data.country,
-        instructions: addressParsed.data.instructions,
-        is_primary: true,
-      };
-
-      const { error: addressError } = await supabase
-        .from("addresses")
-        .upsert(addressPayload, { onConflict: "id" });
-
-      if (addressError) {
-        throw addressError;
+      if (!payload.ok) {
+        throw new Error(payload.error?.message ?? "Unable to save your details.");
       }
 
       setMessage("Profile updated!");
@@ -114,6 +110,41 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
       setError(caught instanceof Error ? caught.message : "Unable to save your details.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleVerifyAddress = async () => {
+    setError(null);
+    setMessage(null);
+    setIsVerifying(true);
+
+    try {
+      const response = await fetch("/api/maps/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          line1,
+          line2: line2 || null,
+          city,
+          state,
+          postal_code: postalCode,
+          country,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!payload.ok) {
+        throw new Error(payload.error?.message ?? "Unable to verify address.");
+      }
+
+      setVerifiedAddress(payload.data.formatted_address);
+      setMessage("Address verified. You can save your profile.");
+    } catch (caught) {
+      setVerifiedAddress(null);
+      setError(caught instanceof Error ? caught.message : "Unable to verify address.");
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -167,7 +198,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             Address line 1
             <input
               value={line1}
-              onChange={(event) => setLine1(event.target.value)}
+              onChange={(event) => {
+                setLine1(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="123 Golden Lantern Ave"
             />
@@ -176,7 +210,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             Address line 2
             <input
               value={line2}
-              onChange={(event) => setLine2(event.target.value)}
+              onChange={(event) => {
+                setLine2(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="Apartment, suite, unit"
             />
@@ -185,7 +222,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             City
             <input
               value={city}
-              onChange={(event) => setCity(event.target.value)}
+              onChange={(event) => {
+                setCity(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="Covina"
             />
@@ -194,7 +234,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             State
             <input
               value={state}
-              onChange={(event) => setState(event.target.value)}
+              onChange={(event) => {
+                setState(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="CA"
             />
@@ -203,7 +246,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             Postal code
             <input
               value={postalCode}
-              onChange={(event) => setPostalCode(event.target.value)}
+              onChange={(event) => {
+                setPostalCode(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="91723"
             />
@@ -212,7 +258,10 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
             Country
             <input
               value={country}
-              onChange={(event) => setCountry(event.target.value)}
+              onChange={(event) => {
+                setCountry(event.target.value);
+                setVerifiedAddress(null);
+              }}
               className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
               placeholder="US"
             />
@@ -232,10 +281,22 @@ export function ProfileForm({ userId, profile, primaryAddress }: ProfileFormProp
         <Button onClick={handleSubmit} disabled={isSaving}>
           {isSaving ? "Saving…" : "Save changes"}
         </Button>
+        <Button
+          onClick={handleVerifyAddress}
+          disabled={isVerifying || isSaving}
+          className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
+        >
+          {isVerifying ? "Verifying…" : "Verify address"}
+        </Button>
       </div>
       {error ? (
         <p className="text-sm text-red-500" role="alert">
           {error}
+        </p>
+      ) : null}
+      {verifiedAddress ? (
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Verified address: {verifiedAddress}
         </p>
       ) : null}
       {message ? (

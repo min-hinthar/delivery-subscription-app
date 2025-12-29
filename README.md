@@ -110,6 +110,7 @@ NEXT_PUBLIC_STRIPE_PRICE_WEEKLY (Price ID)
 Webhook events handled:
 - checkout.session.completed (customer mapping)
 - customer.subscription.created/updated/deleted (subscription cache)
+- invoice.paid (subscription cache refresh)
 - invoice.payment_succeeded / invoice.payment_failed (payment cache)
 
 ### 5) Webhooks (local)
@@ -125,6 +126,7 @@ Enable APIs:
 Set:
 - GOOGLE_MAPS_API_KEY (server)
 - NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID (client map styling)
+- NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY (client map rendering)
 
 ### 7) Run dev
 pnpm dev
@@ -141,8 +143,10 @@ Stripe webhook in production
 - Add the production webhook secret as STRIPE_WEBHOOK_SECRET
 
 Cron jobs (weekly order generation)
-Use Vercel Cron Jobs to call a secure internal route (e.g. /api/cron/generate-week) with CRON_SECRET. Cron schedules are configured in vercel.json. 
-Note: Cron schedules are in UTC. For PT cutoff logic (and DST), run cron frequently (e.g. every 15 minutes) and compute eligibility server-side.
+- Cron schedules live in vercel.json (every 15 minutes UTC by default).
+- Protect the cron endpoint with CRON_SECRET and pass it as a Bearer token header.
+- Endpoint: POST /api/cron/generate-week
+- Note: Cron schedules are in UTC. For PT cutoff logic (and DST), run cron frequently and compute eligibility server-side.
 
 ### Admin Bootstrap
 To grant admin to your account:
