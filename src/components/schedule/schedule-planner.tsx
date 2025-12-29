@@ -62,6 +62,14 @@ export function SchedulePlanner({
     () => windows.find((window) => window.id === selectedWindow),
     [selectedWindow, windows],
   );
+  const selectedWeekIndex = useMemo(
+    () => weekOptions.findIndex((option) => option.value === selectedWeek),
+    [selectedWeek, weekOptions],
+  );
+  const nextWeekOption =
+    selectedWeekIndex >= 0 && selectedWeekIndex + 1 < weekOptions.length
+      ? weekOptions[selectedWeekIndex + 1]
+      : weekOptions[0];
 
   const isFull = selected ? selected.available <= 0 : false;
   const availableWindows = windows.filter((window) => window.available > 0);
@@ -193,57 +201,83 @@ export function SchedulePlanner({
             Availability updates as other subscribers book.
           </p>
         </div>
-        <div className="grid gap-3 md:grid-cols-2">
-          {windows.map((window) => {
-            const isSelected = window.id === selectedWindow;
-            const isUnavailable = window.available <= 0;
-            return (
-              <label
-                key={window.id}
-                className={`flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm transition ${
-                  isSelected
-                    ? "border-slate-900 bg-slate-50 dark:border-slate-200 dark:bg-slate-900"
-                    : "border-slate-200 dark:border-slate-800"
-                } ${
-                  isUnavailable || isSchedulingDisabled
-                    ? "opacity-60"
-                    : "hover:border-slate-400"
-                }`}
+        {windows.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+            <p className="font-medium text-slate-700 dark:text-slate-200">
+              No delivery windows published yet.
+            </p>
+            <p className="mt-1">
+              Try another week or check back once the operations team opens windows for this
+              schedule.
+            </p>
+            {nextWeekOption && nextWeekOption.value !== selectedWeek ? (
+              <Button
+                className="mt-3"
+                onClick={() => handleWeekChange(nextWeekOption.value)}
+                disabled={isInteractionDisabled}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    {window.day_of_week} {window.start_time}–{window.end_time}
+                View {nextWeekOption.label}
+              </Button>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {windows.map((window) => {
+              const isSelected = window.id === selectedWindow;
+              const isUnavailable = window.available <= 0;
+              return (
+                <label
+                  key={window.id}
+                  className={`flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm transition ${
+                    isSelected
+                      ? "border-slate-900 bg-slate-50 dark:border-slate-200 dark:bg-slate-900"
+                      : "border-slate-200 dark:border-slate-800"
+                  } ${
+                    isUnavailable || isSchedulingDisabled
+                      ? "opacity-60"
+                      : "hover:border-slate-400"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">
+                      {window.day_of_week} {window.start_time}–{window.end_time}
+                    </span>
+                    <input
+                      type="radio"
+                      name="delivery_window"
+                      value={window.id}
+                      checked={isSelected}
+                      onChange={() => {
+                        setSelectedWindow(window.id);
+                        setError(null);
+                      }}
+                      disabled={isUnavailable || isSchedulingDisabled}
+                      ref={(element) => {
+                        windowRefs.current[window.id] = element;
+                      }}
+                    />
+                  </div>
+                  {isUnavailable ? (
+                    <span className="text-xs font-semibold text-rose-600">Full</span>
+                  ) : null}
+                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                    {window.available} of {window.capacity} slots remaining
                   </span>
-                  <input
-                    type="radio"
-                    name="delivery_window"
-                    value={window.id}
-                    checked={isSelected}
-                    onChange={() => {
-                      setSelectedWindow(window.id);
-                      setError(null);
-                    }}
-                    disabled={isUnavailable || isSchedulingDisabled}
-                    ref={(element) => {
-                      windowRefs.current[window.id] = element;
-                    }}
-                  />
-                </div>
-                {isUnavailable ? (
-                  <span className="text-xs font-semibold text-rose-600">Full</span>
-                ) : null}
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {window.available} of {window.capacity} slots remaining
-                </span>
-              </label>
-            );
-          })}
-        </div>
+                </label>
+              );
+            })}
+          </div>
+        )}
         <div className="flex flex-col gap-2">
           <Button
             onClick={handleSubmit}
             disabled={
-              !selectedWindow || isFull || isCutoffPassed || isSchedulingDisabled || isSaving
+              !selectedWindow ||
+              windows.length === 0 ||
+              isFull ||
+              isCutoffPassed ||
+              isSchedulingDisabled ||
+              isSaving
             }
           >
             {isSaving ? "Saving…" : appointment ? "Update appointment" : "Confirm appointment"}

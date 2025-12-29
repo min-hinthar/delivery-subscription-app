@@ -92,9 +92,20 @@ export default async function AdminSubscriptionsPage() {
         </div>
         <div className="space-y-3">
           {formatted.length === 0 ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400">
-              No subscription records yet. Stripe webhooks will populate this list.
-            </p>
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
+              <p className="font-medium text-slate-700 dark:text-slate-200">
+                No subscription records yet.
+              </p>
+              <p className="mt-1">
+                Run a test checkout to confirm Stripe webhooks are syncing into operations.
+              </p>
+              <Link
+                href="/pricing"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+              >
+                Open pricing
+              </Link>
+            </div>
           ) : (
             formatted.map((subscription) => (
               <div
