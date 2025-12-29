@@ -1,133 +1,245 @@
-# AGENTS.md — Codex Rules (Build + Maintain + Improve)
-
-This repository is a production app. Agents must optimize for:
-1) security
-2) correctness
-3) maintainability
-4) shipped features
-
-If you find these rules outdated, **update this file in the same PR** with a short rationale.
+# AGENTS.md — Codex House Rules (Morning Star Weekly Delivery App)
+**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase (Auth/Postgres/RLS) + Stripe (Subs/Portal/Webhooks) + Google Maps (Geocode/Directions) + Framer Motion  
+**Primary Specs:** `docs/BLUEPRINT.md`, `docs/QA_UX.md`, `docs/SECURITY_QA.md`, `docs/NEXTJS16_ROUTING_STANDARDS.md`
 
 ---
 
-## 1) Prime Directive
-
-### Always ship working software
-- Keep `pnpm lint`, `pnpm typecheck`, `pnpm build` passing.
-- Prefer small PRs with clear commits.
-
-### Never leak secrets
-- Never commit `.env.local` or any API keys.
-- Update `.env.example` whenever you add env vars.
-
-### RLS-first
-- Every table with user data must have RLS enabled.
-- Policies must enforce ownership by default.
-- Admin-only actions require `profiles.is_admin = true`.
+## 1) Mission
+Build and maintain a **production-grade weekly meal delivery appointment app** with:
+- secure-by-default architecture (RLS-first, server-verified webhooks)
+- modern mobile-first UX (no dead ends, smooth states, accessible)
+- clear routing boundaries (marketing/auth/customer/admin)
+- stable, incremental PRs (minimal conflicts, easy review)
 
 ---
 
-## 2) Next.js 16 Compatibility
-
-- Use App Router + Route Handlers (`src/app/api/**/route.ts`). :contentReference[oaicite:11]{index=11}
-- Avoid request interception unless necessary; if needed, Next.js 16 uses `proxy.ts` (not `middleware.ts`). :contentReference[oaicite:12]{index=12}
-- Do not cause import-time crashes due to missing env vars. Validate env inside server functions.
-
----
-
-## 3) Supabase Rules
-
-### Clients
-Maintain three clients:
-- `browser` client (anon key)
-- `server` SSR client (cookies)
-- `admin` client (service role, server-only)
-
-### Migrations
-- Use `supabase/migrations/001_init.sql`, `002_rls.sql`, `003_triggers.sql`.
-- Never edit old migrations after merge; add new ones.
-
-### Policies
-- Users can CRUD their own `profiles`, `addresses`, `delivery_appointments`.
-- Users can SELECT their own `subscriptions`, `orders`, `payments`.
-- Only admins can manage:
-  - `meal_items`, `meal_plan_templates`, `delivery_windows`
-  - `delivery_routes`, `delivery_stops`
-  - cross-user operational views/exports
+## 2) Golden Rules (Non-negotiable)
+1) **Do not stack PRs.** One PR at a time. Do not begin a new PR until the previous PR is merged into `main`.
+2) **Always start from latest `origin/main`.** Every Codex task/PR must branch off the latest `main`.
+3) **Scope discipline.** Touch only files needed by the active prompt. No drive-by refactors.
+4) **No binary files in PRs.** Do not add `.png/.jpg/.ico/.pdf/.psd` etc. Use SVG/code/icons.
+5) **No secrets committed.** Never edit or commit `.env.local` or any real keys.
+6) **Keep gates green.** Every PR must pass `bash scripts/codex/verify.sh` before requesting review.
+7) **Security is strict.** Never weaken authz, RLS, webhook verification, or admin gating.
 
 ---
 
-## 4) Stripe Rules
+## 3) Branch Hygiene (Conflict-Minimizing Workflow)
+### Required start-of-task routine
+- Fetch latest main and create a new branch:
+  - update local main to `origin/main`
+  - create a fresh branch for the PR (name per conventions below)
 
-### Required routes
-- Checkout session creation (subscription)
-- Billing portal session creation
-- Webhook handler
+### Required completion routine
+- Run `bash scripts/codex/verify.sh`
+- Ensure PR description includes:
+  - summary
+  - how to test
+  - QA_UX/Security considerations
+  - any risk/rollback notes
 
-### Webhook requirements
-- Verify signature with `STRIPE_WEBHOOK_SECRET`.
-- Idempotent upserts keyed by Stripe IDs.
-- Only trust Stripe webhooks (never trust client-submitted Stripe IDs).
-
----
-
-## 5) Google Maps Rules
-
-- Geocoding and Directions happen server-side using `GOOGLE_MAPS_API_KEY`.
-- Client only renders maps (no unrestricted server keys).
-- Plan for waypoint limits; implement route chunking later if needed.
-
----
-
-## 6) Business Rules (must not regress)
-
-- Delivery windows:
-  - Saturday 11:00–19:00 PT
-  - Sunday 11:00–15:00 PT
-- Cutoff: Friday 17:00 PT for upcoming weekend
-- After cutoff: customers cannot change appointments (admin can override)
-- Weekly generation:
-  - active subs + valid appointment => create order + order items from template
-- Tracking:
-  - driver updates stop statuses => customers see realtime progress
+### Naming convention
+- UI polish: `codex/polish-customer-a`, `codex/polish-customer-b`, `codex/polish-customer-c`
+- Security: `codex/security-s0`, `codex/security-s1`, `codex/security-s2`
+- Routing: `codex/routing-r1-groups-boundaries`, `codex/routing-r2-appointments-modals`
 
 ---
 
-## 7) API Standards
+## 4) Where Requirements Live (Source of Truth)
+- Product + architecture: `docs/BLUEPRINT.md`
+- Customer UX QA: `docs/QA_UX.md`
+- Security regression QA: `docs/SECURITY_QA.md`
+- Security standards: `docs/SECURITY_OVERVIEW.md`, `docs/SECURITY_CHECKLIST.md`, `docs/WEBHOOK_SECURITY.md`, `docs/RLS_AUDIT.md`, `docs/HEADERS_AND_CSP.md`
+- Routing standards: `docs/NEXTJS16_ROUTING_STANDARDS.md`
+- Current route inventory (if present): `docs/CURRENT_APP_TREE.md`
 
-- Validate inputs with zod.
-- Standard response shape:
-  - `{ ok: true, data }`
-  - `{ ok: false, error: { message } }`
-- Use correct status codes (401/403/422/500).
-- Keep handlers small; put logic in `src/lib/**`.
-
----
-
-## 8) UX / UI Standards
-
-- Tailwind + shadcn/ui for primitives.
-- next-themes + Framer Motion for theme/page transitions.
-- Accessibility is required (labels, keyboard navigation, aria).
+If a prompt conflicts with these docs, **follow the docs** and update the prompt outcomes in the PR notes.
 
 ---
 
-## 9) Vercel Deployment Rules
+## 5) Commands (Local + Codex Cloud)
+### Standard verification (required for every PR)
+```bash
+bash scripts/codex/verify.sh
+````
 
-- Support Vercel env vars (Preview + Production). :contentReference[oaicite:13]{index=13}
-- Cron jobs use `vercel.json` and call protected endpoints with `CRON_SECRET`. :contentReference[oaicite:14]{index=14}
-- Use Node runtime for Stripe webhooks.
+### Optional checks
+
+* Routing-specific checks (if present):
+
+```bash
+bash scripts/codex/verify-routing.sh
+```
+
+### Dev server
+
+```bash
+pnpm dev
+```
 
 ---
 
-## 10) How Agents Should Work (Default Loop)
+## 6) Coding Standards (Next.js 16 App Router)
 
-1) **Scan** existing code/docs/tests.
-2) **Plan**: list files to touch, migrations, new env vars.
-3) **Implement**: small changes; avoid broad refactors.
-4) **Prove**: ensure lint/typecheck/build.
-5) **Document**: README / BLUEPRINT updates if behavior changed.
+### Server vs client components
 
-If you discover a better approach, implement it and update AGENTS.md.
+* Default to **Server Components**.
+* Use `"use client"` only for interactive UI (forms, toasts, maps rendering).
+* Keep client components **leaf-level** when possible.
+
+### Caching rules
+
+* **Private user data = no-store** (pages + APIs).
+* Public marketing pages may use revalidation if safe.
+* Never cache sensitive data responses.
+
+### Routing boundaries
+
+* Use route groups: `(marketing)`, `(auth)`, `(app)`, `(admin)`
+* Enforce auth in `(app)/layout.tsx` server-side.
+* Enforce admin in `(admin)/layout.tsx` server-side (`profiles.is_admin`).
+
+### Segment boundaries
+
+* Add `loading.tsx`, `error.tsx`, and `not-found.tsx` where it improves UX.
+* `error.tsx` must be a client component using `reset()`.
+
+### Advanced routing patterns (allowed)
+
+* Parallel routes (`@modal`, `@nav`) and intercepting routes are allowed **only** when they:
+
+  * improve list→detail UX
+  * preserve deep linking
+  * keep auth/admin gating intact
+  * preserve back/forward behavior
 
 ---
+
+## 7) API Route Handler Standards (`src/app/api/**/route.ts`)
+
+### Input validation
+
+* All mutating routes must validate input with zod.
+* Return consistent JSON:
+
+  * `{ ok: true, data: ... }`
+  * `{ ok: false, error: { code, message, details? } }`
+
+### Error handling
+
+* Do not leak stack traces, secrets, or full PII.
+* Map common errors to user-friendly messages:
+
+  * 401 unauthenticated
+  * 403 unauthorized
+  * 422 validation/cutoff rules
+  * 429 rate-limited
+  * 500 unexpected
+
+### Privacy
+
+* Do not log full addresses or phone numbers.
+* Never log Stripe raw payloads or secrets.
+
+### Security controls
+
+* Prevent open redirects: only allow internal return paths.
+* Rate limit expensive endpoints (maps geocode/directions) pragmatically.
+* Use `no-store` headers for private endpoints.
+
+---
+
+## 8) Supabase Standards (Auth + Postgres + RLS)
+
+* RLS is mandatory for user-owned tables.
+* Queries must not allow IDOR: user can only read/write their own rows.
+* Admin tables/routes are restricted via admin checks.
+* Service role key usage is **server-only** and limited to:
+
+  * Stripe webhooks
+  * cron jobs
+  * admin operations (when necessary)
+
+DB changes:
+
+* Use migrations in `supabase/migrations/*`.
+* Migrations must be idempotent and documented.
+
+---
+
+## 9) Stripe Standards (Subscriptions + Portal + Webhooks)
+
+* Stripe webhooks must:
+
+  * verify signature
+  * be idempotent (store processed event ids)
+* Subscription state in DB comes from Stripe events (webhook source of truth).
+* Checkout and portal sessions are created server-side only.
+* Never trust client-supplied Stripe IDs.
+
+---
+
+## 10) Google Maps Standards (Geocode + Directions)
+
+* Server-only for geocode/directions (no unrestricted keys in client bundle).
+* Validate inputs; reject invalid requests early.
+* Add abuse controls (rate limits + caching where safe).
+* On maps failure, UX must degrade gracefully (text fallback, retry).
+
+---
+
+## 11) UI/UX Standards (2025/2026)
+
+* Mobile-first layout and tap targets (>=44px).
+* shadcn/ui components for consistent UI.
+* Framer Motion:
+
+  * subtle transitions
+  * no blocking animations
+  * respect `prefers-reduced-motion`
+* Dark mode parity required.
+* Every page must have a clear “next action” CTA (see `docs/QA_UX.md`).
+* Avoid blank screens: loading skeletons/empty states required.
+
+---
+
+## 12) Documentation Expectations
+
+When a PR changes behavior, update docs:
+
+* UX changes → update `docs/QA_UX.md` (or ensure it still passes)
+* Security changes → update `docs/SECURITY_CHECKLIST.md`, `docs/SECURITY_REPORT.md` status
+* Routing changes → update `docs/NEXTJS16_ROUTING_STANDARDS.md` if needed and/or `docs/CURRENT_APP_TREE.md`
+
+Doc changes must be **concrete and testable** (no vague statements).
+
+---
+
+## 13) PR Quality Bar
+
+Every PR must include in the PR description:
+
+* What changed + why
+* How to test (commands + click path)
+* Any risks/rollbacks
+* QA mapping:
+
+  * which parts of `docs/QA_UX.md` are affected
+  * which parts of `docs/SECURITY_QA.md` are affected (if applicable)
+
+---
+
+## 14) Stop Conditions (When to pause and document)
+
+Stop and document (instead of guessing) if:
+
+* implementing a change would require a second PR dependency
+* a change would expand scope beyond the prompt
+* you would need real credentials/keys or direct DB access
+* you’re unsure about expected business rules (cutoffs, windows, admin privileges)
+
+In these cases, add a short note in the PR describing:
+
+* what’s blocked
+* what’s needed to proceed safely
+
