@@ -10,7 +10,7 @@ Hard constraints:
 - Do not change core billing/scheduling business logic except small bug fixes that unblock UX.
 - Do not add binary files (ico/png/jpg). Use SVG or code-generated icons only.
 - Keep pnpm lint/typecheck/build passing.
-- Respect a11y and prefers-reduced-motion.
+- Respect a11y and prefers-interactive-motion.
 
 Scope:
 - src/app/(marketing)/**
