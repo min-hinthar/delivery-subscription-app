@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { PageHeader } from "@/components/layout/page-header";
 import { SchedulePlanner } from "@/components/schedule/schedule-planner";
+import { Card } from "@/components/ui/card";
 import {
   formatDateYYYYMMDD,
   getCutoffForWeek,
@@ -112,7 +113,7 @@ export default async function SchedulePage({
   const { data: existingAppointment } = auth.user
     ? await supabase
         .from("delivery_appointments")
-        .select("delivery_window_id")
+        .select("id, delivery_window_id")
         .eq("week_of", selectedWeek)
         .eq("user_id", auth.user.id)
         .maybeSingle()
@@ -148,6 +149,22 @@ export default async function SchedulePage({
           You need an active subscription to schedule deliveries. Subscribe first, then
           come back to pick your delivery window.
         </div>
+      ) : null}
+      {existingAppointment?.id ? (
+        <Card className="flex flex-wrap items-center justify-between gap-3 border border-slate-200/80 bg-white/70 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/40">
+          <div>
+            <p className="text-sm font-medium">Upcoming appointment ready</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Review notes, address, or delivery window details.
+            </p>
+          </div>
+          <Link
+            href={`/appointment/${existingAppointment.id}`}
+            className="inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+          >
+            View appointment
+          </Link>
+        </Card>
       ) : null}
       <SchedulePlanner
         weekOptions={weekOptions}
