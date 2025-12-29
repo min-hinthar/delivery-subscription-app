@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight, ClipboardList, MapPinned, PackageCheck, Truck } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
@@ -86,8 +87,9 @@ export default async function AdminHomePage() {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/admin/deliveries"
-            className="rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
+            <Truck className="h-4 w-4" aria-hidden="true" />
             View deliveries
           </Link>
           <LogoutButton />
@@ -101,46 +103,57 @@ export default async function AdminHomePage() {
             value: deliveriesCount ?? 0,
             href: "/admin/deliveries",
             accent: "from-emerald-50/80 to-emerald-100/40",
+            icon: Truck,
           },
           {
             label: "Active routes",
             value: routesCount ?? 0,
             href: "/admin/routes",
             accent: "from-blue-50/80 to-blue-100/40",
+            icon: MapPinned,
           },
           {
             label: "Active meals",
             value: mealsCount ?? 0,
             href: "/admin/meals",
             accent: "from-amber-50/80 to-amber-100/40",
+            icon: PackageCheck,
           },
           {
             label: "Subscriptions",
             value: subscriptionsCount ?? 0,
             href: "/admin/subscriptions",
             accent: "from-purple-50/80 to-purple-100/40",
+            icon: ClipboardList,
           },
-        ].map((card) => (
-          <Card
-            key={card.label}
-            className={`bg-gradient-to-br ${card.accent} dark:from-slate-950 dark:via-slate-900/70 dark:to-slate-950/40`}
-          >
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {card.label}
-              </p>
-              <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-                {card.value}
-              </p>
-              <Link
-                href={card.href}
-                className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
-              >
-                Open dashboard
-              </Link>
-            </div>
-          </Card>
-        ))}
+        ].map((card) => {
+          const Icon = card.icon;
+          return (
+            <Card
+              key={card.label}
+              className={`bg-gradient-to-br ${card.accent} dark:from-slate-950 dark:via-slate-900/70 dark:to-slate-950/40`}
+            >
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  {card.label}
+                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
+                    {card.value}
+                  </p>
+                  <Icon className="h-5 w-5 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+                </div>
+                <Link
+                  href={card.href}
+                  className="inline-flex items-center gap-1 text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
+                >
+                  Open dashboard
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

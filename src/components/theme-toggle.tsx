@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
@@ -15,21 +16,24 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button className="w-24 justify-center" disabled>
+      <Button className="w-full justify-center md:w-auto" disabled>
         Theme
       </Button>
     );
   }
 
   const isDark = resolvedTheme === "dark";
+  const label = isDark ? "Switch to light mode" : "Switch to dark mode";
 
   return (
     <Button
-      className="w-24 justify-center"
+      variant="ghost"
+      className="w-full justify-center gap-2 md:w-auto"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label="Toggle theme"
+      aria-label={label}
     >
-      {isDark ? "Light" : "Dark"}
+      {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+      <span className="text-sm font-medium">{isDark ? "Light" : "Dark"}</span>
     </Button>
   );
 }

@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 
 type BillingActionButtonProps = {
   endpoint: string;
-  label: string;
-  loadingLabel?: string;
+  label: React.ReactNode;
+  loadingLabel?: React.ReactNode;
   className?: string;
 };
 
