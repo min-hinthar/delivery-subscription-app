@@ -23,7 +23,7 @@ Read first:
 3) Add segment boundaries:
    - loading.tsx, error.tsx, not-found.tsx where relevant
 
-4) Implement advanced patterns only where they improve UX:
+4) Implement advanced patterns to improve UX:
    - Parallel routes (slots) for nav/content/modal
    - Intercepting routes for modal overlays with deep links
    - Optional catch-all for help/legal with smart 404 (notFound())
@@ -36,6 +36,11 @@ Read first:
    - bash scripts/codex/verify.sh
    - Run QA_UX happy path
    - Run SECURITY_QA auth/open-redirect/IDOR checks
+  
+7) Implement:
+   - Appointment entity: delivery_appointments (id, user_id, week_of, delivery_window_id, address_id, notes, status)
+   - Canonical appointment route: /appointment/[id]
+   - /schedule opens appointment as a modal overlay (intercepting route)
 
 ## PR notes required
 Include in PR description:
