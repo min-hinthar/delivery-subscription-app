@@ -1,7 +1,8 @@
-import Link from "next/link";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type AppGuardProps = {
@@ -29,22 +30,13 @@ export default async function AppGuard({ children }: AppGuardProps) {
   const { data } = await supabase.auth.getUser();
 
   if (!data.user) {
-    return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-4 text-center">
-        <h1 className="text-2xl font-semibold">Sign in required</h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Please sign in to access your account, schedule deliveries, and track orders.
-        </p>
-        <div className="flex justify-center">
-          <Link
-            href="/login"
-            className="text-sm font-medium text-slate-900 underline-offset-4 hover:underline dark:text-slate-100"
-          >
-            Go to login
-          </Link>
-        </div>
-      </div>
-    );
+    const requestHeaders = headers();
+    const headerPath =
+      requestHeaders.get("x-pathname") ??
+      requestHeaders.get("x-next-url") ??
+      requestHeaders.get("referer");
+    const nextPath = getSafeRedirectPath(headerPath, "/account");
+    redirect(`/login?reason=auth&next=${encodeURIComponent(nextPath)}`);
   }
 
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {

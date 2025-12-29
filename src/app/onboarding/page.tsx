@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { PageHeader } from "@/components/layout/page-header";
 import { OnboardingForm } from "@/components/onboarding/onboarding-form";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -27,7 +28,7 @@ export default async function OnboardingPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/login?reason=auth");
   }
 
   const { data: profile } = await supabase
@@ -47,20 +48,11 @@ export default async function OnboardingPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
-          <span className="text-2xl" role="img" aria-label="Sparkling bowl">
-            🥣
-          </span>
-          <span className="text-sm font-medium uppercase tracking-wide">
-            Quick setup
-          </span>
-        </div>
-        <h1 className="text-3xl font-semibold text-foreground">Onboarding</h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Share your delivery details so we can prep your weekly order.
-        </p>
-      </div>
+      <PageHeader
+        eyebrow="Quick setup"
+        title="Onboarding"
+        description="Share your delivery details so we can prep your weekly order."
+      />
       <Card>
         <OnboardingForm initialProfile={profile} primaryAddress={address} />
       </Card>

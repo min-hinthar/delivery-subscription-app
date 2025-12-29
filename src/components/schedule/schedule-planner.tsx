@@ -31,6 +31,8 @@ type SchedulePlannerProps = {
   appointment: Appointment | null;
   cutoffAt: string;
   isCutoffPassed: boolean;
+  nextEligibleWeekLabel?: string;
+  isSchedulingDisabled?: boolean;
 };
 
 export function SchedulePlanner({
@@ -40,6 +42,8 @@ export function SchedulePlanner({
   appointment,
   cutoffAt,
   isCutoffPassed,
+  nextEligibleWeekLabel,
+  isSchedulingDisabled = false,
 }: SchedulePlannerProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -48,6 +52,7 @@ export function SchedulePlanner({
   );
   const [status, setStatus] = useState<string | null>(null);
 
+  const isInteractionDisabled = isSchedulingDisabled || isPending;
   const selected = useMemo(
     () => windows.find((window) => window.id === selectedWindow),
     [selectedWindow, windows],
@@ -93,10 +98,15 @@ export function SchedulePlanner({
     <div className="space-y-6">
       <Card className="space-y-4 p-6">
         <div>
-          <h1 className="text-2xl font-semibold">Schedule delivery</h1>
+          <h2 className="text-xl font-semibold">Schedule delivery</h2>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Select a weekend delivery window before the Friday 5PM PT cutoff.
           </p>
+          {nextEligibleWeekLabel ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Next eligible week: {nextEligibleWeekLabel}
+            </p>
+          ) : null}
         </div>
         <div className="grid gap-4 md:grid-cols-2">
           <label className="flex flex-col gap-2 text-sm font-medium">
@@ -105,7 +115,7 @@ export function SchedulePlanner({
               className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950"
               value={selectedWeek}
               onChange={(event) => handleWeekChange(event.target.value)}
-              disabled={isPending}
+              disabled={isInteractionDisabled}
             >
               {weekOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -122,6 +132,11 @@ export function SchedulePlanner({
             {isCutoffPassed ? (
               <span className="text-xs text-rose-600">
                 Cutoff passed — contact support for changes.
+              </span>
+            ) : null}
+            {isSchedulingDisabled ? (
+              <span className="text-xs text-rose-600">
+                Subscription required — activate a plan to schedule deliveries.
               </span>
             ) : null}
           </div>
@@ -146,7 +161,11 @@ export function SchedulePlanner({
                   isSelected
                     ? "border-slate-900 bg-slate-50 dark:border-slate-200 dark:bg-slate-900"
                     : "border-slate-200 dark:border-slate-800"
-                } ${isUnavailable ? "opacity-60" : "hover:border-slate-400"}`}
+                } ${
+                  isUnavailable || isSchedulingDisabled
+                    ? "opacity-60"
+                    : "hover:border-slate-400"
+                }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-medium">
@@ -158,7 +177,7 @@ export function SchedulePlanner({
                     value={window.id}
                     checked={isSelected}
                     onChange={() => setSelectedWindow(window.id)}
-                    disabled={isUnavailable}
+                    disabled={isUnavailable || isSchedulingDisabled}
                   />
                 </div>
                 <span className="text-xs text-slate-500 dark:text-slate-400">
@@ -169,7 +188,10 @@ export function SchedulePlanner({
           })}
         </div>
         <div className="flex flex-col gap-2">
-          <Button onClick={handleSubmit} disabled={!selectedWindow || isFull || isCutoffPassed}>
+          <Button
+            onClick={handleSubmit}
+            disabled={!selectedWindow || isFull || isCutoffPassed || isSchedulingDisabled}
+          >
             {appointment ? "Update appointment" : "Confirm appointment"}
           </Button>
           {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}

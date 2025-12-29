@@ -7,19 +7,28 @@ export function AuthAlert() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
   const message = searchParams.get("message");
+  const reason = searchParams.get("reason");
 
   const content = useMemo(() => {
-    if (!error && !message) {
+    if (!error && !message && !reason) {
       return null;
     }
 
     return {
-      title: error === "otp_expired" ? "Login link expired" : "Login issue",
-      description: message
-        ? decodeURIComponent(message.replace(/\+/g, " "))
-        : "Please request a fresh login link.",
+      title:
+        reason === "auth"
+          ? "Please sign in to continue"
+          : error === "otp_expired"
+            ? "Login link expired"
+            : "Login issue",
+      description:
+        reason === "auth"
+          ? "Sign in to access your account, schedule deliveries, and track orders."
+          : message
+            ? decodeURIComponent(message.replace(/\+/g, " "))
+            : "Please request a fresh login link.",
     };
-  }, [error, message]);
+  }, [error, message, reason]);
 
   if (!content) {
     return null;

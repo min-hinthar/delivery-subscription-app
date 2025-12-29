@@ -92,13 +92,6 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold">Track delivery</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Follow your driver progress and upcoming stop ETAs in real time.
-        </p>
-      </div>
-
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 p-4 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:from-slate-950 dark:via-slate-900/70 dark:to-blue-950/30">
           <p className="font-medium">Route overview</p>
@@ -106,10 +99,10 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
             Status: {route?.status ?? "Pending"}
           </p>
           <p className="text-slate-500 dark:text-slate-400">
-            Distance: {route?.distance_meters ? `${route.distance_meters} m` : "TBD"}
+            Distance: {route?.distance_meters ? `${distanceMiles} mi` : "TBD"}
           </p>
           <p className="text-slate-500 dark:text-slate-400">
-            Duration: {route?.duration_seconds ? `${route.duration_seconds} s` : "TBD"}
+            Duration: {route?.duration_seconds ? durationLabel : "TBD"}
           </p>
           <p className="mt-2 text-xs text-slate-400">
             {route?.polyline ? "Live route synced from operations." : "Waiting for route build."}
