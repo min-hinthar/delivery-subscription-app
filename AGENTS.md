@@ -1,5 +1,5 @@
 # AGENTS.md — Codex House Rules (Morning Star Weekly Delivery App)
-**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase (Auth/Postgres/RLS) + Stripe (Subs/Portal/Webhooks) + Google Maps (Geocode/Directions) + Framer Motion  
+**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase (Auth/Postgres/RLS) + Stripe (Subs/Portal/Webhooks) + Google Maps (Geocode/Directions) + Framer Motion + next-themes  
 **Primary Specs:** `docs/BLUEPRINT.md`, `docs/QA_UX.md`, `docs/SECURITY_QA.md`, `docs/NEXTJS16_ROUTING_STANDARDS.md`
 
 ---
@@ -15,20 +15,23 @@ Build and maintain a **production-grade weekly meal delivery appointment app** w
 
 ## 2) Golden Rules (Non-negotiable)
 1) **Do not stack PRs.** One PR at a time. Do not begin a new PR until the previous PR is merged into `main`.
-2) **Always start from latest `origin/main`.** Every Codex task/PR must branch off the latest `main`.
+2) **Always start from latest `main` (best effort).** Use `bash scripts/codex/git-sync-main.sh` if present before branching.
 3) **Scope discipline.** Touch only files needed by the active prompt. No drive-by refactors.
 4) **No binary files in PRs.** Do not add `.png/.jpg/.ico/.pdf/.psd` etc. Use SVG/code/icons.
 5) **No secrets committed.** Never edit or commit `.env.local` or any real keys.
 6) **Keep gates green.** Every PR must pass `bash scripts/codex/verify.sh` before requesting review.
 7) **Security is strict.** Never weaken authz, RLS, webhook verification, or admin gating.
+8) **Use existing theming.** `next-themes` is the app’s theming system; do not introduce a second theme provider.
 
 ---
 
 ## 3) Branch Hygiene (Conflict-Minimizing Workflow)
 ### Required start-of-task routine
-- Fetch latest main and create a new branch:
-  - update local main to `origin/main`
+- Sync to latest main (best effort) then create a new branch:
+  - `bash scripts/codex/git-sync-main.sh` (if available)
   - create a fresh branch for the PR (name per conventions below)
+
+> Note: In some Codex environments `origin/main` may be unavailable. If so, proceed from the provided base and document it in the PR.
 
 ### Required completion routine
 - Run `bash scripts/codex/verify.sh`
@@ -40,18 +43,25 @@ Build and maintain a **production-grade weekly meal delivery appointment app** w
 
 ### Naming convention
 - UI polish: `codex/polish-customer-a`, `codex/polish-customer-b`, `codex/polish-customer-c`
+- UI hotfix/polish: `codex/ui-p1-*`
+- Marketing/public: `codex/marketing-p1-*`
+- Platform/DevEx: `codex/platform-p0-*`
 - Security: `codex/security-s0`, `codex/security-s1`, `codex/security-s2`
 - Routing: `codex/routing-r1-groups-boundaries`, `codex/routing-r2-appointments-modals`
+- Auth/Routing fixes: `codex/auth-p0-*`
 
 ---
 
 ## 4) Where Requirements Live (Source of Truth)
 - Product + architecture: `docs/BLUEPRINT.md`
 - Customer UX QA: `docs/QA_UX.md`
+- UI polish spec (if present): `docs/UI_POLISH_SPEC.md`
+- Backlog/workstreams (if present): `docs/BACKLOG.md`, `docs/WORKSTREAMS.md`
 - Security regression QA: `docs/SECURITY_QA.md`
 - Security standards: `docs/SECURITY_OVERVIEW.md`, `docs/SECURITY_CHECKLIST.md`, `docs/WEBHOOK_SECURITY.md`, `docs/RLS_AUDIT.md`, `docs/HEADERS_AND_CSP.md`
 - Routing standards: `docs/NEXTJS16_ROUTING_STANDARDS.md`
 - Current route inventory (if present): `docs/CURRENT_APP_TREE.md`
+- Change policy (if present): `docs/CHANGE_POLICY.md`
 
 If a prompt conflicts with these docs, **follow the docs** and update the prompt outcomes in the PR notes.
 
@@ -63,14 +73,6 @@ If a prompt conflicts with these docs, **follow the docs** and update the prompt
 bash scripts/codex/verify.sh
 ````
 
-### Optional checks
-
-* Routing-specific checks (if present):
-
-```bash
-bash scripts/codex/verify-routing.sh
-```
-
 ### Dev server
 
 ```bash
@@ -79,7 +81,18 @@ pnpm dev
 
 ---
 
-## 6) Coding Standards (Next.js 16 App Router)
+## 6) DevEx: verify/build without secrets
+
+Some environments (Codex/CI) may not have real env vars.
+
+* `scripts/codex/verify.sh` may source `scripts/codex/load-env.sh` (safe stubs) and set `CODEX_VERIFY=1`.
+* Runtime must remain strict in real environments (Vercel), where `CODEX_VERIFY` is not set.
+
+Never commit real secrets. Stubs are acceptable only for build verification.
+
+---
+
+## 7) Coding Standards (Next.js 16 App Router)
 
 ### Server vs client components
 
@@ -98,6 +111,7 @@ pnpm dev
 * Use route groups: `(marketing)`, `(auth)`, `(app)`, `(admin)`
 * Enforce auth in `(app)/layout.tsx` server-side.
 * Enforce admin in `(admin)/layout.tsx` server-side (`profiles.is_admin`).
+* `/admin/login` must NOT be under admin-gated layout (avoid redirect loops).
 
 ### Segment boundaries
 
@@ -106,7 +120,7 @@ pnpm dev
 
 ### Advanced routing patterns (allowed)
 
-* Parallel routes (`@modal`, `@nav`) and intercepting routes are allowed **only** when they:
+* Parallel routes (`@modal`, `@nav`) and intercepting routes are allowed only when they:
 
   * improve list→detail UX
   * preserve deep linking
@@ -115,7 +129,7 @@ pnpm dev
 
 ---
 
-## 7) API Route Handler Standards (`src/app/api/**/route.ts`)
+## 8) API Route Handler Standards (`src/app/api/**/route.ts`)
 
 ### Input validation
 
@@ -128,6 +142,7 @@ pnpm dev
 ### Error handling
 
 * Do not leak stack traces, secrets, or full PII.
+* Avoid user enumeration in auth flows (e.g., “No active account found or credentials are incorrect.”).
 * Map common errors to user-friendly messages:
 
   * 401 unauthenticated
@@ -144,17 +159,17 @@ pnpm dev
 ### Security controls
 
 * Prevent open redirects: only allow internal return paths.
-* Rate limit expensive endpoints (maps geocode/directions) pragmatically.
+* Rate limit expensive endpoints (maps geocode/directions/coverage) pragmatically.
 * Use `no-store` headers for private endpoints.
 
 ---
 
-## 8) Supabase Standards (Auth + Postgres + RLS)
+## 9) Supabase Standards (Auth + Postgres + RLS)
 
 * RLS is mandatory for user-owned tables.
 * Queries must not allow IDOR: user can only read/write their own rows.
 * Admin tables/routes are restricted via admin checks.
-* Service role key usage is **server-only** and limited to:
+* Service role key usage is server-only and limited to:
 
   * Stripe webhooks
   * cron jobs
@@ -164,10 +179,11 @@ DB changes:
 
 * Use migrations in `supabase/migrations/*`.
 * Migrations must be idempotent and documented.
+* Public-read tables require explicit RLS policies scoped to published/public rows.
 
 ---
 
-## 9) Stripe Standards (Subscriptions + Portal + Webhooks)
+## 10) Stripe Standards (Subscriptions + Portal + Webhooks)
 
 * Stripe webhooks must:
 
@@ -179,7 +195,7 @@ DB changes:
 
 ---
 
-## 10) Google Maps Standards (Geocode + Directions)
+## 11) Google Maps Standards (Geocode + Directions)
 
 * Server-only for geocode/directions (no unrestricted keys in client bundle).
 * Validate inputs; reject invalid requests early.
@@ -188,7 +204,7 @@ DB changes:
 
 ---
 
-## 11) UI/UX Standards (2025/2026)
+## 12) UI/UX Standards (2025/2026)
 
 * Mobile-first layout and tap targets (>=44px).
 * shadcn/ui components for consistent UI.
@@ -200,22 +216,24 @@ DB changes:
 * Dark mode parity required.
 * Every page must have a clear “next action” CTA (see `docs/QA_UX.md`).
 * Avoid blank screens: loading skeletons/empty states required.
+* Maintain contrast (WCAG-aware): buttons/text must be readable in both themes.
 
 ---
 
-## 12) Documentation Expectations
+## 13) Documentation Expectations
 
 When a PR changes behavior, update docs:
 
-* UX changes → update `docs/QA_UX.md` (or ensure it still passes)
+* UX changes → update `docs/QA_UX.md` (or ensure it still passes) + `docs/UI_POLISH_REPORT.md` if used
 * Security changes → update `docs/SECURITY_CHECKLIST.md`, `docs/SECURITY_REPORT.md` status
-* Routing changes → update `docs/NEXTJS16_ROUTING_STANDARDS.md` if needed and/or `docs/CURRENT_APP_TREE.md`
+* Routing changes → update `docs/NEXTJS16_ROUTING_STANDARDS.md` and/or `docs/CURRENT_APP_TREE.md`
+* Platform/DevEx changes → update `docs/CODEX_DEVEX.md`
 
-Doc changes must be **concrete and testable** (no vague statements).
+Doc changes must be concrete and testable.
 
 ---
 
-## 13) PR Quality Bar
+## 14) PR Quality Bar
 
 Every PR must include in the PR description:
 
@@ -229,7 +247,7 @@ Every PR must include in the PR description:
 
 ---
 
-## 14) Stop Conditions (When to pause and document)
+## 15) Stop Conditions (When to pause and document)
 
 Stop and document (instead of guessing) if:
 
@@ -242,4 +260,3 @@ In these cases, add a short note in the PR describing:
 
 * what’s blocked
 * what’s needed to proceed safely
-
