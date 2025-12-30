@@ -1,11 +1,10 @@
-import { createClient } from "@supabase/supabase-js";
+"use client";
+
+import { createBrowserClient } from "@supabase/ssr";
+
 import { getSupabaseConfig } from "./env";
 
-let _browserClient: ReturnType<typeof createClient> | null = null;
-
-export function getSupabaseBrowserClient() {
-  if (_browserClient) return _browserClient;
+export function createSupabaseBrowserClient() {
   const { url, anonKey } = getSupabaseConfig();
-  _browserClient = createClient(url, anonKey);
-  return _browserClient;
+  return createBrowserClient(url, anonKey);
 }
