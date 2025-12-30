@@ -111,6 +111,22 @@ export async function POST(request: Request) {
   }
 
   const admin = createSupabaseAdminClient();
+  const { error: eventInsertError } = await admin.from("stripe_events").insert({
+    event_id: event.id,
+    event_type: event.type,
+  });
+
+  if (eventInsertError) {
+    if (eventInsertError.code === "23505") {
+      console.info("stripe_webhook_duplicate", {
+        eventId: event.id,
+        eventType: event.type,
+      });
+      return ok({ received: true });
+    }
+
+    return bad("Failed to record Stripe event.", { status: 500 });
+  }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
@@ -229,6 +245,11 @@ export async function POST(request: Request) {
       }
     }
   }
+
+  console.info("stripe_webhook_processed", {
+    eventId: event.id,
+    eventType: event.type,
+  });
 
   return ok({ received: true });
 }

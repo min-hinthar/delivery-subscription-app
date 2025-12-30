@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { bad, ok } from "@/lib/api/response";
 import { directionsRoute } from "@/lib/maps/google";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const directionsSchema = z.object({
@@ -18,7 +19,25 @@ export async function POST(request: Request) {
     return bad("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const clientIp =
+    forwardedFor?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "unknown";
+  const rate = rateLimit({
+    key: `maps:directions:${auth.user.id ?? clientIp}`,
+    max: 10,
+    windowMs: 60_000,
+  });
+
+  if (!rate.allowed) {
+    return bad("Too many map requests. Please wait and try again.", {
+      status: 429,
+      headers: {
+        "Retry-After": Math.ceil(rate.resetMs / 1000).toString(),
+      },
+    });
+  }
+
+  const body = await request.json().catch(() => null);
   const parsed = directionsSchema.safeParse(body);
 
   if (!parsed.success) {

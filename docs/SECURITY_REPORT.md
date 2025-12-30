@@ -7,8 +7,8 @@
 
 ## Executive Summary
 - Overall risk: **Medium**
-- P0 findings: **1**
-- P1 findings: **2**
+- P0 findings: **1** (resolved in `security-s1`)
+- P1 findings: **2** (P1-1 resolved in `security-s1`)
 - P2 findings: **1**
 - Biggest risk area(s):
   - Stripe webhook idempotency not implemented (replay events can cause inconsistent state).
@@ -44,8 +44,8 @@
 | `src/app/api/account/profile/route.ts` | Profile + primary address update | Auth | Zod | No |
 | `src/app/api/delivery/appointment/route.ts` | Create/update appointment with cutoff guard | Auth | Zod | No |
 | `src/app/api/maps/verify/route.ts` | Verify address via geocode | Auth | Zod | No |
-| `src/app/api/maps/geocode/route.ts` | Geocode + update address | Auth | Zod | No |
-| `src/app/api/maps/directions/route.ts` | Build directions route | Auth | Zod | No |
+| `src/app/api/maps/geocode/route.ts` | Geocode + update address | Auth | Zod | Yes (per-user/IP) |
+| `src/app/api/maps/directions/route.ts` | Build directions route | Auth | Zod | Yes (per-user/IP) |
 | `src/app/api/subscriptions/checkout/route.ts` | Stripe Checkout session | Auth | Zod | No |
 | `src/app/api/subscriptions/portal/route.ts` | Stripe Billing Portal session | Auth | Zod | No |
 | `src/app/api/stripe/webhook/route.ts` | Stripe webhook processing | Public (signature verified) | Stripe signature | No |
@@ -101,8 +101,8 @@
 
 ## Recommended Remediations (Plan)
 ### Phase S1 (Hardening)
-- P0: Implement webhook idempotency with a `stripe_events` table + replay guard.
-- P1: Add lightweight rate limiting for maps/directions and admin route building.
+- P0: Implement webhook idempotency with a `stripe_events` table + replay guard. **Resolved in `security-s1`.**
+- P1: Add lightweight rate limiting for maps/directions and admin route building. **Resolved in `security-s1` for maps endpoints.**
 
 ### Phase S2 (Headers/CSP)
 - Add baseline security headers in `next.config.ts`.
@@ -115,6 +115,12 @@
 - [ ] Run `docs/SECURITY_QA.md` checks relevant to fixes
 - [ ] Confirm no new public data exposures
 - [ ] Confirm Stripe/Maps flows still work
+
+---
+
+## Remediation Status (security-s1)
+- ✅ P0-1: Stripe webhook idempotency guard added with `stripe_events` table + replay short-circuit.
+- ✅ P1-1: Rate limiting added to `/api/maps/geocode` and `/api/maps/directions` (per-user/IP, 10/min).
 
 ---
 

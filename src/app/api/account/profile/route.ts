@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     return bad("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const parsed = profileUpdateSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -36,6 +36,19 @@ export async function POST(request: Request) {
   }
 
   const { full_name, phone, onboarding_completed, address } = parsed.data;
+
+  if (address.id) {
+    const { data: existingAddress } = await supabase
+      .from("addresses")
+      .select("id")
+      .eq("id", address.id)
+      .eq("user_id", auth.user.id)
+      .maybeSingle();
+
+    if (!existingAddress?.id) {
+      return bad("Address not available.", { status: 403 });
+    }
+  }
 
   const addressString = [
     address.line1,
