@@ -1,7 +1,7 @@
 export function friendlyAuthError(err: unknown): string {
   const msg =
     typeof err === "object" && err && "message" in err
-      ? String((err as any).message)
+      ? String((err as { message?: unknown }).message ?? "")
       : "";
 
   // Supabase commonly returns "Invalid login credentials"
