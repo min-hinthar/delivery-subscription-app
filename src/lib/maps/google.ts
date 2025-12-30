@@ -8,6 +8,7 @@ type GeocodeResult = {
     route?: string;
     locality?: string;
     administrativeArea?: string;
+    county?: string;
     postalCode?: string;
     country?: string;
   };
@@ -77,6 +78,9 @@ function parseGeocodeResult(result: GeocodeApiResult): GeocodeResult {
     }
     if (component.types?.includes("administrative_area_level_1")) {
       components.administrativeArea = component.short_name;
+    }
+    if (component.types?.includes("administrative_area_level_2")) {
+      components.county = component.long_name;
     }
     if (component.types?.includes("postal_code")) {
       components.postalCode = component.long_name;

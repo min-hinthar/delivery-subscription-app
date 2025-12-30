@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight, BadgeCheck, MapPin, UserCheck } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { CoverageChecker } from "@/components/marketing/coverage-checker";
+import { WeeklyMenu } from "@/components/marketing/weekly-menu";
 import { Card } from "@/components/ui/card";
 
 export default function Home() {
@@ -16,7 +18,7 @@ export default function Home() {
             className="border-none pb-0"
             cta={
               <Link
-                href="/signup?next=/onboarding"
+                href="#coverage"
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:active:transform-none"
               >
                 <MapPin className="h-4 w-4" aria-hidden="true" />
@@ -64,6 +66,35 @@ export default function Home() {
           </div>
         </Card>
       </section>
+
+      <section id="coverage" className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold text-foreground">Delivery coverage in minutes</h2>
+            <p className="text-sm text-muted-foreground">
+              Enter a ZIP code to confirm delivery eligibility, drive time, and distance from
+              the Morning Star kitchen.
+            </p>
+          </div>
+          <CoverageChecker />
+        </div>
+        <Card className="relative overflow-hidden rounded-2xl border border-border bg-background p-6 shadow-sm">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-muted/40" />
+          <div className="relative space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">Coverage basics</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li>• We verify ZIP county eligibility before confirming delivery.</li>
+              <li>• Route ETA is based on live Google Maps travel time.</li>
+              <li>• If you’re outside the radius, we’ll keep you on our expansion list.</li>
+            </ul>
+            <div className="rounded-xl border border-dashed border-border bg-background/80 px-4 py-4 text-xs text-muted-foreground shadow-sm">
+              Need help? Email support@morningstardelivery.com and we’ll double-check coverage.
+            </div>
+          </div>
+        </Card>
+      </section>
+
+      <WeeklyMenu />
 
       <section id="how-it-works" className="space-y-6">
         <div className="space-y-2">
