@@ -1,4 +1,4 @@
-You are Codex. Follow AGENTS.md.
+You are Codex. Follow AGENTS.md and docs/CHANGE_POLICY.md.
 
 PR GOAL (P0 Platform): Make verify/build and PR-start workflow reliable in ephemeral environments.
 
@@ -7,8 +7,8 @@ Must:
 - Update scripts/codex/verify.sh to source load-env.sh before lint/typecheck/build.
 - Add scripts/codex/git-sync-main.sh (best-effort sync to origin/main).
 - Update src/lib/supabase/env.ts: strict in real env, tolerant during CODEX_VERIFY build checks.
-- Ensure src/lib/supabase/client.ts does not call getSupabaseConfig() at module top-level (lazy singleton).
 - Add docs/CODEX_DEVEX.md explaining behavior.
+- Update docs/BACKLOG.md item(s) status if needed.
 
 Constraints:
 - No secrets committed.
