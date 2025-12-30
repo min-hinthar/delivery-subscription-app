@@ -3,6 +3,8 @@
 import { useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 
+import { friendlyAuthError } from "@/lib/auth/errorMessages";
+
 export function AuthAlert() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
@@ -14,6 +16,8 @@ export function AuthAlert() {
       return null;
     }
 
+    const decodedMessage = message ? decodeURIComponent(message.replace(/\+/g, " ")) : null;
+
     return {
       title:
         reason === "auth"
@@ -24,8 +28,8 @@ export function AuthAlert() {
       description:
         reason === "auth"
           ? "Sign in to access your account, schedule deliveries, and track orders."
-          : message
-            ? decodeURIComponent(message.replace(/\+/g, " "))
+          : decodedMessage
+            ? friendlyAuthError({ message: decodedMessage }, decodedMessage)
             : "Please request a fresh login link.",
     };
   }, [error, message, reason]);

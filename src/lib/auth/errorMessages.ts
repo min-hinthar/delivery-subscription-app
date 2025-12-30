@@ -1,4 +1,7 @@
-export function friendlyAuthError(err: unknown): string {
+export function friendlyAuthError(
+  err: unknown,
+  fallback = "Login failed. Please try again.",
+): string {
   const msg =
     typeof err === "object" && err && "message" in err
       ? String((err as { message?: unknown }).message ?? "")
@@ -13,5 +16,5 @@ export function friendlyAuthError(err: unknown): string {
     return "Please confirm your email before logging in.";
   }
 
-  return "Login failed. Please try again.";
+  return fallback;
 }
