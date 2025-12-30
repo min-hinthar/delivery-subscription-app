@@ -1,35 +1,60 @@
-# Security Report — Audit Findings (Template)
+# Security Report — Audit Findings (S0)
 
 **Project:** Morning Star Weekly Delivery App  
-**Date:** YYYY-MM-DD  
-**Audited commit/branch:** `<hash>` / `<branch>`  
-**Auditor:** Codex / Human  
+**Date:** 2025-12-30  
+**Audited commit/branch:** `2abfd7de1f0b1ae8d90a4e8dd1b65d74952a1316` / `codex/security-s0`  
+**Auditor:** Codex  
 
 ## Executive Summary
-- Overall risk: [Low / Medium / High]
-- P0 findings: #
-- P1 findings: #
-- P2 findings: #
+- Overall risk: **Medium**
+- P0 findings: **1**
+- P1 findings: **2**
+- P2 findings: **1**
 - Biggest risk area(s):
-  - (e.g., IDOR risk in route handlers, missing RLS policies, webhook idempotency)
+  - Stripe webhook idempotency not implemented (replay events can cause inconsistent state).
+  - Maps endpoints lack rate limiting (potential abuse / cost exposure).
 
 ## Scope Inventory
 ### Frontend routes (customer)
-- `/`
+- `/` (marketing)
 - `/pricing`
 - `/login`
 - `/signup`
+- `/subscribe/success`
 - `/onboarding`
 - `/account`
+- `/account/profile`
+- `/appointment/[id]`
+- `/billing`
 - `/schedule`
 - `/track`
 
 ### Frontend routes (admin)
-- `/admin/*`
+- `/admin`
+- `/admin/login`
+- `/admin/deliveries`
+- `/admin/meals`
+- `/admin/routes`
+- `/admin/subscriptions`
 
 ### API routes (Route Handlers)
-List each:
-- `src/app/api/.../route.ts` — purpose — auth required? — validation? — rate limited?
+| Route | Purpose | Auth/Admin | Validation | Rate limit |
+| --- | --- | --- | --- | --- |
+| `src/app/(auth)/auth/callback/route.ts` | Supabase auth callback + safe redirect | Public | Query parsing only | No |
+| `src/app/api/account/profile/route.ts` | Profile + primary address update | Auth | Zod | No |
+| `src/app/api/delivery/appointment/route.ts` | Create/update appointment with cutoff guard | Auth | Zod | No |
+| `src/app/api/maps/verify/route.ts` | Verify address via geocode | Auth | Zod | No |
+| `src/app/api/maps/geocode/route.ts` | Geocode + update address | Auth | Zod | No |
+| `src/app/api/maps/directions/route.ts` | Build directions route | Auth | Zod | No |
+| `src/app/api/subscriptions/checkout/route.ts` | Stripe Checkout session | Auth | Zod | No |
+| `src/app/api/subscriptions/portal/route.ts` | Stripe Billing Portal session | Auth | Zod | No |
+| `src/app/api/stripe/webhook/route.ts` | Stripe webhook processing | Public (signature verified) | Stripe signature | No |
+| `src/app/api/cron/generate-week/route.ts` | Weekly order generation | CRON_SECRET | Header/query secret | No |
+| `src/app/api/admin/routes/build/route.ts` | Admin route planning (maps) | Admin | Zod | No |
+| `src/app/api/admin/routes/delete/route.ts` | Admin route deletion | Admin | Zod | No |
+| `src/app/api/admin/routes/summary/route.ts` | Admin route summary | Admin | Query params | No |
+| `src/app/api/admin/routes/stops/route.ts` | Admin stops list | Admin | Query params | No |
+| `src/app/api/admin/manifest.csv/route.ts` | Admin manifest export | Admin | Query params | No |
 
 ### External integrations
 - Supabase Auth + Postgres + RLS
@@ -45,43 +70,43 @@ List each:
 
 | ID | Area | Finding | Risk | Location | Exploit scenario | Fix summary | Acceptance test |
 |---:|------|---------|------|----------|------------------|-------------|-----------------|
-| P0-1 | RLS | (e.g., RLS missing/incorrect) | High | `supabase/migrations/...` | User reads other user rows | Add policy + index | See SECURITY_QA.md: IDOR test |
-| P0-2 | Webhook | (e.g., no signature verify / no idempotency) | High | `api/stripe/webhook` | Attacker spoofs subscription | Verify sig + stripe_events | Replay event test |
+| P0-1 | Webhook | Stripe webhook is verified but **not idempotent** (no event replay guard). | High | `src/app/api/stripe/webhook/route.ts` | Replayed event updates subscriptions/payments multiple times, causing incorrect billing state. | Add `stripe_events` table + store processed event IDs; short-circuit when already handled. | Replay a valid event ID and confirm only first attempt mutates DB (SECURITY_QA: Stripe section). |
 
 ### P1 — Should Fix Soon
 > Weaknesses that can become critical under abuse or increase likelihood of incident.
 
 | ID | Area | Finding | Risk | Location | Fix summary | Acceptance test |
 |---:|------|---------|------|----------|-------------|-----------------|
-| P1-1 | Maps | Missing rate limiting | Med | `api/maps/*` | Add per-IP/user limit | Rate limit test |
-| P1-2 | Logging | Possible PII in logs | Med | `...` | Redact/avoid | Log scan |
+| P1-1 | Maps | No rate limiting or abuse control on geocode/directions endpoints. | Med | `src/app/api/maps/*/route.ts` | Add per-user/IP throttling + optional caching; keep pragmatic thresholds. | Flood test: repeated calls return 429 (SECURITY_QA: Maps section). |
+| P1-2 | Headers/CSP | No baseline security headers or CSP report-only configured. | Med | `next.config.ts` | Add baseline headers + CSP report-only starting policy. | Verify headers on `/` and `/account` (SECURITY_QA: Headers/CSP). |
 
 ### P2 — Nice to Have
 > Defense-in-depth, polish, or operational improvements.
 
 | ID | Area | Finding | Risk | Location | Fix summary | Acceptance test |
 |---:|------|---------|------|----------|-------------|-----------------|
+| P2-1 | Auditability | No explicit audit log for admin route changes (build/delete). | Low | `src/app/api/admin/routes/*` | Add lightweight admin action logging table/event. | Admin actions produce log entries. |
 
 ---
 
 ## Positive Controls (What’s Already Good)
-- [ ] Stripe signature verification present
-- [ ] Webhook idempotency present
-- [ ] RLS enabled on all user-owned tables
-- [ ] Admin gating enforced server-side
-- [ ] Input validation present on all mutating endpoints
-- [ ] Secrets not committed; `.env.local` excluded
+- [x] Stripe signature verification present (`src/app/api/stripe/webhook/route.ts`).
+- [x] Open-redirect prevention implemented (`src/lib/navigation.ts` and return URL normalization in Stripe routes).
+- [x] RLS enabled with ownership/admin policies (`supabase/migrations/002_rls.sql`).
+- [x] Admin gating enforced server-side (`src/components/auth/admin-guard.tsx`, `src/lib/auth/admin.ts`).
+- [x] Input validation present on mutating endpoints (zod in API routes).
+- [x] Secrets not committed; `.env.local` not tracked.
 
 ---
 
 ## Recommended Remediations (Plan)
 ### Phase S1 (Hardening)
-- P0 items: …
-- P1 items: …
+- P0: Implement webhook idempotency with a `stripe_events` table + replay guard.
+- P1: Add lightweight rate limiting for maps/directions and admin route building.
 
 ### Phase S2 (Headers/CSP)
-- Baseline headers: …
-- CSP Report-Only: …
+- Add baseline security headers in `next.config.ts`.
+- Start CSP in Report-Only, iterate to enforcement.
 
 ---
 
@@ -94,4 +119,5 @@ List each:
 ---
 
 ## Notes / Open Questions
-- …
+- Rate limiting and CSP policies should be implemented pragmatically to avoid breaking Stripe Checkout or Maps integrations.
+- Cron secret is accepted via header or query param; consider restricting to headers only in a future hardening pass.
