@@ -16,7 +16,11 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button className="w-full justify-center md:w-auto" disabled>
+      <Button
+        variant="secondary"
+        className="w-full justify-center border border-border/60 md:w-auto"
+        disabled
+      >
         Theme
       </Button>
     );
@@ -27,8 +31,8 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="ghost"
-      className="w-full justify-center gap-2 md:w-auto"
+      variant="secondary"
+      className="w-full justify-center gap-2 border border-border/60 md:w-auto"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={label}
     >

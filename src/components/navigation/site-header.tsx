@@ -109,7 +109,7 @@ export function SiteHeader() {
   const showLogout = isAdminRoute || isAppRoute;
 
   return (
-    <header className="border-b border-border/60 bg-background/95 backdrop-blur">
+    <header className="relative z-50 border-b border-border/60 bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link href="/" className="text-lg font-semibold text-foreground">
           Morning Star Delivery
@@ -140,13 +140,20 @@ export function SiteHeader() {
           onClick={() => setOpenPathname(pathname)}
           className="h-11 w-11 rounded-full border border-border bg-background p-0 text-foreground shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none md:hidden"
           aria-label="Open navigation menu"
+          aria-expanded={isOpen}
+          aria-controls="mobile-nav"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
       <AnimatePresence>
         {isOpen ? (
-          <div className="fixed inset-0 z-[60] md:hidden" role="dialog" aria-modal="true">
+          <div
+            className="fixed inset-0 z-[70] md:hidden"
+            role="dialog"
+            aria-modal="true"
+            id="mobile-nav"
+          >
             <motion.div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => setOpenPathname(null)}
@@ -157,7 +164,7 @@ export function SiteHeader() {
               transition={transition}
             />
             <motion.div
-              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-border bg-background p-6 shadow-2xl"
+              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-border bg-background p-6 shadow-2xl ring-1 ring-border/40"
               initial={panelInitial}
               animate={panelAnimate}
               exit={panelExit}

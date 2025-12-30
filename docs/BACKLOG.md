@@ -62,7 +62,7 @@
 - No bleed-through, correct z-index layering
 - Works in dark/light
 
-**Planned PR:** `codex/ui-p1-nav-contrast-gradients`
+**Planned PR:** `codex/ui-hotfix-mobile-nav`
 
 ### P1 — Fix contrast for buttons and text across themes
 **Problem:** low contrast in dark/light.  
@@ -70,7 +70,7 @@
 - WCAG-aware contrast (primary buttons readable)
 - Focus states visible
 
-**Planned PR:** `codex/ui-p1-nav-contrast-gradients`
+**Planned PR:** `codex/ui-hotfix-mobile-nav`
 
 ### P2 — Enhanced hover/interactions (gradient effects)
 **Problem:** UI feels flat.  
