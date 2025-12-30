@@ -109,9 +109,9 @@ export function SiteHeader() {
   const showLogout = isAdminRoute || isAppRoute;
 
   return (
-    <header className="border-b border-slate-200/60 bg-white/80 backdrop-blur dark:border-slate-800/60 dark:bg-slate-950/80">
+    <header className="border-b border-border/60 bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <Link href="/" className="text-lg font-semibold text-foreground">
           Morning Star Delivery
         </Link>
         <nav className="hidden items-center gap-4 text-sm md:flex">
@@ -122,10 +122,10 @@ export function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5",
+                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:transform-none",
                   isActiveRoute(pathname, link.href)
-                    ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-                    : "text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
@@ -138,7 +138,7 @@ export function SiteHeader() {
         </nav>
         <button
           onClick={() => setOpenPathname(pathname)}
-          className="h-11 w-11 rounded-full border border-slate-200 bg-white p-0 text-slate-900 shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100 md:hidden"
+          className="h-11 w-11 rounded-full border border-border bg-background p-0 text-foreground shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none md:hidden"
           aria-label="Open navigation menu"
         >
           <Menu className="h-5 w-5" aria-hidden="true" />
@@ -148,7 +148,7 @@ export function SiteHeader() {
         {isOpen ? (
           <div className="fixed inset-0 z-[60] md:hidden" role="dialog" aria-modal="true">
             <motion.div
-              className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
               onClick={() => setOpenPathname(null)}
               aria-hidden="true"
               initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
@@ -157,17 +157,17 @@ export function SiteHeader() {
               transition={transition}
             />
             <motion.div
-              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-950"
+              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-border bg-background p-6 shadow-2xl"
               initial={panelInitial}
               animate={panelAnimate}
               exit={panelExit}
               transition={transition}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">Menu</p>
+                <p className="text-sm font-semibold text-foreground">Menu</p>
                 <button
                   onClick={() => setOpenPathname(null)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 text-slate-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-200 dark:focus-visible:ring-slate-100"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
                   aria-label="Close navigation menu"
                   ref={closeButtonRef}
                 >
@@ -183,10 +183,10 @@ export function SiteHeader() {
                       href={link.href}
                       onClick={() => setOpenPathname(null)}
                       className={cn(
-                        "flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-medium",
+                        "flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-medium transition motion-reduce:transition-none",
                         isActiveRoute(pathname, link.href)
-                          ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-                          : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-900",
+                          ? "bg-primary text-primary-foreground shadow-sm"
+                          : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
@@ -199,7 +199,7 @@ export function SiteHeader() {
                 {showLogout ? <LogoutButton /> : null}
                 <ThemeToggle />
               </div>
-              <p className="mt-auto text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-auto text-xs text-muted-foreground">
                 Need help? Email support@morningstardelivery.com
               </p>
             </motion.div>

@@ -20,7 +20,8 @@ export function LogoutButton() {
     <Button
       onClick={handleLogout}
       disabled={isLoading}
-      className="gap-2 bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
+      variant="secondary"
+      className="gap-2"
     >
       <LogOut className="h-4 w-4" aria-hidden="true" />
       {isLoading ? "Signing out…" : "Sign out"}

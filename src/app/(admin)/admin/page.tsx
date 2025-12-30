@@ -16,7 +16,7 @@ export default async function AdminHomePage() {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
         <h1 className="text-2xl font-semibold">Supabase not configured</h1>
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-muted-foreground">
           Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to load
           operations dashboards.
         </p>
@@ -67,7 +67,7 @@ export default async function AdminHomePage() {
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
         <h1 className="text-2xl font-semibold">Admin data unavailable</h1>
-        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+        <p className="text-muted-foreground">{message}</p>
       </div>
     );
   }
@@ -80,14 +80,14 @@ export default async function AdminHomePage() {
             Operations Hub
           </div>
           <h1 className="text-2xl font-semibold">Admin dashboard</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Stay ahead of weekend delivery operations with live stats and quick actions.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href="/admin/deliveries"
-            className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none"
           >
             <Truck className="h-4 w-4" aria-hidden="true" />
             View deliveries
