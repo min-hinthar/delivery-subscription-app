@@ -103,3 +103,9 @@
 - If DB tables added, RLS allows public select only for published menus
 
 **Planned PR:** `codex/marketing-p1-coverage-menu`
+
+---
+
+### P1 — Admin Weekly Menu Management (service-role API)
+**Acceptance:** /admin/menus CRUD weekly menus/items + reorder + publish + add from catalog.
+**Planned PR:** codex/admin-menu-crud
