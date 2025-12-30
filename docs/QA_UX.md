@@ -351,3 +351,16 @@ Minimum automated tests:
 - [ ] No binary files introduced in Codex Web PRs
 - [ ] Security headers / CSP reviewed (especially if adding external scripts) :contentReference[oaicite:4]{index=4}
 - [ ] If using request interception, follow Next.js 16 `proxy.ts` convention (avoid middleware pitfalls) :contentReference[oaicite:5]{index=5}
+
+---
+
+## Admin — Weekly Menu Management
+Happy path:
+- Admin logs in → /admin/menus
+- Create/load menu for current week
+- Add items, reorder, publish
+- Verify homepage shows published menu
+
+Edge cases:
+- Non-admin blocked from admin routes
+- Missing menu shows clear empty state
