@@ -124,6 +124,11 @@
 
 ---
 
+## Remediation Status (security-s2)
+- ✅ P1-2: Baseline security headers + CSP Report-Only configured in `next.config.ts`.
+
+---
+
 ## Notes / Open Questions
 - Rate limiting and CSP policies should be implemented pragmatically to avoid breaking Stripe Checkout or Maps integrations.
 - Cron secret is accepted via header or query param; consider restricting to headers only in a future hardening pass.

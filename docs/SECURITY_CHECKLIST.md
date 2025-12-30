@@ -43,6 +43,8 @@ Use this checklist for PR review and before deployments.
 - [ ] Baseline security headers present
 - [ ] CSP Report-Only rolled out; enforce only after violations resolved
 - [ ] No unsafe script directives in production without justification
+> Implementation note: baseline headers and CSP Report-Only are configured in `next.config.ts`
+> (see `docs/HEADERS_AND_CSP.md` for the exact policy and rollout steps).
 
 ## Dependencies
 - [ ] No new packages added without a reason
