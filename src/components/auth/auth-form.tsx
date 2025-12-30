@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { friendlyAuthError } from "@/lib/auth/errorMessages";
 import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
@@ -82,7 +83,11 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
       });
     } catch (caught) {
       const nextError =
-        caught instanceof Error ? caught.message : "Authentication failed.";
+        mode === "login"
+          ? friendlyAuthError(caught)
+          : caught instanceof Error
+            ? caught.message
+            : "Authentication failed.";
       setError(nextError);
       toast({
         title: "Authentication failed",
@@ -136,7 +141,12 @@ export function AuthForm({ mode, redirectPath }: AuthFormProps) {
         description: nextMessage,
       });
     } catch (caught) {
-      const nextError = caught instanceof Error ? caught.message : "Unable to resend link.";
+      const nextError =
+        mode === "login"
+          ? friendlyAuthError(caught)
+          : caught instanceof Error
+            ? caught.message
+            : "Unable to resend link.";
       setError(nextError);
       toast({
         title: "Unable to resend link",

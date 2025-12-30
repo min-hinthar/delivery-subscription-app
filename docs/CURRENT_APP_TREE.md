@@ -2,7 +2,6 @@
 
 ```text
 src/app/(admin)/admin/deliveries/page.tsx
-src/app/(admin)/admin/login/page.tsx
 src/app/(admin)/admin/meals/page.tsx
 src/app/(admin)/admin/page.tsx
 src/app/(admin)/admin/routes/page.tsx
@@ -10,6 +9,8 @@ src/app/(admin)/admin/subscriptions/page.tsx
 src/app/(admin)/error.tsx
 src/app/(admin)/layout.tsx
 src/app/(admin)/loading.tsx
+src/app/(admin-auth)/admin/login/page.tsx
+src/app/(admin-auth)/layout.tsx
 src/app/(app)/account/page.tsx
 src/app/(app)/account/profile/page.tsx
 src/app/(app)/appointment/[id]/page.tsx

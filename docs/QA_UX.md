@@ -232,6 +232,7 @@ Checklist:
 - [ ] Magic link login:
   - success → returns to last intended route
   - failure/expired → clear message and resend option
+- [ ] Invalid login credentials or unknown account → show “No active account found or credentials are incorrect. Please sign up.”
 
 ### Subscription states
 - [ ] subscription = `past_due`:
