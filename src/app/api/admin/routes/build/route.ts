@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     return bad("Admin access required.", { status: 403 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const parsed = buildRouteSchema.safeParse(body);
 
   if (!parsed.success) {

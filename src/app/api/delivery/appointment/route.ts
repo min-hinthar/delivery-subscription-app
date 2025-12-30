@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     return bad("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const parsed = appointmentSchema.safeParse(body);
 
   if (!parsed.success) {
@@ -62,15 +62,28 @@ export async function POST(request: Request) {
     return bad("Selected delivery window is full.", { status: 409 });
   }
 
-  const addressId =
-    parsed.data.address_id ??
-    (await supabase
+  let addressId = parsed.data.address_id ?? null;
+
+  if (addressId) {
+    const { data: address } = await supabase
       .from("addresses")
       .select("id")
+      .eq("id", addressId)
       .eq("user_id", auth.user.id)
-      .eq("is_primary", true)
-      .maybeSingle()).data?.id ??
-    null;
+      .maybeSingle();
+
+    if (!address?.id) {
+      return bad("Address not available.", { status: 403 });
+    }
+  } else {
+    addressId =
+      (await supabase
+        .from("addresses")
+        .select("id")
+        .eq("user_id", auth.user.id)
+        .eq("is_primary", true)
+        .maybeSingle()).data?.id ?? null;
+  }
 
   const { data: appointment, error } = await supabase
     .from("delivery_appointments")

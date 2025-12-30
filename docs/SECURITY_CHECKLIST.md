@@ -25,7 +25,7 @@ Use this checklist for PR review and before deployments.
 
 ## Stripe
 - [ ] Webhook signature verification is enforced
-- [ ] Webhook processing is idempotent (store processed event IDs)
+- [ ] Webhook processing is idempotent (store processed event IDs in `stripe_events`)
 - [ ] Client never supplies trusted Stripe IDs
 - [ ] Portal/Checkout sessions created server-side only
 
@@ -36,7 +36,7 @@ Use this checklist for PR review and before deployments.
 
 ## Maps / Expensive Endpoints
 - [ ] Geocode/directions run server-side with server key
-- [ ] Rate limit exists (by IP/user) or strong abuse prevention is in place
+- [ ] Rate limit exists (by IP/user) or strong abuse prevention is in place (429 + Retry-After)
 - [ ] Caching considered for repeated addresses/routes
 
 ## Headers & CSP

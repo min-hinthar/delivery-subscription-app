@@ -126,6 +126,12 @@ export async function POST(request: Request) {
     .update({ total_cents: templateTotal, updated_at: new Date().toISOString() })
     .in("id", orderIds);
 
+  console.info("cron_generate_week_complete", {
+    weekOf,
+    ordersCreated: orderIds.length,
+    itemsCreated: itemsPayload.length,
+  });
+
   return ok({
     week_of: weekOf,
     orders_created: orderIds.length,

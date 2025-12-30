@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return bad("Unauthorized", { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const parsed = verifySchema.safeParse(body);
 
   if (!parsed.success) {
