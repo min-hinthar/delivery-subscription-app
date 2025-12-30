@@ -115,3 +115,13 @@ curl -X POST http://localhost:3000/api/cron/generate-week \
 
 ### Stripe webhook forwarding
 stripe listen --forward-to localhost:3000/api/stripe/webhook
+
+---
+
+## Admin service-role CRUD
+All admin writes must:
+- validate session
+- enforce profiles.is_admin
+- validate input (zod)
+- use service-role client (server-only)
+
