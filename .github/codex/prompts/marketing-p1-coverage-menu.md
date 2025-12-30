@@ -1,4 +1,4 @@
-You are Codex. Follow AGENTS.md, docs/QA_UX.md, and docs/UI_POLISH_SPEC.md.
+You are Codex. Follow AGENTS.md, docs/QA_UX.md, docs/CHANGE_POLICY.md.
 
 PR GOAL (P1 Marketing):
 1) Add a PUBLIC coverage checker on homepage:
@@ -6,13 +6,13 @@ PR GOAL (P1 Marketing):
    - Calls POST /api/maps/coverage
    - Server geocodes ZIP and checks eligibility:
      - county in COVERAGE_ALLOWED_COUNTIES
-     - route distance/time from KITCHEN_ORIGIN_ADDRESS under thresholds
+     - route distance/time from kitchen origin under thresholds
    - Returns eligible/ineligible with clear reason + ETA/distance when eligible
-   - Add soft rate limiting + caching by ZIP (no new paid services required)
+   - Add soft rate limiting + caching by ZIP
 
 2) Add PUBLIC weekly chef-curated menu section on homepage:
    - Show current week’s published menu items
-   - If none, show a friendly empty state
+   - If none, show friendly empty state
    - You may add DB tables/migrations (weekly_menus, weekly_menu_items) with RLS allowing public select ONLY when published.
 
 Requirements:
