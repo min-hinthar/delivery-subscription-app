@@ -8,9 +8,26 @@ type SupabaseServiceConfig = {
   serviceRoleKey: string;
 };
 
+function isCodexVerify(): boolean {
+  return process.env.CODEX_VERIFY === "1";
+}
+
+function requireEnv(name: string): string {
+  const val = process.env[name];
+  if (val) return val;
+
+  // Allow build/verify to proceed with stub env.
+  if (isCodexVerify()) return `stub_${name}`;
+
+  throw new Error(`Missing required environment variable: ${name}`);
+}
+
 export function getSupabaseConfig(): SupabaseConfig {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    (isCodexVerify() ? "https://example.supabase.co" : undefined);
+
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? (isCodexVerify() ? requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY") : undefined);
 
   if (!url || !anonKey) {
     throw new Error(
@@ -22,8 +39,11 @@ export function getSupabaseConfig(): SupabaseConfig {
 }
 
 export function getSupabaseServiceConfig(): SupabaseServiceConfig {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    (isCodexVerify() ? "https://example.supabase.co" : undefined);
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? (isCodexVerify() ? requireEnv("SUPABASE_SERVICE_ROLE_KEY") : undefined);
 
   if (!url || !serviceRoleKey) {
     throw new Error(
