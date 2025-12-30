@@ -161,14 +161,14 @@ export default async function AccountPage() {
           hasActiveSubscription ? (
             <Link
               href="/schedule"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:active:transform-none"
             >
               Schedule delivery
             </Link>
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-5 text-sm font-medium text-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.99] dark:from-slate-100 dark:via-slate-200 dark:to-slate-100 dark:text-slate-900 dark:focus-visible:ring-slate-100"
+              className="inline-flex h-11 items-center justify-center rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:active:transform-none"
             >
               View plans
             </Link>
@@ -219,7 +219,7 @@ export default async function AccountPage() {
           </Link>
           <Link
             href="/track"
-            className="text-sm font-medium text-slate-900 underline-offset-4 transition hover:-translate-y-0.5 hover:underline dark:text-slate-100"
+            className="text-sm font-medium text-foreground underline-offset-4 transition hover:-translate-y-0.5 hover:underline motion-reduce:transition-none motion-reduce:hover:transform-none"
           >
             Track delivery
           </Link>
@@ -227,10 +227,8 @@ export default async function AccountPage() {
       </Card>
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="space-y-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Billing overview
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm font-semibold text-foreground">Billing overview</p>
+          <p className="text-sm text-muted-foreground">
             Keep payment methods up to date and manage your subscription status.
           </p>
           {hasStripeCustomer ? (
@@ -242,56 +240,50 @@ export default async function AccountPage() {
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-slate-200 px-4 text-sm font-medium text-slate-900 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:border-slate-800 dark:text-slate-100 dark:focus-visible:ring-slate-100"
+              className="inline-flex h-11 items-center justify-center rounded-md border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none"
             >
               View plans
             </Link>
           )}
         </Card>
         <Card className="space-y-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Schedule next delivery
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm font-semibold text-foreground">Schedule next delivery</p>
+          <p className="text-sm text-muted-foreground">
             Choose your weekend window before the Friday 5 PM cutoff.
           </p>
           <Link
             href="/schedule"
-            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:focus-visible:ring-slate-100 ${
+            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none ${
               hasActiveSubscription
-                ? "border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:text-slate-100"
-                : "pointer-events-none border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-500"
+                ? "border-border text-foreground hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-md"
+                : "pointer-events-none border-border text-muted-foreground"
             }`}
             aria-disabled={!hasActiveSubscription}
           >
             {hasActiveSubscription ? "Pick a window" : "Subscription required"}
           </Link>
           {!hasActiveSubscription ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Subscribe to unlock scheduling.
-            </p>
+            <p className="text-xs text-muted-foreground">Subscribe to unlock scheduling.</p>
           ) : null}
         </Card>
         <Card className="space-y-3">
-          <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-            Track your driver
-          </p>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm font-semibold text-foreground">Track your driver</p>
+          <p className="text-sm text-muted-foreground">
             Real-time updates appear after your appointment is assigned to a route.
           </p>
           <Link
             href="/track"
-            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 dark:focus-visible:ring-slate-100 ${
+            className={`inline-flex h-11 items-center justify-center rounded-md border px-4 text-sm font-medium shadow-sm transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none ${
               hasActiveSubscription
-                ? "border-slate-200 text-slate-900 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:text-slate-100"
-                : "pointer-events-none border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-500"
+                ? "border-border text-foreground hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-md"
+                : "pointer-events-none border-border text-muted-foreground"
             }`}
             aria-disabled={!hasActiveSubscription}
           >
             {hasActiveSubscription ? "Open tracking" : "Subscription required"}
           </Link>
           {!hasActiveSubscription ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-muted-foreground">
               Activate your subscription to track deliveries.
             </p>
           ) : null}

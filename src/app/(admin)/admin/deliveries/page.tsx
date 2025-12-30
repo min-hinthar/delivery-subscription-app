@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Download, Route } from "lucide-react";
 
 import { DeliveryFilters } from "@/components/admin/delivery-filters";
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -130,7 +131,7 @@ export default async function AdminDeliveriesPage({
     return (
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
         <h1 className="text-2xl font-semibold">Deliveries unavailable</h1>
-        <p className="text-slate-500 dark:text-slate-400">{message}</p>
+        <p className="text-muted-foreground">{message}</p>
       </div>
     );
   }
@@ -151,21 +152,23 @@ export default async function AdminDeliveriesPage({
             Operations
           </div>
           <h1 className="text-2xl font-semibold">Deliveries</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Manage weekend schedules, prep totals, and manifest exports.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href={`/api/admin/manifest.csv?week_of=${selectedWeek}`}
-            className="rounded-md border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
+            className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium text-foreground shadow-sm transition hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none"
           >
+            <Download className="h-4 w-4" aria-hidden="true" />
             Export manifest CSV
           </Link>
           <Link
             href="/admin/routes"
-            className="rounded-md bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:-translate-y-0.5 hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none"
           >
+            <Route className="h-4 w-4" aria-hidden="true" />
             Build routes
           </Link>
           <LogoutButton />
@@ -180,15 +183,15 @@ export default async function AdminDeliveriesPage({
         />
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
-            <p className="text-slate-500 dark:text-slate-400">Appointments</p>
+            <p className="text-muted-foreground">Appointments</p>
             <p className="text-xl font-semibold">{appointments.length}</p>
           </div>
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
-            <p className="text-slate-500 dark:text-slate-400">Orders</p>
+            <p className="text-muted-foreground">Orders</p>
             <p className="text-xl font-semibold">{orders.length}</p>
           </div>
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
-            <p className="text-slate-500 dark:text-slate-400">Prep items</p>
+            <p className="text-muted-foreground">Prep items</p>
             <p className="text-xl font-semibold">{prepTotals.size}</p>
           </div>
         </div>
@@ -198,16 +201,14 @@ export default async function AdminDeliveriesPage({
         <h2 className="text-lg font-semibold">Prep totals</h2>
         <div className="grid gap-2 text-sm">
           {prepTotals.size === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              <p className="font-medium text-slate-700 dark:text-slate-200">
-                No prep totals yet.
-              </p>
+            <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-muted-foreground dark:border-slate-800">
+              <p className="font-medium text-foreground">No prep totals yet.</p>
               <p className="mt-1">
                 Build a weekly template and generate orders to populate prep counts.
               </p>
               <Link
                 href="/admin/meals"
-                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-border bg-background px-4 text-xs font-semibold text-foreground transition hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-sm motion-reduce:transition-none motion-reduce:hover:transform-none"
               >
                 Review meal templates
               </Link>
