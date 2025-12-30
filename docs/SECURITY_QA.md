@@ -125,3 +125,9 @@ All admin writes must:
 - validate input (zod)
 - use service-role client (server-only)
 
+Admin menu endpoints to verify:
+- `GET/POST /api/admin/weekly-menus`
+- `PATCH /api/admin/weekly-menus/update`
+- `GET/POST /api/admin/weekly-menu-items`
+- `PATCH/DELETE /api/admin/weekly-menu-items/update`
+- `POST /api/admin/weekly-menu-items/reorder`

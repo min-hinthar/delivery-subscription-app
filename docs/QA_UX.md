@@ -358,7 +358,8 @@ Minimum automated tests:
 Happy path:
 - Admin logs in → /admin/menus
 - Create/load menu for current week
-- Add items, reorder, publish
+- Add items (custom + catalog), reorder, publish
+- Edit title (saves on blur)
 - Verify homepage shows published menu
 
 Edge cases:
