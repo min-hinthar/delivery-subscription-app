@@ -28,7 +28,7 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      className="w-full justify-center gap-2 md:w-auto"
+      className="w-full justify-center gap-2 text-muted-foreground hover:bg-accent hover:text-foreground md:w-auto"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={label}
     >
