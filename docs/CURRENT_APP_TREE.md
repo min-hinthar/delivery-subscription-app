@@ -3,6 +3,7 @@
 ```text
 src/app/(admin)/admin/deliveries/page.tsx
 src/app/(admin)/admin/meals/page.tsx
+src/app/(admin)/admin/menus/page.tsx
 src/app/(admin)/admin/page.tsx
 src/app/(admin)/admin/routes/page.tsx
 src/app/(admin)/admin/subscriptions/page.tsx
@@ -39,11 +40,17 @@ src/app/(marketing)/page.tsx
 src/app/(marketing)/pricing/loading.tsx
 src/app/(marketing)/pricing/page.tsx
 src/app/api/account/profile/route.ts
+src/app/api/admin/meals/route.ts
 src/app/api/admin/manifest.csv/route.ts
 src/app/api/admin/routes/build/route.ts
 src/app/api/admin/routes/delete/route.ts
 src/app/api/admin/routes/stops/route.ts
 src/app/api/admin/routes/summary/route.ts
+src/app/api/admin/weekly-menu-items/reorder/route.ts
+src/app/api/admin/weekly-menu-items/route.ts
+src/app/api/admin/weekly-menu-items/update/route.ts
+src/app/api/admin/weekly-menus/route.ts
+src/app/api/admin/weekly-menus/update/route.ts
 src/app/api/cron/generate-week/route.ts
 src/app/api/delivery/appointment/route.ts
 src/app/api/maps/directions/route.ts

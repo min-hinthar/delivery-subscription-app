@@ -49,6 +49,7 @@ const ADMIN_LINKS: NavLink[] = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Deliveries", href: "/admin/deliveries", icon: Truck },
   { label: "Routes", href: "/admin/routes", icon: Route },
+  { label: "Menus", href: "/admin/menus", icon: ChefHat },
   { label: "Meals", href: "/admin/meals", icon: ChefHat },
   { label: "Subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
 ];

@@ -15,9 +15,10 @@ If you cannot access admin pages:
 ## Weekly Menu Workflow (recommended weekly cadence)
 ### 1) Create or load the weekly menu
 1) Go to `/admin/menus`
-2) Set **Week of (Monday)** to the week you want (YYYY-MM-DD)
+2) Set **Week of (Saturday)** to the delivery weekend you want (YYYY-MM-DD)
 3) Click **Load**
 4) If no menu exists, click **Create Menu**
+5) Update the menu title (saves on blur)
 
 ### 2) Add items
 You can add items two ways:

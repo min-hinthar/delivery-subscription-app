@@ -109,3 +109,4 @@
 ### P1 — Admin Weekly Menu Management (service-role API)
 **Acceptance:** /admin/menus CRUD weekly menus/items + reorder + publish + add from catalog.
 **Planned PR:** codex/admin-menu-crud
+**Status:** ✅ Implemented in codex/admin-menu-crud
