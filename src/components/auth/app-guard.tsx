@@ -32,8 +32,20 @@ export default async function AppGuard({ children }: AppGuardProps) {
   const headerPath =
     requestHeaders.get("x-pathname") ??
     requestHeaders.get("x-next-url") ??
+    requestHeaders.get("x-original-url") ??
     requestHeaders.get("referer");
-  const currentPath = getSafeRedirectPath(headerPath, "/account");
+  const safeHeaderPath = getSafeRedirectPath(headerPath, "/account");
+  let currentPath = safeHeaderPath;
+
+  if (headerPath && headerPath.includes("/auth/callback")) {
+    try {
+      const parsed = new URL(headerPath, "http://localhost");
+      const nextParam = parsed.searchParams.get("next");
+      currentPath = getSafeRedirectPath(nextParam, safeHeaderPath);
+    } catch {
+      currentPath = safeHeaderPath;
+    }
+  }
   const isOnboardingRoute =
     currentPath === "/onboarding" || currentPath.startsWith("/onboarding/");
 

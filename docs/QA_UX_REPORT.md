@@ -17,6 +17,7 @@
 - Added reduced-motion fallbacks to shorten transitions and avoid motion-heavy UI when `prefers-reduced-motion` is enabled.
 - Ensured protected route redirects preserve the intended return path and explain auth gating via the existing alert messaging.
 - Prevented onboarding redirect loops so new users can complete setup without repeated redirects.
+- Normalized auth callback redirect handling so onboarding links return to the expected setup flow.
 - Minimized address PII in the Account and Tracking views while keeping operational map data intact.
 - Added configuration guardrail on `/track` when Supabase env is missing to avoid blank screens.
 
