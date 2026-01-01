@@ -28,15 +28,29 @@ export default async function AppGuard({ children }: AppGuardProps) {
 
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase.auth.getUser();
+  const requestHeaders = await headers();
+  const headerPath =
+    requestHeaders.get("x-pathname") ??
+    requestHeaders.get("x-next-url") ??
+    requestHeaders.get("x-original-url") ??
+    requestHeaders.get("referer");
+  const safeHeaderPath = getSafeRedirectPath(headerPath, "/account");
+  let currentPath = safeHeaderPath;
+
+  if (headerPath && headerPath.includes("/auth/callback")) {
+    try {
+      const parsed = new URL(headerPath, "http://localhost");
+      const nextParam = parsed.searchParams.get("next");
+      currentPath = getSafeRedirectPath(nextParam, safeHeaderPath);
+    } catch {
+      currentPath = safeHeaderPath;
+    }
+  }
+  const isOnboardingRoute =
+    currentPath === "/onboarding" || currentPath.startsWith("/onboarding/");
 
   if (!data.user) {
-    const requestHeaders = await headers();
-    const headerPath =
-      requestHeaders.get("x-pathname") ??
-      requestHeaders.get("x-next-url") ??
-      requestHeaders.get("referer");
-    const nextPath = getSafeRedirectPath(headerPath, "/account");
-    redirect(`/login?reason=auth&next=${encodeURIComponent(nextPath)}`);
+    redirect(`/login?reason=auth&next=${encodeURIComponent(currentPath)}`);
   }
 
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -65,7 +79,11 @@ export default async function AppGuard({ children }: AppGuardProps) {
     .eq("is_primary", true)
     .maybeSingle();
 
-  if (!profile?.is_admin && (!profile?.onboarding_completed || !primaryAddress?.id)) {
+  if (
+    !profile?.is_admin &&
+    (!profile?.onboarding_completed || !primaryAddress?.id) &&
+    !isOnboardingRoute
+  ) {
     redirect("/onboarding");
   }
 
