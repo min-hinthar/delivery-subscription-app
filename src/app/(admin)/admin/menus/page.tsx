@@ -378,7 +378,7 @@ export default function AdminMenusPage() {
         body: JSON.stringify({
           item_id: updated.id,
           name: updated.name,
-          description: updated.description,
+          description: updated.description?.trim() ? updated.description : null,
           price_cents: updated.price_cents,
         }),
       });

@@ -49,7 +49,7 @@ export async function PATCH(request: Request) {
     .from("weekly_menu_items")
     .update({
       ...updates,
-      description: updates.description ?? undefined,
+      ...(updates.description === undefined ? {} : { description: updates.description }),
     })
     .eq("id", item_id);
 
