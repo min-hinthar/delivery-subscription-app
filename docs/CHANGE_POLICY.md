@@ -65,3 +65,10 @@ Stop and document rather than guessing if:
 - changes require real production credentials
 - requirements are ambiguous
 - a change would force stacking PRs
+
+---
+
+## Recent behavior updates (documented)
+- 2026-01: Protected routing audit aligned onboarding and appointment access:
+  - `/onboarding` now redirects to `/account` once onboarding + primary address are complete.
+  - `/appointment/[id]` now lives under `(app)/(protected)` to enforce onboarding gating.

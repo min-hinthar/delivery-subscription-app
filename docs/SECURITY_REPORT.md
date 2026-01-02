@@ -96,6 +96,7 @@
 - [x] Admin gating enforced server-side (`src/components/auth/admin-guard.tsx`, `src/lib/auth/admin.ts`).
 - [x] Input validation present on mutating endpoints (zod in API routes).
 - [x] Secrets not committed; `.env.local` not tracked.
+- [x] Private route handlers return `Cache-Control: no-store` (auth/profile/subscription flows, webhook).
 
 ---
 

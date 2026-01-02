@@ -19,20 +19,21 @@ const profileUpdateSchema = z.object({
     instructions: z.string().optional().nullable(),
   }),
 });
+const privateHeaders = { "Cache-Control": "no-store" };
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { data: auth, error: authError } = await supabase.auth.getUser();
 
   if (authError || !auth.user) {
-    return bad("Unauthorized", { status: 401 });
+    return bad("Unauthorized", { status: 401, headers: privateHeaders });
   }
 
   const body = await request.json().catch(() => null);
   const parsed = profileUpdateSchema.safeParse(body);
 
   if (!parsed.success) {
-    return bad("Invalid profile payload.", { status: 422 });
+    return bad("Invalid profile payload.", { status: 422, headers: privateHeaders });
   }
 
   const { full_name, phone, onboarding_completed, address } = parsed.data;
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!existingAddress?.id) {
-      return bad("Address not available.", { status: 403 });
+      return bad("Address not available.", { status: 403, headers: privateHeaders });
     }
   }
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
     canonical = applyCanonicalAddress(geocode);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to validate address.";
-    return bad(message, { status: 422 });
+    return bad(message, { status: 422, headers: privateHeaders });
   }
 
   const { error: authUpdateError } = await supabase.auth.updateUser({
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
   });
 
   if (authUpdateError) {
-    return bad("Failed to sync user metadata.", { status: 500 });
+    return bad("Failed to sync user metadata.", { status: 500, headers: privateHeaders });
   }
 
   const { error: profileError } = await supabase.from("profiles").upsert({
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
   });
 
   if (profileError) {
-    return bad("Failed to update profile.", { status: 500 });
+    return bad("Failed to update profile.", { status: 500, headers: privateHeaders });
   }
 
   const { error: addressError } = await supabase
@@ -116,8 +117,8 @@ export async function POST(request: Request) {
     );
 
   if (addressError) {
-    return bad("Failed to update address.", { status: 500 });
+    return bad("Failed to update address.", { status: 500, headers: privateHeaders });
   }
 
-  return ok({ updated: true });
+  return ok({ updated: true }, { headers: privateHeaders });
 }

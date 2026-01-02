@@ -9,6 +9,7 @@ const checkoutInputSchema = z.object({
   successUrl: z.string().url().optional(),
   cancelUrl: z.string().url().optional(),
 });
+const privateHeaders = { "Cache-Control": "no-store" };
 
 function buildReturnUrl(requestUrl: string, fallbackPath: string) {
   const url = new URL(requestUrl);
@@ -41,14 +42,14 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return bad("Authentication required.", { status: 401 });
+    return bad("Authentication required.", { status: 401, headers: privateHeaders });
   }
 
   const payload = await request.json().catch(() => ({}));
   const parsed = checkoutInputSchema.safeParse(payload);
 
   if (!parsed.success) {
-    return bad("Invalid checkout request.", { status: 422 });
+    return bad("Invalid checkout request.", { status: 422, headers: privateHeaders });
   }
 
   const stripe = getStripeClient();
@@ -61,7 +62,7 @@ export async function POST(request: Request) {
     .limit(1);
 
   if (customerError) {
-    return bad("Unable to load Stripe customer.", { status: 500 });
+    return bad("Unable to load Stripe customer.", { status: 500, headers: privateHeaders });
   }
 
   let stripeCustomerId = existingCustomers?.[0]?.stripe_customer_id ?? null;
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
     });
 
     if (insertError) {
-      return bad("Unable to save Stripe customer.", { status: 500 });
+      return bad("Unable to save Stripe customer.", { status: 500, headers: privateHeaders });
     }
   }
 
@@ -112,5 +113,5 @@ export async function POST(request: Request) {
     },
   });
 
-  return ok({ url: session.url });
+  return ok({ url: session.url }, { headers: privateHeaders });
 }

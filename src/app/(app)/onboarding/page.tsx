@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, phone, email")
+    .select("full_name, phone, email, onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -45,6 +45,10 @@ export default async function OnboardingPage() {
     .eq("user_id", user.id)
     .eq("is_primary", true)
     .maybeSingle();
+
+  if (profile?.onboarding_completed && address?.id) {
+    redirect("/account");
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">

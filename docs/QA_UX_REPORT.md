@@ -24,6 +24,9 @@
 - Confirmed signup confirm link reaches `/onboarding` once without looping.
 - Confirmed pre-onboarding visits to `/schedule` redirect to `/onboarding` once.
 - Confirmed post-onboarding access to `/account`, `/schedule`, and `/track`.
+- Added protected segment loading/error boundaries so customer pages render friendly states while data loads.
+- Redirected onboarded customers away from `/onboarding` to `/account` to avoid dead ends.
+- Moved appointment detail routes under protected gating to align with onboarding requirements.
 
 ## Smoke coverage
 - No lightweight test tooling (Playwright/Jest/etc.) is present in the repo, so no new smoke tests were added.
