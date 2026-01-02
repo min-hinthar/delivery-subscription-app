@@ -181,10 +181,14 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
 
     setIsSaving(true);
 
+    const saveController = new AbortController();
+    const saveTimeout = setTimeout(() => saveController.abort(), 15000);
+
     try {
       const response = await fetch("/api/account/profile", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: saveController.signal,
         body: JSON.stringify({
           full_name: fullName,
           phone,
@@ -216,8 +220,13 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       setStep("done");
       router.refresh();
     } catch (caught) {
-      const message =
-        caught instanceof Error ? caught.message : "Unable to save your details.";
+      let message = "Unable to save your details.";
+      if (caught instanceof Error) {
+        message =
+          caught.name === "AbortError"
+            ? "Saving your profile timed out. Please try again."
+            : caught.message;
+      }
       setFormError(message);
       toast({
         title: "Unable to save profile",
@@ -225,6 +234,7 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
         variant: "destructive",
       });
     } finally {
+      clearTimeout(saveTimeout);
       setIsSaving(false);
     }
   };
@@ -282,10 +292,14 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
 
     setIsVerifying(true);
 
+    const verifyController = new AbortController();
+    const verifyTimeout = setTimeout(() => verifyController.abort(), 15000);
+
     try {
       const response = await fetch("/api/maps/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: verifyController.signal,
         body: JSON.stringify({
           line1,
           line2: line2 || null,
@@ -310,8 +324,13 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       });
     } catch (caught) {
       setVerifiedAddress(null);
-      const message =
-        caught instanceof Error ? caught.message : "Unable to verify address.";
+      let message = "Unable to verify address.";
+      if (caught instanceof Error) {
+        message =
+          caught.name === "AbortError"
+            ? "Address verification timed out. Please try again."
+            : caught.message;
+      }
       setFormError(message);
       toast({
         title: "Address verification failed",
@@ -319,6 +338,7 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
         variant: "destructive",
       });
     } finally {
+      clearTimeout(verifyTimeout);
       setIsVerifying(false);
     }
   };
