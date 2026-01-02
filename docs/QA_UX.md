@@ -169,6 +169,7 @@ Checklist:
     - Step 1: name + phone
     - Step 2: address + validation
     - Done: confirmation + CTA to schedule
+    - CTA routes to `/schedule` without compilation errors or redirect loops
 
 Address requirements:
 - [ ] Address input validates format
@@ -182,7 +183,7 @@ Checklist:
 - [ ] Success toast/alert appears
 
 ### 5.4 Schedule Appointment
-6) Visit `/schedule`
+6) From onboarding completion, tap “Schedule delivery” → `/schedule`
 - Expected:
   - shows next eligible `week_of`
   - shows delivery windows (Sat 11–7, Sun 11–3)

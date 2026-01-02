@@ -13,8 +13,12 @@
 - Move /onboarding into (app)
 - Add group-level loading.tsx + error.tsx
 - Keep URLs unchanged
+**Status:** ✅ Completed (route groups in place; added schedule segment loading + protected layout env guard).
 
 ### R2 — Appointment detail canonical page + Schedule modal overlay
 - Canonical: /appointment/[id]
 - Intercept from /schedule with @modal + (..)appointment/[id]
 - Back button closes modal; deep link works
+
+## Follow-ups discovered
+- Add per-route error boundaries for data-heavy customer pages (e.g., `/schedule`, `/track`) to enable localized retry without relying on the group error boundary.

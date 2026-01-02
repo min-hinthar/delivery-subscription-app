@@ -19,6 +19,7 @@ src/app/(app)/(protected)/layout.tsx
 src/app/(app)/(protected)/schedule/@modal/(..)appointment/[id]/page.tsx
 src/app/(app)/(protected)/schedule/@modal/default.tsx
 src/app/(app)/(protected)/schedule/layout.tsx
+src/app/(app)/(protected)/schedule/loading.tsx
 src/app/(app)/(protected)/schedule/page.tsx
 src/app/(app)/(protected)/track/page.tsx
 src/app/(app)/appointment/[id]/page.tsx
@@ -41,8 +42,8 @@ src/app/(marketing)/page.tsx
 src/app/(marketing)/pricing/loading.tsx
 src/app/(marketing)/pricing/page.tsx
 src/app/api/account/profile/route.ts
-src/app/api/admin/meals/route.ts
 src/app/api/admin/manifest.csv/route.ts
+src/app/api/admin/meals/route.ts
 src/app/api/admin/routes/build/route.ts
 src/app/api/admin/routes/delete/route.ts
 src/app/api/admin/routes/stops/route.ts
@@ -54,6 +55,7 @@ src/app/api/admin/weekly-menus/route.ts
 src/app/api/admin/weekly-menus/update/route.ts
 src/app/api/cron/generate-week/route.ts
 src/app/api/delivery/appointment/route.ts
+src/app/api/maps/coverage/route.ts
 src/app/api/maps/directions/route.ts
 src/app/api/maps/geocode/route.ts
 src/app/api/maps/verify/route.ts
