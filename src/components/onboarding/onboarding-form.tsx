@@ -679,7 +679,9 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
           <p className="text-base font-semibold">You’re all set!</p>
           <p>Next, choose a delivery window for your first weekend order.</p>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={() => router.push("/schedule")}>Schedule delivery</Button>
+            <Button onClick={() => window.location.assign("/schedule")}>
+              Schedule delivery
+            </Button>
             <Button
               onClick={() => router.push("/account")}
               className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
