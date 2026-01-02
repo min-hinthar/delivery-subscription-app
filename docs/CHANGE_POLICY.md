@@ -44,6 +44,7 @@ Required:
 - URLs must not change unless explicitly stated
 - admin gating remains server-side
 - update routing docs if structure changes
+- AppGuard is auth-only. Onboarding gating must live in (app)/(protected) layout to prevent loops.
 
 ### D) Triggers/functions (allowed but require extra care)
 Allowed when:

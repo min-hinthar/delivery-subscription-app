@@ -5,6 +5,7 @@
 - Modern UX: modal overlays with deep links for appointment details/edit
 - No URL breakage unless explicitly noted
 - Segment loading/error boundaries for perceived performance
+- (app) is auth-only; (app)/(protected) enforces onboarding + primary address requirements
 
 ## Planned PRs
 ### R1 — Route groups + segment boundaries
