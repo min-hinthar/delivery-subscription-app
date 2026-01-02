@@ -8,6 +8,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 const portalInputSchema = z.object({
   returnUrl: z.string().url().optional(),
 });
+const privateHeaders = { "Cache-Control": "no-store" };
 
 function buildReturnUrl(requestUrl: string, fallbackPath: string) {
   const url = new URL(requestUrl);
@@ -40,14 +41,14 @@ export async function POST(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return bad("Authentication required.", { status: 401 });
+    return bad("Authentication required.", { status: 401, headers: privateHeaders });
   }
 
   const payload = await request.json().catch(() => ({}));
   const parsed = portalInputSchema.safeParse(payload);
 
   if (!parsed.success) {
-    return bad("Invalid billing portal request.", { status: 422 });
+    return bad("Invalid billing portal request.", { status: 422, headers: privateHeaders });
   }
 
   const admin = createSupabaseAdminClient();
@@ -58,13 +59,13 @@ export async function POST(request: Request) {
     .limit(1);
 
   if (error) {
-    return bad("Unable to load Stripe customer.", { status: 500 });
+    return bad("Unable to load Stripe customer.", { status: 500, headers: privateHeaders });
   }
 
   const stripeCustomerId = customers?.[0]?.stripe_customer_id;
 
   if (!stripeCustomerId) {
-    return bad("No Stripe customer on file.", { status: 404 });
+    return bad("No Stripe customer on file.", { status: 404, headers: privateHeaders });
   }
 
   const stripe = getStripeClient();
@@ -75,5 +76,5 @@ export async function POST(request: Request) {
     return_url: returnUrl,
   });
 
-  return ok({ url: session.url });
+  return ok({ url: session.url }, { headers: privateHeaders });
 }

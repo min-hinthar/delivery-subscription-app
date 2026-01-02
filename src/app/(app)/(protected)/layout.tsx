@@ -1,5 +1,7 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -32,7 +34,14 @@ export default async function ProtectedLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect(`/login?reason=auth&next=${encodeURIComponent("/account")}`);
+    const requestHeaders = await headers();
+    const rawPath =
+      requestHeaders.get("x-next-url") ??
+      requestHeaders.get("x-original-url") ??
+      requestHeaders.get("x-pathname") ??
+      null;
+    const currentPath = getSafeRedirectPath(rawPath, "/account");
+    redirect(`/login?reason=auth&next=${encodeURIComponent(currentPath)}`);
   }
 
   const { data: profile } = await supabase

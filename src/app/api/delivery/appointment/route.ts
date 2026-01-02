@@ -10,26 +10,27 @@ const appointmentSchema = z.object({
   address_id: z.string().uuid().optional().nullable(),
   notes: z.string().max(500).optional().nullable(),
 });
+const privateHeaders = { "Cache-Control": "no-store" };
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { data: auth, error: authError } = await supabase.auth.getUser();
 
   if (authError || !auth.user) {
-    return bad("Unauthorized", { status: 401 });
+    return bad("Unauthorized", { status: 401, headers: privateHeaders });
   }
 
   const body = await request.json().catch(() => null);
   const parsed = appointmentSchema.safeParse(body);
 
   if (!parsed.success) {
-    return bad("Invalid appointment payload.", { status: 422 });
+    return bad("Invalid appointment payload.", { status: 422, headers: privateHeaders });
   }
 
   const weekOfDate = new Date(`${parsed.data.week_of}T00:00:00Z`);
 
   if (Number.isNaN(weekOfDate.getTime())) {
-    return bad("Invalid week_of date.", { status: 422 });
+    return bad("Invalid week_of date.", { status: 422, headers: privateHeaders });
   }
 
   const { data: profile } = await supabase
@@ -39,7 +40,10 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (!profile?.is_admin && isAfterCutoff(weekOfDate)) {
-    return bad("The Friday 5PM PT cutoff has passed for this week.", { status: 403 });
+    return bad("The Friday 5PM PT cutoff has passed for this week.", {
+      status: 403,
+      headers: privateHeaders,
+    });
   }
 
   const { data: window } = await supabase
@@ -49,7 +53,10 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (!window || !window.is_active) {
-    return bad("Selected delivery window is unavailable.", { status: 404 });
+    return bad("Selected delivery window is unavailable.", {
+      status: 404,
+      headers: privateHeaders,
+    });
   }
 
   const { data: appointments } = await supabase
@@ -59,7 +66,7 @@ export async function POST(request: Request) {
     .eq("delivery_window_id", parsed.data.delivery_window_id);
 
   if ((appointments?.length ?? 0) >= window.capacity) {
-    return bad("Selected delivery window is full.", { status: 409 });
+    return bad("Selected delivery window is full.", { status: 409, headers: privateHeaders });
   }
 
   let addressId = parsed.data.address_id ?? null;
@@ -73,7 +80,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (!address?.id) {
-      return bad("Address not available.", { status: 403 });
+      return bad("Address not available.", { status: 403, headers: privateHeaders });
     }
   } else {
     addressId =
@@ -102,8 +109,8 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (error) {
-    return bad("Failed to save appointment.", { status: 500 });
+    return bad("Failed to save appointment.", { status: 500, headers: privateHeaders });
   }
 
-  return ok({ appointment });
+  return ok({ appointment }, { headers: privateHeaders });
 }

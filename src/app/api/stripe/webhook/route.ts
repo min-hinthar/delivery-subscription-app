@@ -5,6 +5,7 @@ import { getStripeClient, getStripeWebhookSecret } from "@/lib/stripe";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
+const privateHeaders = { "Cache-Control": "no-store" };
 
 function toDateTime(timestamp: number | null | undefined) {
   if (!timestamp) {
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
-    return bad("Missing Stripe signature.", { status: 400 });
+    return bad("Missing Stripe signature.", { status: 400, headers: privateHeaders });
   }
 
   const rawBody = await request.text();
@@ -107,7 +108,10 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Invalid signature.";
-    return bad(`Stripe webhook error: ${message}`, { status: 400 });
+    return bad(`Stripe webhook error: ${message}`, {
+      status: 400,
+      headers: privateHeaders,
+    });
   }
 
   const admin = createSupabaseAdminClient();
@@ -122,10 +126,10 @@ export async function POST(request: Request) {
         eventId: event.id,
         eventType: event.type,
       });
-      return ok({ received: true });
+      return ok({ received: true }, { headers: privateHeaders });
     }
 
-    return bad("Failed to record Stripe event.", { status: 500 });
+    return bad("Failed to record Stripe event.", { status: 500, headers: privateHeaders });
   }
 
   if (event.type === "checkout.session.completed") {
@@ -146,7 +150,7 @@ export async function POST(request: Request) {
       );
 
       if (error) {
-        return bad("Failed to sync Stripe customer.", { status: 500 });
+        return bad("Failed to sync Stripe customer.", { status: 500, headers: privateHeaders });
       }
     }
   }
@@ -171,7 +175,7 @@ export async function POST(request: Request) {
     const { error } = await upsertSubscription(admin, subscription, userId);
 
     if (error) {
-      return bad("Failed to sync subscription.", { status: 500 });
+      return bad("Failed to sync subscription.", { status: 500, headers: privateHeaders });
     }
   }
 
@@ -212,7 +216,7 @@ export async function POST(request: Request) {
     );
 
     if (error) {
-      return bad("Failed to sync payment.", { status: 500 });
+      return bad("Failed to sync payment.", { status: 500, headers: privateHeaders });
     }
   }
 
@@ -241,7 +245,10 @@ export async function POST(request: Request) {
       const { error } = await upsertSubscription(admin, subscription, userId);
 
       if (error) {
-        return bad("Failed to sync subscription from invoice.", { status: 500 });
+        return bad("Failed to sync subscription from invoice.", {
+          status: 500,
+          headers: privateHeaders,
+        });
       }
     }
   }
@@ -251,5 +258,5 @@ export async function POST(request: Request) {
     eventType: event.type,
   });
 
-  return ok({ received: true });
+  return ok({ received: true }, { headers: privateHeaders });
 }

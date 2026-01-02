@@ -19,6 +19,7 @@
 - Canonical: /appointment/[id]
 - Intercept from /schedule with @modal + (..)appointment/[id]
 - Back button closes modal; deep link works
+**Status:** ✅ Completed (appointment routes live under protected gating; modal overlay preserved).
 
 ## Follow-ups discovered
 - Add per-route error boundaries for data-heavy customer pages (e.g., `/schedule`, `/track`) to enable localized retry without relying on the group error boundary.

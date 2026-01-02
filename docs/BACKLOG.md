@@ -33,6 +33,17 @@
 
 ## Workstream: Routing / Auth
 
+### P0 — Protected routing audit (R1)
+**Problem:** protected/onboarding routes needed a full audit for Supabase/Stripe gating and redirect loops.  
+**Acceptance:**
+- (app) layout remains auth-only; (protected) enforces onboarding + primary address
+- Onboarding redirects to `/account` when complete
+- Appointment routes are protected and rely on server-verified state
+- Private APIs return `Cache-Control: no-store`
+
+**Planned PR:** `codex/r1-protected-routing-supabase-stripe-audit`  
+**Status:** ✅ Done
+
 ### P2 — Per-route error boundaries for customer scheduling flows
 **Problem:** group-level error boundaries cover all (app) pages, but `/schedule` and `/track` would benefit from localized retry without losing shell state.  
 **Acceptance:**

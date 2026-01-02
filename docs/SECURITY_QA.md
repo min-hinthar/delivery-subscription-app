@@ -34,6 +34,10 @@ If app supports `returnTo` / `redirect` params:
 - [ ] `returnTo=https://evil.com` is rejected or ignored
 - [ ] `returnTo=//evil.com` is rejected or ignored
 
+### 2.3 Private API caching
+- [ ] Authenticated route handlers return `Cache-Control: no-store`
+- [ ] Stripe webhook responses are not cached
+
 ## 3) Authorization & IDOR (Two-user test)
 Create two customer accounts: User A and User B.
 
