@@ -19,40 +19,29 @@ export default async function AppGuard({ children }: AppGuardProps) {
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
         <h1 className="text-2xl font-semibold">Supabase not configured</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable
-          authentication.
+          Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable authentication.
         </p>
       </div>
     );
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.auth.getUser();
   const requestHeaders = await headers();
-  const headerPath =
-    requestHeaders.get("x-pathname") ??
+  const rawPath =
     requestHeaders.get("x-next-url") ??
     requestHeaders.get("x-original-url") ??
-    requestHeaders.get("referer");
-  const safeHeaderPath = getSafeRedirectPath(headerPath, "/account");
-  let currentPath = safeHeaderPath;
+    requestHeaders.get("x-pathname") ??
+    null;
 
-  if (headerPath && headerPath.includes("/auth/callback")) {
-    try {
-      const parsed = new URL(headerPath, "http://localhost");
-      const nextParam = parsed.searchParams.get("next");
-      currentPath = getSafeRedirectPath(nextParam, safeHeaderPath);
-    } catch {
-      currentPath = safeHeaderPath;
-    }
-  }
-  const isOnboardingRoute =
-    currentPath === "/onboarding" || currentPath.startsWith("/onboarding/");
+  const currentPath = getSafeRedirectPath(rawPath, "/account");
+
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
 
   if (!data.user) {
     redirect(`/login?reason=auth&next=${encodeURIComponent(currentPath)}`);
   }
 
+  // Keep your existing “profile upsert” behavior (service-role only).
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
     const adminClient = createSupabaseAdminClient();
     await adminClient.from("profiles").upsert({
@@ -66,26 +55,8 @@ export default async function AppGuard({ children }: AppGuardProps) {
     });
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("full_name, onboarding_completed, is_admin")
-    .eq("id", data.user.id)
-    .maybeSingle();
-
-  const { data: primaryAddress } = await supabase
-    .from("addresses")
-    .select("id")
-    .eq("user_id", data.user.id)
-    .eq("is_primary", true)
-    .maybeSingle();
-
-  if (
-    !profile?.is_admin &&
-    (!profile?.onboarding_completed || !primaryAddress?.id) &&
-    !isOnboardingRoute
-  ) {
-    redirect("/onboarding");
-  }
-
+  // NOTE:
+  // Onboarding/address gating is enforced in src/app/(app)/(protected)/layout.tsx
+  // This prevents redirect loops on /onboarding.
   return children;
 }

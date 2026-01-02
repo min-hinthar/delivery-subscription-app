@@ -239,6 +239,9 @@ Checklist:
 - [ ] Magic link login:
   - success → returns to last intended route
   - failure/expired → clear message and resend option
+- [ ] Signup confirm link → `/auth/callback` → `/onboarding` renders once (no loop)
+- [ ] Visit `/schedule` before onboarding → redirects to `/onboarding` once
+- [ ] After onboarding, `/account`, `/schedule`, `/track` are accessible
 - [ ] Invalid login credentials or unknown account → show “No active account found or credentials are incorrect. Please sign up.”
 
 ### Subscription states

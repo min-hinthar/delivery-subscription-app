@@ -42,6 +42,16 @@
 
 **Planned PR:** `codex/auth-p0-admin-login-fix`
 
+### P0 — Fix onboarding redirect loop after magic link confirm
+**Problem:** auth callback redirects loop between `/auth/callback` and `/onboarding`.  
+**Acceptance:**
+- Confirm link lands on `/onboarding` once without repeating redirects
+- Visiting `/schedule` pre-onboarding redirects to `/onboarding` once
+- Onboarded users can access `/account`, `/schedule`, `/track`
+
+**Planned PR:** `codex/p0-fix-onboarding-redirect-loop`  
+**Status:** ✅ Done
+
 ### P1 — Friendly auth errors (no user enumeration)
 **Problem:** confusing auth errors; missing account should show signup guidance.  
 **Acceptance:**
