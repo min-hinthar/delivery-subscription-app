@@ -21,6 +21,7 @@ Sources:
 3) **Parallel + intercepting routes** are allowed for UX (modals/side panels) only if they do not weaken auth.
 4) **Prefer server control flow**: use `redirect()` / `notFound()` in server components. :contentReference[oaicite:3]{index=3}
 5) Every segment has a deliberate **loading/error/not-found** story. :contentReference[oaicite:4]{index=4}
+6) **Layouts that call Supabase server helpers must guard missing env vars** and render a friendly config message before invoking `createSupabaseServerClient` to avoid compile/runtime crashes in dev/verify environments.
 
 ---
 

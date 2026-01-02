@@ -9,6 +9,22 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const hasSupabaseConfig =
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+
+  if (!hasSupabaseConfig) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-3 text-center">
+        <h1 className="text-2xl font-semibold">Supabase not configured</h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable
+          scheduling.
+        </p>
+      </div>
+    );
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const {

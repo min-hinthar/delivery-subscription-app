@@ -20,6 +20,7 @@
 - Normalized auth callback redirect handling so onboarding links return to the expected setup flow.
 - Minimized address PII in the Account and Tracking views while keeping operational map data intact.
 - Added configuration guardrail on `/track` when Supabase env is missing to avoid blank screens.
+- Added a `/schedule` loading boundary and guarded the protected layout against missing Supabase env vars to prevent compile/runtime crashes after onboarding.
 - Confirmed signup confirm link reaches `/onboarding` once without looping.
 - Confirmed pre-onboarding visits to `/schedule` redirect to `/onboarding` once.
 - Confirmed post-onboarding access to `/account`, `/schedule`, and `/track`.

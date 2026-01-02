@@ -33,6 +33,15 @@
 
 ## Workstream: Routing / Auth
 
+### P2 — Per-route error boundaries for customer scheduling flows
+**Problem:** group-level error boundaries cover all (app) pages, but `/schedule` and `/track` would benefit from localized retry without losing shell state.  
+**Acceptance:**
+- Add `error.tsx` for `/schedule` and `/track` segments
+- Provide “Retry” CTA via `reset()` and a secondary link back to `/account`
+- Keep layouts server-driven and auth-gated
+
+**Planned PR:** `codex/routing-r1-groups-boundaries`
+
 ### P0 — Fix /admin/login redirect loop and compilation crashes
 **Problem:** admin login nested under admin-gated layout causes loop/crash.  
 **Acceptance:**
