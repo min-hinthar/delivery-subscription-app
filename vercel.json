@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/generate-week",
-      "schedule": "*/15 * * * *",
+      "schedule": "0 5 * * *",
       "headers": [
         {
           "key": "Authorization",
