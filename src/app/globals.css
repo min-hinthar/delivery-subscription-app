@@ -1,9 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+:root {
+  --brand-primary: 31 53% 64%;
+  --brand-secondary: 25 76% 31%;
+  --brand-accent: 348 83% 47%;
+  --gradient-hero: linear-gradient(135deg, #d4a574 0%, #8b4513 100%);
+  --gradient-card: linear-gradient(180deg, rgba(212, 165, 116, 0.12) 0%, rgba(255, 255, 255, 0) 100%);
+  --gradient-cta: linear-gradient(90deg, #dc143c 0%, #8b4513 100%);
+  --font-display: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --spacing-component: 1rem;
+  --spacing-section: 2rem;
+  --spacing-layout: 3rem;
+  --spacing-page: 4rem;
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --primary: var(--brand-primary);
+  --primary-foreground: 30 20% 12%;
+  --secondary: 30 30% 96%;
+  --secondary-foreground: 25 30% 18%;
+  --accent: 30 40% 94%;
+  --accent-foreground: 25 30% 18%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: var(--brand-primary);
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: 222 47% 7%;
+  --foreground: 210 40% 96%;
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20% 65%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 210 40% 96%;
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 96%;
+  --border: 217 32% 17%;
+  --input: 217 32% 17%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 217 32% 17%;
+  --secondary-foreground: 210 40% 96%;
+  --accent: 217 32% 17%;
+  --accent-foreground: 210 40% 96%;
+  --destructive: 0 62% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: var(--brand-primary);
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+}
+
+.font-display {
+  font-family: var(--font-display);
 }
 
 @media (prefers-reduced-motion: reduce) {
