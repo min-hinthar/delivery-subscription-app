@@ -201,7 +201,7 @@ export default function Home() {
                 </ul>
                 <div className="rounded-xl border-2 border-dashed border-[#D4A574]/30 bg-[#D4A574]/5 p-4">
                   <p className="text-xs text-gray-700 dark:text-gray-300">
-                    <strong>Need help?</strong> Email support@morningstardelivery.com and we'll verify coverage for you.
+                    <strong>Need help?</strong> Email support@morningstardelivery.com and we&apos;ll verify coverage for you.
                   </p>
                 </div>
               </div>
@@ -338,7 +338,7 @@ export default function Home() {
                       <Star key={i} className="h-4 w-4 fill-[#D4A574] text-[#D4A574]" aria-hidden="true" />
                     ))}
                   </div>
-                  <p className="text-sm text-white/90">"{testimonial.quote}"</p>
+                  <p className="text-sm text-white/90">&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className="border-t border-white/20 pt-4">
                     <p className="font-semibold">{testimonial.name}</p>
                     <p className="text-sm text-white/70">{testimonial.role}</p>
