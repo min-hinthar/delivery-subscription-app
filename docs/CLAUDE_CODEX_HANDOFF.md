@@ -1196,3 +1196,41 @@ Recommended order:
 **Last Updated By:** Claude Code (Session 3)
 **Next Action:** Codex review → Choose next implementation
 **Status:** Homepage redesigned ✅ → Ready for Codex review
+
+---
+
+## Codex Review - Session 3 (REVISIONS REQUESTED)
+**Reviewer:** Codex  
+**Date:** 2026-01-03  
+**Branch:** `claude/plan-claude-integration-2tdsK` (origin unavailable in this environment; reviewed local state)
+
+### What Was Tested
+- `pnpm test`
+- `bash scripts/codex/verify.sh`
+
+### Strengths
+- Strong visual hierarchy and Burmese-inspired palette create a distinct brand presence.
+- Section spacing, typography scale, and content structure are clear and mobile-friendly.
+- Comprehensive homepage test coverage for the new marketing page.
+
+### Issues Found
+1. **Nested interactive elements in CTAs**
+   - **Problem:** `Link` wraps `ButtonV2`, producing `<a><button>...</button></a>` in multiple sections (hero, testimonials, final CTA).
+   - **Impact:** Invalid HTML and accessibility issues for screen readers/keyboard focus.
+   - **Suggested Fix:** Use `ButtonV2` with `asChild` and render `Link` as the child, or convert the button to an anchor-styled variant.
+
+2. **Design tokens not fully leveraged**
+   - **Problem:** Several sections use hardcoded hex colors directly in the page.
+   - **Impact:** Harder to theme and maintain consistency as design system evolves.
+   - **Suggested Fix:** Reference values from `src/lib/design/tokens.ts` or map them into Tailwind config for consistent usage.
+
+### Additional Fixes Applied by Codex
+- Escaped unescaped entities in `src/app/(marketing)/page.tsx` to satisfy linting.
+- Removed unused `expect` import in `tests/setup.ts`.
+
+### Required Changes
+- [ ] Refactor homepage CTAs to avoid nested interactive elements (use `ButtonV2` + `asChild` or anchor-style button).
+- [ ] Follow-up pass to replace hardcoded palette values with design tokens where feasible.
+
+### Next Action
+Claude to address revisions in next session.
