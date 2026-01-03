@@ -260,3 +260,232 @@ In these cases, add a short note in the PR describing:
 
 * what’s blocked
 * what’s needed to proceed safely
+
+---
+
+## 16) Working with Claude Code (Dual-Agent Collaboration)
+
+This project uses **both Codex and Claude Code** in a coordinated workflow to leverage their complementary strengths.
+
+### 16.1) Division of Responsibilities
+
+**Claude Code is responsible for:**
+- Comprehensive planning and architecture design
+- UI/UX design and mockups
+- Research and industry benchmarking
+- Creating detailed implementation plans
+- Writing extensive test suites
+- Documentation updates and maintenance
+- Branch naming: `claude/*` (e.g., `claude/plan-claude-integration-2tdsK`)
+
+**Codex is responsible for:**
+- Implementation of planned features
+- Code reviews with critical feedback
+- Bug fixes and refactoring
+- Production deployment concerns
+- Performance optimization
+- Branch naming: `codex/*` (e.g., `codex/polish-customer-a`)
+
+### 16.2) Claude Branch Handoff Protocol (CRITICAL)
+
+When Codex needs to work on a Claude branch, follow these **exact steps**:
+
+#### Step 1: Fetch the Claude branch
+```bash
+git fetch origin claude/plan-claude-integration-2tdsK
+```
+
+#### Step 2: Check out the branch with tracking
+```bash
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+```
+
+OR if the branch already exists locally:
+```bash
+git checkout claude/plan-claude-integration-2tdsK
+git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
+```
+
+#### Step 3: Pull latest changes
+```bash
+git pull
+```
+
+#### Step 4: Start dev server and review
+```bash
+pnpm dev
+```
+
+**Important Notes:**
+- Claude branches use the naming pattern: `claude/<description>-<session-id>`
+- The session ID suffix (e.g., `-2tdsK`) is required for Claude to push successfully
+- **DO NOT** create a new Codex branch when reviewing Claude's work
+- Work directly on the Claude branch for reviews and feedback
+- After review, either:
+  - Merge the Claude branch to main if approved
+  - Leave feedback in the handoff document for Claude to address
+
+### 16.3) Handoff Documents (Source of Truth)
+
+**Primary Handoff Document:**
+- `docs/CLAUDE_CODEX_HANDOFF.md` - Session summaries, what was done, what's next
+
+**Planning Documents (Claude creates, Codex reviews):**
+- `docs/UI_UX_REVAMP_PLAN.md` - Complete UI/UX redesign plan
+- `docs/GOOGLE_MAPS_ARCHITECTURE.md` - Google Maps integration architecture
+- `docs/PR_PROMPTS_NEXT_SESSIONS.md` - 14+ detailed PR prompts for future work
+- `docs/CLAUDE_INTEGRATION.md` - Master integration plan
+
+**Review Expectations:**
+- Codex should critically review ALL Claude work (not rubber-stamp)
+- Compare implementations against top apps in the industry
+- Challenge design decisions with data/research
+- Suggest improvements and alternatives
+- Update handoff document with review findings
+
+### 16.4) Communication Protocol
+
+**After Each Claude Session:**
+1. Claude updates `docs/CLAUDE_CODEX_HANDOFF.md` with:
+   - Session number and date
+   - What was completed
+   - Files modified/created
+   - Test results
+   - Critical review points for Codex
+   - Next steps and recommendations
+
+2. Claude commits all work with detailed commit messages including:
+   - Summary of changes
+   - Impact analysis
+   - Test results
+   - Next steps for Codex
+
+**After Each Codex Review:**
+1. Codex reviews the work on the Claude branch
+2. Codex adds a review section to `docs/CLAUDE_CODEX_HANDOFF.md` with:
+   - What was tested
+   - Critical feedback (strengths + weaknesses)
+   - Suggestions for improvements
+   - Decision: merge to main OR request Claude revisions
+
+3. If approved, Codex merges the Claude branch to main
+4. If revisions needed, Codex documents specific changes required
+
+### 16.5) Conflict Resolution
+
+**If implementations conflict:**
+1. Follow the source of truth hierarchy:
+   - `docs/BLUEPRINT.md` (product requirements)
+   - `docs/SECURITY_QA.md` (security standards)
+   - `docs/NEXTJS16_ROUTING_STANDARDS.md` (technical standards)
+   - `docs/QA_UX.md` (UX requirements)
+
+2. When standards conflict, prioritize:
+   - Security > UX > Performance > Aesthetics
+   - User safety > Developer convenience
+   - Production stability > New features
+
+3. Document the decision in the PR and relevant docs
+
+### 16.6) Example Workflow
+
+**Claude Session:**
+```bash
+# Claude starts from main, creates planning branch
+git checkout -b claude/plan-ui-redesign-xYz9K
+# Claude creates comprehensive plans
+# Claude implements foundational components
+# Claude writes tests
+# Claude commits and pushes
+git push -u origin claude/plan-ui-redesign-xYz9K
+# Claude updates CLAUDE_CODEX_HANDOFF.md
+```
+
+**Codex Review:**
+```bash
+# Codex fetches and checks out Claude's branch
+git fetch origin claude/plan-ui-redesign-xYz9K
+git checkout -b claude/plan-ui-redesign-xYz9K origin/claude/plan-ui-redesign-xYz9K
+
+# Codex reviews the work
+pnpm dev  # Test locally
+pnpm test # Run tests
+bash scripts/codex/verify.sh # Verify build
+
+# Codex provides feedback in CLAUDE_CODEX_HANDOFF.md
+# If approved:
+git checkout main
+git merge claude/plan-ui-redesign-xYz9K
+git push origin main
+
+# If revisions needed:
+# Document specific changes in CLAUDE_CODEX_HANDOFF.md
+# Claude will address in next session
+```
+
+### 16.7) Common Pitfalls to Avoid
+
+**❌ DON'T:**
+- Try to `git pull` on a Claude branch without setting upstream first
+- Create a new Codex branch when reviewing Claude's work
+- Merge Claude work to main without thorough testing
+- Skip updating the handoff document
+- Ignore Claude's critical review points
+
+**✅ DO:**
+- Always fetch and checkout with tracking (`git checkout -b <branch> origin/<branch>`)
+- Work directly on Claude branches for reviews
+- Test all changes locally before merging
+- Provide detailed, critical feedback
+- Update handoff document with decisions
+- Compare work against industry standards
+
+### 16.8) Emergency Procedures
+
+**If git issues occur:**
+1. Check current branch: `git status -sb`
+2. List remote branches: `git branch -r | grep claude`
+3. Reset to remote: `git reset --hard origin/<claude-branch>`
+4. Document the issue in CLAUDE_CODEX_HANDOFF.md
+
+**If merge conflicts occur:**
+1. Don't force push to Claude branches
+2. Document the conflict in CLAUDE_CODEX_HANDOFF.md
+3. Let Claude resolve conflicts in next session
+4. Alternatively, resolve locally and document resolution strategy
+
+### 16.9) Quality Standards for Both Agents
+
+**Both agents must:**
+- Write comprehensive tests (aim for 75%+ coverage)
+- Follow TypeScript strict mode
+- Ensure all tests pass before committing
+- Run `bash scripts/codex/verify.sh` before pushing
+- Update relevant documentation
+- Provide detailed commit messages
+- Think critically about architectural decisions
+
+**Critical Review Mindset:**
+- Challenge assumptions with data
+- Compare against industry best practices
+- Consider edge cases and failure modes
+- Verify accessibility compliance
+- Test on mobile devices
+- Verify dark mode support
+
+---
+
+## Summary: Claude + Codex Working Together
+
+This dual-agent setup leverages:
+- **Claude's strengths:** Planning, research, comprehensive documentation, test writing
+- **Codex's strengths:** Implementation, code review, production concerns, optimization
+
+Success depends on:
+- Clear handoff documentation
+- Proper git workflow (especially branch tracking)
+- Critical, constructive feedback
+- Following established standards
+- Maintaining communication through handoff documents
+
+When in doubt, check `docs/CLAUDE_CODEX_HANDOFF.md` for the latest status and next actions.

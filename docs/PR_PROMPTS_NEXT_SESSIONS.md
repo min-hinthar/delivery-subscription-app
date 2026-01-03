@@ -24,6 +24,48 @@
 
 ---
 
+## ⚙️ Git Setup for Codex (REQUIRED READING)
+
+**Before starting ANY prompt below, set up the branch correctly:**
+
+### If Working on a Claude Branch
+```bash
+# Step 1: Fetch the Claude branch
+git fetch origin claude/plan-claude-integration-2tdsK
+
+# Step 2: Checkout with tracking (CRITICAL)
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+
+# Step 3: Pull latest changes
+git pull
+
+# Step 4: Review what Claude did
+pnpm dev
+pnpm test
+```
+
+### If Creating a New Codex Branch
+```bash
+# Step 1: Ensure you're on latest main
+git checkout main
+git pull origin main
+
+# Step 2: Create Codex branch
+git checkout -b codex/design-system-2.0
+
+# Step 3: Work on your changes
+# ... make changes ...
+
+# Step 4: Commit and push
+git add -A
+git commit -m "feat: implement design system 2.0"
+git push -u origin codex/design-system-2.0
+```
+
+**For full git workflow details, see AGENTS.md Section 16**
+
+---
+
 ## 🚀 PHASE 1: Foundation & Design System (Weeks 1-2)
 
 ### PR #1: Design System 2.0 — Foundation (P0)

@@ -24,6 +24,63 @@
 
 ---
 
+## **🔄 Git Workflow for Dual-Agent Collaboration**
+
+### **For Codex: Working with Claude Branches**
+
+**CRITICAL: Read AGENTS.md Section 16 for full details**
+
+When Claude completes a session and pushes to a `claude/*` branch, Codex must:
+
+#### Step 1: Fetch the Claude branch
+```bash
+git fetch origin claude/plan-claude-integration-2tdsK
+```
+
+#### Step 2: Checkout with tracking (REQUIRED)
+```bash
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+```
+
+**Important:** The `-b` and `origin/` prefix are required to set up tracking. Without this, `git pull` will fail.
+
+#### Step 3: Pull latest changes
+```bash
+git pull
+```
+
+#### Step 4: Review and test
+```bash
+pnpm dev
+pnpm test
+bash scripts/codex/verify.sh
+```
+
+### **Common Git Issues**
+
+**Problem:** `git pull` fails with "no tracking information"
+**Solution:**
+```bash
+git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
+git pull
+```
+
+**Problem:** Not sure which Claude branch to review
+**Solution:**
+```bash
+git branch -r | grep claude
+# Check docs/CLAUDE_CODEX_HANDOFF.md for latest branch name
+```
+
+### **Handoff Documents to Check**
+
+Before reviewing, always read:
+1. `docs/CLAUDE_CODEX_HANDOFF.md` - Latest session summary
+2. `docs/PR_PROMPTS_NEXT_SESSIONS.md` - What's planned next
+3. Git commit messages on the Claude branch
+
+---
+
 ## **Phase 1: Initial Codebase Analysis** 📊
 
 ### 1.1 Dependency & Security Audit

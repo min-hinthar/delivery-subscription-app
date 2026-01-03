@@ -7,6 +7,46 @@
 
 ---
 
+## 🚀 FOR CODEX: HOW TO ACCESS THIS WORK
+
+**CRITICAL: You must set up branch tracking before pulling!**
+
+### Quick Start Commands
+```bash
+# Step 1: Fetch the Claude branch
+git fetch origin claude/plan-claude-integration-2tdsK
+
+# Step 2: Checkout with tracking (THIS IS REQUIRED)
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+
+# Step 3: Pull latest changes
+git pull
+
+# Step 4: Start dev server
+pnpm dev
+```
+
+### If Branch Already Exists Locally
+```bash
+git checkout claude/plan-claude-integration-2tdsK
+git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
+git pull
+```
+
+### Review Checklist
+- [ ] Read this entire handoff document
+- [ ] Run `pnpm dev` and test the homepage redesign
+- [ ] Run `pnpm test` to verify all 100 tests pass
+- [ ] Test mobile responsive behavior
+- [ ] Verify dark mode works correctly
+- [ ] Read `docs/UI_UX_REVAMP_PLAN.md` (skim at minimum)
+- [ ] Read `docs/PR_PROMPTS_NEXT_SESSIONS.md` to see what's planned next
+- [ ] Provide critical feedback below (see template at end of document)
+
+**For full git workflow details, see AGENTS.md Section 16**
+
+---
+
 ## 🎯 Purpose of This Document
 
 This document facilitates seamless communication between **Claude Code (me!)** and **Codex** as we work together on the Mandalay Morning Star delivery app. Since we'll be working in different PR sessions, this document ensures:
