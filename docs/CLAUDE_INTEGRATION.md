@@ -24,6 +24,94 @@
 
 ---
 
+## **🏆 Competitive Collaboration Philosophy**
+
+**This project uses a friendly competition model between Claude and Codex to drive excellence.**
+
+### Why Competition Works
+- ✅ Pushes both agents to deliver their absolute best work
+- ✅ Creates measurable benchmarks for objective success
+- ✅ Encourages proactive improvements, not just passive reviews
+- ✅ Makes collaboration more engaging and effective
+- ✅ User wins by getting exceptional output from both agents
+
+### Key Competitive Principles
+1. **Challenge Everything** - Both agents question assumptions and propose alternatives
+2. **Compete on Metrics** - Test coverage, performance, accessibility, bundle size
+3. **Improve Before Merging** - Codex enhances Claude's work before accepting it
+4. **Set New Challenges** - Each session raises the bar for the next
+5. **Learn and Adapt** - Both agents learn from each other's strengths
+6. **No Rubber-Stamping** - Approval without improvement is failure
+
+### Success Metrics (Both Agents Compete)
+- Test Coverage: Target >80% (currently ~60%)
+- TypeScript Strictness: Zero `any` types
+- Accessibility: WCAG AAA (currently AA)
+- Performance: Lighthouse 90+ (not yet measured)
+- Bundle Size: <180KB initial load (not yet measured)
+- Each session measurably better than the last
+
+**See AGENTS.md Section 16 for full competitive collaboration rules and current scorecard.**
+
+---
+
+## **🔄 Git Workflow for Dual-Agent Collaboration**
+
+### **For Codex: Working with Claude Branches**
+
+**CRITICAL: Read AGENTS.md Section 16 for full details**
+
+When Claude completes a session and pushes to a `claude/*` branch, Codex must:
+
+#### Step 1: Fetch the Claude branch
+```bash
+git fetch origin claude/plan-claude-integration-2tdsK
+```
+
+#### Step 2: Checkout with tracking (REQUIRED)
+```bash
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+```
+
+**Important:** The `-b` and `origin/` prefix are required to set up tracking. Without this, `git pull` will fail.
+
+#### Step 3: Pull latest changes
+```bash
+git pull
+```
+
+#### Step 4: Review and test
+```bash
+pnpm dev
+pnpm test
+bash scripts/codex/verify.sh
+```
+
+### **Common Git Issues**
+
+**Problem:** `git pull` fails with "no tracking information"
+**Solution:**
+```bash
+git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
+git pull
+```
+
+**Problem:** Not sure which Claude branch to review
+**Solution:**
+```bash
+git branch -r | grep claude
+# Check docs/CLAUDE_CODEX_HANDOFF.md for latest branch name
+```
+
+### **Handoff Documents to Check**
+
+Before reviewing, always read:
+1. `docs/CLAUDE_CODEX_HANDOFF.md` - Latest session summary
+2. `docs/PR_PROMPTS_NEXT_SESSIONS.md` - What's planned next
+3. Git commit messages on the Claude branch
+
+---
+
 ## **Phase 1: Initial Codebase Analysis** 📊
 
 ### 1.1 Dependency & Security Audit

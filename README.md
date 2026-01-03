@@ -8,6 +8,24 @@ Built with **Next.js 16 (App Router)**, **Supabase (Auth + Postgres + RLS)**, **
 
 ---
 
+## 🤖 For Codex: Start Here
+
+**Working on this project?** Read this first:
+- **[START_HERE_CODEX.md](START_HERE_CODEX.md)** - Quick start (30 seconds)
+- **[CODEX_PLAYBOOK.md](CODEX_PLAYBOOK.md)** - Complete guide (5 minutes)
+
+Everything else is referenced from these two files.
+
+---
+
+## 🤖 For Claude: Collaboration
+
+**Working with Codex?** Check these:
+- **[AGENTS.md](AGENTS.md)** Section 16 - Competitive collaboration rules
+- **[docs/CLAUDE_CODEX_HANDOFF.md](docs/CLAUDE_CODEX_HANDOFF.md)** - Session summaries & challenges
+
+---
+
 ## Features
 
 ### Customer

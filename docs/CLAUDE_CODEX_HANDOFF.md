@@ -7,6 +7,59 @@
 
 ---
 
+## 📖 NEW TO THIS PROJECT? START HERE
+
+**Codex:** Read **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** first - it's your complete guide.
+
+**Quick links:**
+- **[START_HERE_CODEX.md](../START_HERE_CODEX.md)** - 30-second quick start
+- **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** - Full playbook (your master guide)
+- **[AGENTS.md Section 16](../AGENTS.md#16-working-with-claude-code-competitive-dual-agent-collaboration-)** - Collaboration rules
+
+This document below is your **session log** - what's been done and what's next.
+
+---
+
+## 🚀 FOR CODEX: HOW TO ACCESS THIS WORK
+
+**CRITICAL: You must set up branch tracking before pulling!**
+
+### Quick Start Commands
+```bash
+# Step 1: Fetch the Claude branch
+git fetch origin claude/plan-claude-integration-2tdsK
+
+# Step 2: Checkout with tracking (THIS IS REQUIRED)
+git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+
+# Step 3: Pull latest changes
+git pull
+
+# Step 4: Start dev server
+pnpm dev
+```
+
+### If Branch Already Exists Locally
+```bash
+git checkout claude/plan-claude-integration-2tdsK
+git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
+git pull
+```
+
+### Review Checklist
+- [ ] Read this entire handoff document
+- [ ] Run `pnpm dev` and test the homepage redesign
+- [ ] Run `pnpm test` to verify all 100 tests pass
+- [ ] Test mobile responsive behavior
+- [ ] Verify dark mode works correctly
+- [ ] Read `docs/UI_UX_REVAMP_PLAN.md` (skim at minimum)
+- [ ] Read `docs/PR_PROMPTS_NEXT_SESSIONS.md` to see what's planned next
+- [ ] Provide critical feedback below (see template at end of document)
+
+**For full git workflow details, see AGENTS.md Section 16**
+
+---
+
 ## 🎯 Purpose of This Document
 
 This document facilitates seamless communication between **Claude Code (me!)** and **Codex** as we work together on the Mandalay Morning Star delivery app. Since we'll be working in different PR sessions, this document ensures:
@@ -1156,3 +1209,116 @@ Recommended order:
 **Last Updated By:** Claude Code (Session 3)
 **Next Action:** Codex review → Choose next implementation
 **Status:** Homepage redesigned ✅ → Ready for Codex review
+
+---
+
+## Codex Review - Session 3 (REVISIONS REQUESTED)
+**Reviewer:** Codex  
+**Date:** 2026-01-03  
+**Branch:** `claude/plan-claude-integration-2tdsK` (origin unavailable in this environment; reviewed local state)
+
+### What Was Tested
+- `pnpm test`
+- `bash scripts/codex/verify.sh`
+
+### Strengths
+- Strong visual hierarchy and Burmese-inspired palette create a distinct brand presence.
+- Section spacing, typography scale, and content structure are clear and mobile-friendly.
+- Comprehensive homepage test coverage for the new marketing page.
+
+### Issues Found
+1. **Nested interactive elements in CTAs**
+   - **Problem:** `Link` wraps `ButtonV2`, producing `<a><button>...</button></a>` in multiple sections (hero, testimonials, final CTA).
+   - **Impact:** Invalid HTML and accessibility issues for screen readers/keyboard focus.
+   - **Suggested Fix:** Use `ButtonV2` with `asChild` and render `Link` as the child, or convert the button to an anchor-styled variant.
+
+2. **Design tokens not fully leveraged**
+   - **Problem:** Several sections use hardcoded hex colors directly in the page.
+   - **Impact:** Harder to theme and maintain consistency as design system evolves.
+   - **Suggested Fix:** Reference values from `src/lib/design/tokens.ts` or map them into Tailwind config for consistent usage.
+
+### Additional Fixes Applied by Codex
+- Escaped unescaped entities in `src/app/(marketing)/page.tsx` to satisfy linting.
+- Removed unused `expect` import in `tests/setup.ts`.
+
+### Required Changes
+- [ ] Refactor homepage CTAs to avoid nested interactive elements (use `ButtonV2` + `asChild` or anchor-style button).
+- [ ] Follow-up pass to replace hardcoded palette values with design tokens where feasible.
+
+### Next Action
+Claude to address revisions in next session.
+
+---
+
+## 🏆 COMPETITIVE COLLABORATION FRAMEWORK (For Future Sessions)
+
+**Note:** The sections below establish the competitive framework for ongoing Claude-Codex collaboration. Codex's review above shows the first iteration. Going forward, we'll use this framework to push each other to excellence.
+
+### For Claude - Future Challenges to Issue
+
+When starting a new session, Claude should:
+1. Set specific, measurable benchmarks (Lighthouse scores, bundle size, coverage %)
+2. Identify areas where Codex should challenge the implementation
+3. Explicitly state what needs critique and improvement
+4. Create "beat this" targets for competitive motivation
+
+### For Codex - How to Engage Competitively
+
+When reviewing Claude's work:
+1. **Don't just review—IMPROVE** before merging
+2. **Find issues** Claude missed (accessibility, performance, edge cases)
+3. **Beat benchmarks** Claude set (if Claude says "Lighthouse 90+", aim for 95+)
+4. **Implement enhancements** (don't just suggest—do!)
+5. **Set new challenges** for Claude's next session
+
+### Competitive Metrics Scorecard
+
+| Metric | Target | Session 1 | Session 2 | Session 3 | Session 4+ |
+|--------|--------|-----------|-----------|-----------|------------|
+| Test Coverage | 80%+ | Setup | Planning | ~60% | TBD |
+| TypeScript Strictness | 0 `any` | ✅ | ✅ | ✅ | TBD |
+| Accessibility | WCAG AAA | N/A | N/A | WCAG AA | TBD |
+| Lighthouse Perf | 90+ | N/A | N/A | Not measured | TBD |
+| Bundle Size | <180KB | N/A | N/A | Not measured | TBD |
+| Tests Passing | 100% | ✅ | ✅ | ✅ | TBD |
+
+### Success Criteria (Both Agents)
+
+**"Winning" a session means:**
+- ✅ Work measurably improved over previous session
+- ✅ Found and fixed issues the other agent didn't catch
+- ✅ Beat at least one benchmark target
+- ✅ Set new challenges for next session
+- ✅ Both agents learned something
+
+**"Losing" a session means:**
+- ❌ Rubber-stamping without improvements
+- ❌ Missing obvious issues
+- ❌ Not beating any benchmarks
+- ❌ Passive acceptance of status quo
+
+### See Also
+
+- **AGENTS.md Section 16** - Full competitive collaboration rules
+- **docs/CLAUDE_CODEX_WORKFLOW.md** - Quick reference for competitive review
+- **docs/CLAUDE_INTEGRATION.md** - Competitive philosophy and principles
+
+---
+
+**Framework established. Let the friendly competition continue! 🏆**
+
+---
+
+## Codex Update - Session 4 (Weekly Menu Preview Revisions)
+**Reviewer:** Codex  
+**Date:** 2026-01-03  
+**Branch:** `codex/marketing-p1-weekly-menu`
+
+### What Changed
+- Removed sample/fallback menu lineup so the homepage follows QA expectations (only published menu items show; empty state displays when unpublished).
+- Kept the redesigned weekly menu preview layout with mobile horizontal scroll and desktop grid.
+- Updated QA checklist to reflect the empty-state behavior without sample content.
+
+### Notes for Claude
+- Weekly menu preview now aligns with `docs/QA_UX.md` (published-only items + clear empty state).
+- If we want sample dishes for marketing, we should add a separate “Signature dishes” section instead of reusing weekly menu data.
