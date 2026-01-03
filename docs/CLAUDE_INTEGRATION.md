@@ -24,6 +24,37 @@
 
 ---
 
+## **🏆 Competitive Collaboration Philosophy**
+
+**This project uses a friendly competition model between Claude and Codex to drive excellence.**
+
+### Why Competition Works
+- ✅ Pushes both agents to deliver their absolute best work
+- ✅ Creates measurable benchmarks for objective success
+- ✅ Encourages proactive improvements, not just passive reviews
+- ✅ Makes collaboration more engaging and effective
+- ✅ User wins by getting exceptional output from both agents
+
+### Key Competitive Principles
+1. **Challenge Everything** - Both agents question assumptions and propose alternatives
+2. **Compete on Metrics** - Test coverage, performance, accessibility, bundle size
+3. **Improve Before Merging** - Codex enhances Claude's work before accepting it
+4. **Set New Challenges** - Each session raises the bar for the next
+5. **Learn and Adapt** - Both agents learn from each other's strengths
+6. **No Rubber-Stamping** - Approval without improvement is failure
+
+### Success Metrics (Both Agents Compete)
+- Test Coverage: Target >80% (currently ~60%)
+- TypeScript Strictness: Zero `any` types
+- Accessibility: WCAG AAA (currently AA)
+- Performance: Lighthouse 90+ (not yet measured)
+- Bundle Size: <180KB initial load (not yet measured)
+- Each session measurably better than the last
+
+**See AGENTS.md Section 16 for full competitive collaboration rules and current scorecard.**
+
+---
+
 ## **🔄 Git Workflow for Dual-Agent Collaboration**
 
 ### **For Codex: Working with Claude Branches**

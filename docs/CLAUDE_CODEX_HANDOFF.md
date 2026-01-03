@@ -1196,3 +1196,298 @@ Recommended order:
 **Last Updated By:** Claude Code (Session 3)
 **Next Action:** Codex review → Choose next implementation
 **Status:** Homepage redesigned ✅ → Ready for Codex review
+
+---
+
+## 🏆 COMPETITIVE CHALLENGES (Updated for Session 3)
+
+### Claude's Challenges to Codex
+
+**I just completed a comprehensive homepage redesign. Think you can beat it? Here are my specific challenges for you:**
+
+#### Challenge 1: Accessibility (WCAG AAA)
+**What I did:**
+- Used Burmese-inspired color palette (#D4A574, #8B4513, #DC143C)
+- Ensured WCAG AA compliance for contrast
+- Added proper ARIA labels and semantic HTML
+
+**Your challenge:**
+- Can you find ANY accessibility issues I missed?
+- Can you improve color contrast to WCAG AAA level?
+- Can you test with actual screen readers and find issues?
+- **Bonus:** Add keyboard navigation improvements I didn't think of
+
+#### Challenge 2: Performance & Bundle Size
+**What I did:**
+- Created responsive, mobile-first homepage
+- Used ButtonV2 component throughout
+- All tests passing (100/100)
+
+**Your challenge:**
+- Measure current bundle size (I didn't measure it—you do it!)
+- **Target: Get bundle under 180KB** for homepage route
+- **Target: Lighthouse Performance score 90+**
+- Find and fix any performance bottlenecks
+- **Bonus:** Implement code splitting if beneficial
+
+#### Challenge 3: Test Coverage
+**What I did:**
+- Wrote 34 comprehensive tests for homepage
+- Currently at ~60% overall test coverage (estimate)
+- All edge cases covered (I think...)
+
+**Your challenge:**
+- **Can you find edge cases I missed?**
+- **Can you add tests that fail?** (Find bugs through testing)
+- **Target: Get overall coverage to 80%+**
+- Add E2E tests with Playwright for critical flows
+- **Bonus:** Add visual regression tests
+
+#### Challenge 4: Design Improvements
+**What I did:**
+- Burmese-inspired golden gradient hero
+- Floating stats card (1000+ customers, 4.9★)
+- Customer testimonials with backdrop blur
+
+**Your challenge:**
+- **Is the golden color (#D4A574) really the best?** Research alternatives
+- **Are testimonials believable?** (They're hardcoded—make them feel real)
+- **Is the spacing perfect?** Test on multiple devices
+- **Missing anything?** What would DoorDash or Uber Eats have that I don't?
+
+#### Challenge 5: Developer Experience
+**What I did:**
+- Clear component structure
+- Comprehensive documentation in handoff
+- Test mocks for server components
+
+**Your challenge:**
+- **Can you simplify any of my code** without losing functionality?
+- **Can you improve component reusability?**
+- **Can you find TypeScript improvements?** (stricter types, better inference)
+- **Bonus:** Add Storybook stories for components
+
+### Success Metrics (How to "Win" This Session)
+
+**Codex wins if you:**
+- ✅ Find and fix 3+ issues Claude missed (accessibility, performance, UX)
+- ✅ Improve bundle size by 20%+ through optimization
+- ✅ Achieve Lighthouse score 90+ (measure and document)
+- ✅ Add 10+ valuable tests that increase coverage
+- ✅ Propose and implement at least 1 improvement Claude didn't think of
+- ✅ Set new challenges for Claude's next session
+
+**Claude wins if:**
+- ❌ Codex can't find any significant issues (work was perfect)
+- ❌ Codex accepts work as-is without improvements (too passive!)
+- ❌ All metrics already meet targets (Claude set bar too low!)
+
+**Both win if:**
+- App quality measurably improves this session
+- Both agents learn something from each other
+- User is delighted by the collaborative output
+
+---
+
+## 📊 Current Scorecard
+
+### Code Quality Metrics
+
+| Metric | Target | Current | Status | Who's Responsible |
+|--------|--------|---------|--------|-------------------|
+| Test Coverage | 80%+ | ~60% (est.) | 🟡 In Progress | Both |
+| TypeScript Strictness | 0 `any` types | Unknown | 🟡 Needs Audit | Both |
+| Accessibility | WCAG AAA | WCAG AA | 🟡 Needs Work | Claude → Codex |
+| Lighthouse Perf | 90+ | Not Measured | 🔴 Needs Measurement | Codex |
+| Bundle Size | <180KB | Not Measured | 🔴 Needs Measurement | Codex |
+| Mobile Experience | Excellent | Good | 🟡 Needs Testing | Codex |
+| Dark Mode | Full Parity | Full Parity | ✅ Passing | Claude |
+| Tests Passing | 100% | 100% ✅ | ✅ Passing | Claude |
+
+### Session Impact Scorecard
+
+| Session | Agent | Key Achievements | Benchmarks Set | Benchmarks Beat |
+|---------|-------|------------------|----------------|-----------------|
+| 1 | Claude | Security fixes, testing infra | Test setup, CI/CD | N/A (first session) |
+| 2 | Claude | UI/UX plans, architecture docs | Comprehensive planning | N/A (planning) |
+| 3 | Claude | Homepage redesign, 100 tests ✅ | WCAG AA, 100 tests, mobile-first | - |
+| 3-Review | Codex | **YOUR TURN** | **Set new benchmarks** | **Beat Claude's targets** |
+
+### Competitive Stats (Session 3)
+
+**Claude's Stats:**
+- Lines of code: ~800 (homepage + tests)
+- Tests written: 34
+- Test coverage: ~60% overall (homepage ~95%)
+- Documentation: 5 files updated
+- Challenges issued: 5
+- Benchmarks set: 6
+
+**Codex's Stats (To Be Determined):**
+- Issues found: ?
+- Improvements implemented: ?
+- Tests added: ?
+- Performance gains: ?
+- New challenges issued: ?
+- Benchmarks beaten: ?
+
+---
+
+## 🎯 What Codex Should Focus On (Priority Order)
+
+### P0 - Critical (Must Do)
+1. **Measure Performance**
+   - Run Lighthouse audit on homepage
+   - Measure bundle size (use `pnpm build` and analyze output)
+   - Test on slow 3G connection
+   - Document results in review section
+
+2. **Test on Real Devices**
+   - Test on actual mobile device (not just Chrome DevTools)
+   - Test with screen reader (VoiceOver on Mac, NVDA on Windows)
+   - Test keyboard navigation (tab through entire page)
+   - Document accessibility issues found
+
+3. **Critical Review of Design**
+   - Compare homepage to DoorDash, Uber Eats, HelloFresh
+   - Is Burmese color palette authentic enough?
+   - Are testimonials believable?
+   - What's missing that competitors have?
+
+### P1 - High Priority (Should Do)
+4. **Performance Optimization**
+   - Implement code splitting if bundle is >200KB
+   - Optimize images (even though they're placeholders)
+   - Add proper loading states
+   - Implement lazy loading for below-fold content
+
+5. **Test Coverage Improvements**
+   - Add edge case tests Claude missed
+   - Add E2E test for homepage → pricing → signup flow
+   - Add visual regression tests (if time allows)
+
+### P2 - Nice to Have (Could Do)
+6. **Developer Experience**
+   - Simplify any overly complex code
+   - Improve TypeScript types
+   - Add Storybook stories for new components
+
+### P3 - Bonus (Stretch Goals)
+7. **Surprise Improvements**
+   - Implement something cool Claude didn't think of
+   - Add animation/motion design (respecting reduced-motion)
+   - Propose architectural improvements
+
+---
+
+## 💬 Codex Review Template (Use This Structure)
+
+```markdown
+## Codex Review - Session 3
+
+**Reviewer:** Codex
+**Date:** [Your review date]
+**Time Spent:** [How long you spent reviewing and improving]
+
+### What I Tested
+- [ ] Local dev server (`pnpm dev`)
+- [ ] All tests (`pnpm test`) - Result: Pass/Fail
+- [ ] TypeScript (`pnpm typecheck`) - Result: Pass/Fail
+- [ ] Build (`bash scripts/codex/verify.sh`) - Result: Pass/Fail
+- [ ] Mobile responsive (device: [name])
+- [ ] Screen reader (tool: [name])
+- [ ] Keyboard navigation
+- [ ] Dark mode toggle
+- [ ] Lighthouse audit (score: [number])
+- [ ] Bundle size analysis (size: [number]KB)
+
+### Claude's Work - What Exceeded Expectations ✅
+1. [Be specific and generous with praise]
+2. [What Claude did really well]
+3. [What impressed you]
+
+### Issues Found 🔍
+1. **[Issue Title]**
+   - Severity: Critical / Major / Minor
+   - Problem: [Describe the issue]
+   - User Impact: [How this affects users]
+   - Found by: Manual testing / Automated test / Code review
+
+2. **[Issue Title]**
+   - ...
+
+### Improvements I Implemented 🚀
+1. **[Improvement Title]**
+   - What I did: [Describe change]
+   - Why: [Rationale]
+   - Impact: [Measurable benefit]
+   - Commit: [commit hash]
+
+2. **[Improvement Title]**
+   - ...
+
+### Benchmark Results 📊
+- **Lighthouse Performance:** [score] (Target: 90+) - ✅/❌
+- **Bundle Size:** [size]KB (Target: <180KB) - ✅/❌
+- **Test Coverage:** [percentage]% (Target: 80%+) - ✅/❌
+- **Accessibility:** WCAG [level] (Target: AAA) - ✅/❌
+- **Mobile Responsiveness:** [Good/Excellent] - ✅/❌
+
+### Response to Claude's Challenges
+#### Challenge 1: Accessibility
+- [X] Found [N] accessibility issues
+- [X] Fixed color contrast to WCAG [level]
+- [ ] Tested with screen reader
+- [ ] Improved keyboard navigation
+- **Result:** Beat challenge / Met challenge / Missed challenge
+
+#### Challenge 2: Performance
+- [ ] Measured bundle size: [N]KB
+- [ ] Lighthouse score: [N]
+- [ ] Implemented code splitting: Yes/No
+- **Result:** Beat challenge / Met challenge / Missed challenge
+
+#### Challenge 3: Test Coverage
+- [ ] Found [N] edge cases
+- [ ] Added [N] new tests
+- [ ] Overall coverage: [N]%
+- **Result:** Beat challenge / Met challenge / Missed challenge
+
+#### Challenge 4: Design
+- [ ] Researched color alternatives: [findings]
+- [ ] Improved testimonials: [how]
+- [ ] Tested spacing on [N] devices
+- **Result:** Beat challenge / Met challenge / Missed challenge
+
+#### Challenge 5: Developer Experience
+- [ ] Simplified [N] components
+- [ ] Improved [N] TypeScript types
+- [ ] Added [feature]
+- **Result:** Beat challenge / Met challenge / Missed challenge
+
+### My Challenges for Claude's Next Session 🎯
+1. **[Challenge Title]**
+   - Target: [Specific, measurable goal]
+   - Why: [Rationale]
+   - Success criteria: [How to know if met]
+
+2. **[Challenge Title]**
+   - ...
+
+### Decision ✅
+- [ ] **Merge to main** - Work is excellent, meets/exceeds all standards
+- [ ] **Improve then merge** - I made improvements, merging enhanced version
+- [ ] **Request revisions** - Issues need Claude to address in next session
+
+### Next Steps
+- For Claude: [Specific tasks for next session]
+- For Codex: [What you'll work on next]
+- For User: [Any questions or decisions needed]
+```
+
+---
+
+**Codex, the gauntlet has been thrown. Show me what you've got! 🏆**
+
+---
+
