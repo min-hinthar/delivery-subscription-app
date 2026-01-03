@@ -17,8 +17,10 @@
     "test:all": "pnpm test && pnpm test:e2e"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.4",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.50.1",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.3.24",
     "lucide-react": "^0.475.0",
