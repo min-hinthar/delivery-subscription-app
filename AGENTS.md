@@ -263,347 +263,141 @@ In these cases, add a short note in the PR describing:
 
 ---
 
-## 16) Working with Claude Code (Competitive Dual-Agent Collaboration) 🏆
+## 16) Working with Codex (Dual-Agent Collaboration)
 
-This project uses **both Codex and Claude Code** in a **friendly competition** to build the best possible app. You're not just collaborating—you're **challenging each other** to deliver exceptional work.
+This project uses both Codex and Claude Code working together as senior full-stack developers. Each agent has clear responsibilities to ensure efficient, high-quality development.
 
-### 16.1) The Competition Framework
+### 16.1) Agent Responsibilities
 
-**Goal:** Build the best Burmese food delivery app by pushing each other to excellence.
+**Claude Code focuses on:**
+- Planning and architecture design
+- UI/UX design and research
+- Frontend component design
+- Code review and feedback
+- Documentation updates
+- Setting quality benchmarks
 
-**Rules of Engagement:**
-- ✅ **Challenge everything** - Question assumptions, propose alternatives
-- ✅ **Compete on quality** - Aim to outdo the previous session's work
-- ✅ **Be proactive** - Don't wait for instructions, anticipate what's needed
-- ✅ **Raise the bar** - Each PR should be better than the last
-- ✅ **Learn from each other** - Steal good ideas, improve on weak ones
-- ❌ **Never rubber-stamp** - Critique honestly, push for improvements
-- ❌ **Don't be passive** - If you see something that could be better, fix it or call it out
+**Codex focuses on:**
+- Feature implementation from specifications
+- Writing comprehensive tests
+- Bug fixes and debugging
+- Performance optimization
+- Production concerns
 
-### 16.2) Agent Specializations (Leverage Your Strengths)
+### 16.2) Workflow
 
-**Claude Code excels at:**
-- 🎨 Comprehensive planning and architecture design (challenge: create plans so good Codex can't find flaws)
-- 🔬 UI/UX design and industry research (challenge: find inspiration Codex hasn't seen)
-- 📊 Writing extensive test suites (challenge: achieve >80% coverage)
-- 📚 Creating detailed documentation (challenge: make docs so clear no questions remain)
-- 🎯 Setting ambitious benchmarks (challenge: define success metrics Codex must beat)
+**Standard Development Cycle:**
+1. Claude creates plans, architecture docs, and designs → Pushes to `claude/*` branch
+2. User reviews and merges Claude's work to `main`
+3. Codex pulls `main` → Implements features → Pushes to `codex/*` branch
+4. User reviews and merges Codex's work to `main`
+5. Repeat
 
-**Codex excels at:**
-- ⚡ Rapid, high-quality implementation (challenge: build features better than Claude planned)
-- 🔍 Critical code review with sharp feedback (challenge: find issues Claude missed)
-- 🐛 Bug fixes and production concerns (challenge: prevent bugs Claude didn't anticipate)
-- 🚀 Performance optimization (challenge: make it faster than Claude expected)
-- 💡 Creative problem-solving (challenge: find solutions Claude didn't consider)
+**Key Principle:** Codex ALWAYS works from the `main` branch, not Claude branches. This ensures a clean, linear workflow.
 
-**The Competition:**
-- Claude sets the bar with comprehensive plans → Codex tries to exceed expectations
-- Codex finds issues in Claude's work → Claude learns and improves next session
-- Both agents compete to deliver the most value per session
-- User wins by getting better work from both of you
+### 16.3) Git Workflow
 
-### 16.3) Proactive Expectations (Don't Just Review—Improve!)
-
-**For Codex (Don't Just Follow Plans):**
-- ✅ **Implement AND improve** - If you see a better way, do it and document why
-- ✅ **Challenge design decisions** - Found a better color palette? Better UX flow? Propose it!
-- ✅ **Add features Claude didn't think of** - See an opportunity? Take it (document in PR)
-- ✅ **Optimize aggressively** - Make it faster, smaller, more accessible
-- ✅ **Find and fix issues proactively** - Don't wait for bugs to surface
-- ✅ **Compete on metrics** - Beat Claude's test coverage, bundle size targets, performance benchmarks
-
-**For Claude (Set the Bar Higher):**
-- ✅ **Create plans Codex can't critique** - Research thoroughly, anticipate objections
-- ✅ **Design better than industry leaders** - Study DoorDash, Uber Eats, then beat them
-- ✅ **Write tests that catch everything** - Aim for 80%+ coverage, test edge cases
-- ✅ **Document so well Codex has no questions** - Clear, comprehensive, actionable
-- ✅ **Set ambitious benchmarks** - Define success metrics that push both agents
-
-### 16.4) Git Workflow (Quick Reference)
-
-**Codex: Accessing Claude's Branch**
+**For Codex: Starting Work**
 ```bash
-# Fetch and checkout with tracking (DO THIS FIRST)
-git fetch origin claude/plan-claude-integration-2tdsK
-git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
-git pull
+# Always start from main
+git checkout main
+git pull origin main
 
-# Review and test
+# Create feature branch
+git checkout -b codex/[feature-name]
+
+# Implement, test, commit
 pnpm dev
 pnpm test
 bash scripts/codex/verify.sh
-```
 
-**Codex: After Review, You Have Options**
-
-**Option 1: Merge as-is (if truly excellent)**
-```bash
-git checkout main
-git merge claude/plan-claude-integration-2tdsK
-git push origin main
-# Document review in CLAUDE_CODEX_HANDOFF.md
-```
-
-**Option 2: Improve it before merging (ENCOURAGED)**
-```bash
-# Stay on Claude branch
-# Make improvements
-# Commit your enhancements
+# Push when ready
 git add -A
-git commit -m "feat: improve [Claude's feature] with [your improvements]"
-git push
-# Then merge to main
-git checkout main
-git merge claude/plan-claude-integration-2tdsK
-git push origin main
+git commit -m "feat: [feature-name]"
+git push -u origin codex/[feature-name]
 ```
 
-**Option 3: Request revisions (if issues found)**
+**For Claude: Planning & Design**
 ```bash
-# Document issues in CLAUDE_CODEX_HANDOFF.md
-# Claude will fix in next session
+# Work on planning branch
+git checkout -b claude/plan-[feature-name]
+
+# Create docs, designs, architecture
+# Push for user review
+git push -u origin claude/plan-[feature-name]
 ```
 
-### 16.5) Competitive Metrics (Track Who's Winning) 📊
-
-**Code Quality Scorecard (Both Agents Compete):**
-- Test Coverage: Target >80% (current: need to measure)
-- TypeScript Strictness: Zero `any` types (current: audit needed)
-- Accessibility Score: WCAG AA+ (current: spot check passing)
-- Performance: Lighthouse 90+ (current: not measured)
-- Bundle Size: < 200KB initial load (current: not measured)
-- User Impact: Conversion rate improvement (target: +30%)
-
-**Session Success Metrics:**
-- Did work exceed expectations? (Yes/No)
-- Were improvements suggested and implemented? (Count)
-- Was critical feedback provided? (Quality, not quantity)
-- Were benchmarks beaten? (Which ones?)
-- Did this session raise the bar? (Subjectively judged by user)
-
-**Who's Ahead?**
-- Update after each session in `CLAUDE_CODEX_HANDOFF.md`
-- Celebrate wins, learn from losses
-- No ego—just continuous improvement
-
-### 16.6) Communication Protocol (Fast Feedback Loops)
+### 16.4) Communication Protocol
 
 **After Each Claude Session:**
-1. Claude documents in `docs/CLAUDE_CODEX_HANDOFF.md`:
-   - What was built (be specific, quantify impact)
-   - **Challenges for Codex** (specific things to critique or improve)
-   - **Success metrics** (how to measure if this was successful)
-   - **Open questions** (things Claude is uncertain about)
-   - **Where Claude expects pushback** (anticipated critiques)
+Claude documents in `docs/CLAUDE_CODEX_HANDOFF.md`:
+- What was planned/designed
+- Implementation notes for Codex
+- Acceptance criteria
+- Files to review
+- Open questions
 
-2. Claude commits with detailed messages including:
-   - What problem this solves
-   - Why this approach was chosen
-   - Alternatives considered (and why rejected)
-   - **What Codex should focus review on**
+**After Each Codex Session:**
+Codex adds to `docs/CLAUDE_CODEX_HANDOFF.md`:
+- What was implemented
+- Test coverage achieved
+- Issues encountered
+- Suggestions for Claude's next session
 
-**After Each Codex Review:**
-1. Codex adds review to `docs/CLAUDE_CODEX_HANDOFF.md`:
-   - What was tested (comprehensive)
-   - **What exceeded expectations** (be generous with praise)
-   - **What needs improvement** (be specific and actionable)
-   - **What you improved** (if you enhanced Claude's work)
-   - **Suggestions for next Claude session** (proactive ideas)
-   - Decision: Merge / Improve & Merge / Request Revisions
+### 16.5) Handoff Documents
 
-2. Codex is encouraged to:
-   - **Improve before merging** (don't just accept—enhance!)
-   - **Add features Claude didn't think of** (document why)
-   - **Optimize performance** (bundle size, load time)
-   - **Strengthen tests** (add edge cases Claude missed)
+**Primary Communication:**
+- `docs/CLAUDE_CODEX_HANDOFF.md` - Session summaries and task handoffs
 
-### 16.7) Handoff Documents (Source of Truth)
+**Planning & Specs (Claude creates, Codex implements from):**
+- `docs/UI_UX_REVAMP_PLAN.md` - UI/UX specifications
+- `docs/GOOGLE_MAPS_ARCHITECTURE.md` - Maps implementation plan
+- `docs/PR_PROMPTS_NEXT_SESSIONS.md` - Feature specifications
+- `CODEX_WORKFLOW.md` - Codex workflow guide
 
-**Primary:**
-- `docs/CLAUDE_CODEX_HANDOFF.md` - Session summaries, challenges, improvements
+**For Codex: Quick Start**
+Read `CODEX_WORKFLOW.md` for complete workflow instructions.
 
-**Planning Docs (Claude creates, Codex critiques & improves):**
-- `docs/UI_UX_REVAMP_PLAN.md` - UI/UX roadmap (Codex: find gaps, suggest improvements)
-- `docs/GOOGLE_MAPS_ARCHITECTURE.md` - Maps plan (Codex: challenge technical decisions)
-- `docs/PR_PROMPTS_NEXT_SESSIONS.md` - Future work (Codex: reorder priorities, add tasks)
-- `docs/CLAUDE_INTEGRATION.md` - Master plan (Codex: propose better approaches)
+### 16.6) Quality Standards
 
-**Review Expectations (Be Tough on Each Other):**
-- 🎯 **Challenge design decisions** - Is this really the best approach?
-- 🎯 **Compare to industry leaders** - How does this stack up against DoorDash, Uber Eats?
-- 🎯 **Find edge cases** - What breaks? What's missing?
-- 🎯 **Suggest better alternatives** - Don't just criticize—propose improvements
-- 🎯 **Measure impact** - Will this actually improve user experience? By how much?
+**Both agents must:**
+- Write comprehensive tests (target 80%+ coverage)
+- Follow TypeScript strict mode (zero `any` types)
+- Ensure all tests pass before committing
+- Run `bash scripts/codex/verify.sh` before pushing
+- Update relevant documentation
+- Provide clear commit messages
 
-### 16.8) Example Competitive Workflow
+**Code Quality Targets:**
+- Test Coverage: 80%+
+- TypeScript: Zero `any` types
+- Accessibility: WCAG AA minimum
+- Performance: Lighthouse 90+
+- Bundle Size: <200KB initial load
 
-**Claude's Turn:**
-```bash
-# Claude researches competitor apps
-# Claude creates comprehensive UI/UX plan
-# Claude implements foundational components
-# Claude writes 100+ tests (80% coverage)
-# Claude sets benchmarks: "Codex should achieve Lighthouse 90+"
+### 16.7) Conflict Resolution
 
-# Claude commits and CHALLENGES Codex:
-git commit -m "feat: homepage redesign with 34 tests
+**If technical disagreement arises:**
+1. Document both approaches in `CLAUDE_CODEX_HANDOFF.md`
+2. Provide evidence/benchmarks for each approach
+3. Let user make final decision
 
-CHALLENGE FOR CODEX:
-- Can you find any accessibility issues I missed?
-- Can you improve the Burmese color palette?
-- Can you get test coverage above 85%?
-- Can you make the bundle smaller?
-
-Benchmarks to beat:
-- Lighthouse Performance: Need 90+
-- Bundle size: Currently unknown, measure and optimize
-- Mobile responsiveness: Test on real devices"
-
-git push -u origin claude/plan-ui-redesign-xYz9K
-```
-
-**Codex's Turn (BE PROACTIVE):**
-```bash
-# Codex checks out Claude's branch
-git fetch origin claude/plan-ui-redesign-xYz9K
-git checkout -b claude/plan-ui-redesign-xYz9K origin/claude/plan-ui-redesign-xYz9K
-
-# Codex tests thoroughly
-pnpm dev  # Find UX issues
-pnpm test # All tests pass? Good. Can I add more?
-bash scripts/codex/verify.sh
-
-# Codex finds opportunities:
-# - Color contrast could be better
-# - Missing loading states
-# - Bundle size is 250KB (too big!)
-
-# Codex IMPROVES (don't just critique):
-# - Adjusts color palette for WCAG AAA
-# - Adds skeleton loading states
-# - Code splits to reduce bundle to 180KB
-# - Adds 10 more tests (coverage now 87%)
-
-git add -A
-git commit -m "feat: improve homepage with accessibility & perf optimizations
-
-Built on Claude's foundation and added:
-✅ WCAG AAA color contrast (was AA)
-✅ Skeleton loading states (Claude didn't include)
-✅ Code splitting (bundle 250KB → 180KB)
-✅ 10 additional tests (coverage 80% → 87%)
-✅ Lighthouse score: 94 (beat Claude's target of 90)
-
-RESPONSE TO CLAUDE'S CHALLENGES:
-✓ Accessibility: Found and fixed 3 contrast issues
-✓ Color palette: Improved golden shade for better readability
-✓ Test coverage: Achieved 87% (beat 85% target)
-✓ Bundle size: Reduced to 180KB through code splitting
-
-NEXT CHALLENGE FOR CLAUDE:
-- Can you get test coverage to 90%?
-- Can you add E2E tests with Playwright?
-- Can you research animation patterns from Airbnb?"
-
-git push
-
-# Then merge to main
-git checkout main
-git merge claude/plan-ui-redesign-xYz9K
-git push origin main
-```
-
-### 16.9) What "Competitive Collaboration" Looks Like
-
-**Good (Passive Review):**
-- ✓ Tests all features
-- ✓ Finds bugs
-- ✓ Suggests improvements
-- ✓ Merges to main
-
-**EXCELLENT (Proactive Competition):**
-- ✓ Tests all features **and adds edge cases**
-- ✓ Finds bugs **and patterns that cause bugs**
-- ✓ Suggests improvements **and implements them**
-- ✓ Improves before merging **and documents why**
-- ✓ **Sets new challenges for the other agent**
-- ✓ **Beats benchmarks set by the other agent**
-- ✓ **Proposes bold new ideas the other agent didn't consider**
-
-### 16.10) Conflict Resolution (When You Disagree)
-
-**If you disagree with the other agent's approach:**
-
-1. **Don't silently accept it** - Speak up in CLAUDE_CODEX_HANDOFF.md
-2. **Propose alternative** - Don't just critique, suggest better approach
-3. **Provide evidence** - Link to research, benchmarks, industry examples
-4. **Implement a proof of concept** - Show, don't just tell
-5. **Let user decide** - If neither agent convinces the other, document both approaches and let user choose
-
-**Priority Hierarchy (When Standards Conflict):**
+**Priority Hierarchy:**
 1. Security > UX > Performance > Aesthetics
 2. User safety > Developer convenience
 3. Production stability > New features
-4. Data/research > opinions
-
-### 16.11) Emergency Procedures
-
-**Git Issues:**
-```bash
-git status -sb  # Check current state
-git branch -r | grep claude  # Find Claude branches
-git reset --hard origin/<branch>  # Reset if needed
-```
-
-**Merge Conflicts:**
-1. Don't force push to Claude branches
-2. Document conflict in CLAUDE_CODEX_HANDOFF.md
-3. Resolve locally if straightforward, or let Claude handle in next session
-
-### 16.12) Quality Standards (Both Agents Must Meet)
-
-**Both must:**
-- ✅ Write comprehensive tests (75%+ coverage minimum, 80%+ competitive)
-- ✅ Follow TypeScript strict mode (zero `any` types)
-- ✅ Ensure all tests pass before committing
-- ✅ Run `bash scripts/codex/verify.sh` before pushing
-- ✅ Update relevant documentation
-- ✅ Provide detailed commit messages
-- ✅ Think critically about architectural decisions
-- ✅ **Challenge each other's assumptions**
-- ✅ **Compete on metrics and quality**
-- ✅ **Be proactive, not reactive**
 
 ---
 
-## Summary: Claude + Codex Competitive Collaboration 🏆
+## Summary: Professional Dual-Agent Workflow
 
-**This is a friendly competition to build the best app possible.**
+**Workflow:** Claude plans → User merges to main → Codex implements → User merges to main
 
-**Claude's Mission:**
-- Set the bar so high Codex has to stretch to beat it
-- Create plans so thorough Codex can't find flaws (but Codex will try!)
-- Write tests so comprehensive Codex struggles to add more (but should!)
-- Design experiences better than industry leaders
+**Claude's Role:** Planning, architecture, design, review
+**Codex's Role:** Implementation, testing, optimization
 
-**Codex's Mission:**
-- Implement so well it exceeds Claude's plans
-- Find issues Claude missed (they exist—find them!)
-- Improve work before merging (don't just accept it)
-- Set new challenges for Claude with each review
+**Key Documents:**
+- `CODEX_WORKFLOW.md` - Codex's workflow guide
+- `docs/CLAUDE_CODEX_HANDOFF.md` - Session handoffs and communication
 
-**Both agents:**
-- Push each other to excellence
-- Learn from each other's strengths
-- Compete on measurable metrics
-- Celebrate each other's wins
-- Be brutally honest in reviews
-- Always ask: "Can this be better?"
-
-**Success looks like:**
-- Each session better than the last
-- Both agents growing and improving
-- User getting exceptional work from both
-- App becoming best-in-class
-
-**Check `docs/CLAUDE_CODEX_HANDOFF.md` for latest challenges, improvements, and competitive metrics.**
+**Success Metrics:** Quality code, comprehensive tests, clear documentation, efficient collaboration.
