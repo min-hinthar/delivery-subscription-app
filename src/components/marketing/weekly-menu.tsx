@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { ArrowRight, Flame, Leaf, Sparkles } from "lucide-react";
 
+import { ButtonV2 } from "@/components/ui/button-v2";
 import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -47,55 +49,100 @@ export async function WeeklyMenu() {
 
   const items = error ? [] : (data?.weekly_menu_items ?? []);
   const title = data?.title ?? `Chef-curated menu • Week of ${formatWeekLabel(weekOf)}`;
+  const previewItems = items.slice(0, 4);
+  const hasPublishedMenu = items.length > 0;
+  const totalItems = items.length;
 
   return (
-    <section id="weekly-menu" className="space-y-6">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-          This Week’s Menu
-        </p>
-        <h2 className="text-2xl font-semibold text-foreground">{title}</h2>
-        <p className="text-sm text-muted-foreground">
-          Freshly prepared Burmese favorites with rotating sides and seasonal desserts.
-        </p>
+    <section id="weekly-menu" className="mx-auto max-w-7xl space-y-10">
+      <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            This Week’s Menu
+          </p>
+          <h2 className="text-3xl font-semibold text-foreground">{title}</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            Discover four signature dishes from our rotating weekly lineup—crafted in small
+            batches and inspired by classic Burmese flavors.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="/pricing">
+            <ButtonV2 size="lg" variant="secondary">
+              View Full Menu
+              <ArrowRight className="h-5 w-5" aria-hidden="true" />
+            </ButtonV2>
+          </Link>
+          <Link href="/signup?next=/onboarding">
+            <ButtonV2 size="lg">Start my subscription</ButtonV2>
+          </Link>
+        </div>
       </div>
 
-      {items.length === 0 ? (
-        <Card className="rounded-2xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground">
-          The chef-curated menu is being finalized. Check back soon or start your
-          subscription to get notified when it drops.
-        </Card>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2">
-          {items.map((item) => (
-            <Card key={item.id} className="space-y-2 rounded-2xl p-5">
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-base font-semibold text-foreground">{item.name}</p>
-                <span className="text-xs font-semibold text-muted-foreground">
-                  {priceFormatter.format((item.price_cents ?? 0) / 100)}
-                </span>
-              </div>
-              {item.description ? (
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-              ) : null}
-            </Card>
-          ))}
+      <div className="rounded-3xl border border-border/60 bg-gradient-to-br from-background via-background to-muted/40 p-6 shadow-sm md:p-8">
+        <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-2 rounded-full bg-muted px-4 py-1 font-medium text-foreground/80">
+            <Sparkles className="h-4 w-4 text-[#D4A574]" aria-hidden="true" />
+            {hasPublishedMenu ? "Published menu for this week" : "Menu drops every Friday"}
+          </span>
+          {hasPublishedMenu ? (
+            <span className="inline-flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[#D4A574]" aria-hidden="true" />
+              {totalItems} dishes available this week
+            </span>
+          ) : null}
+          <span className="inline-flex items-center gap-2">
+            <Leaf className="h-4 w-4 text-[#8B4513]" aria-hidden="true" />
+            Vegetarian options every week
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Flame className="h-4 w-4 text-[#DC143C]" aria-hidden="true" />
+            Heat level clearly labeled
+          </span>
         </div>
-      )}
 
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href="/signup?next=/onboarding"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-gradient-to-r from-primary via-primary/90 to-primary px-5 text-sm font-medium text-primary-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:from-primary/90 hover:via-primary hover:to-primary/80 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:translate-y-0 active:scale-[0.99] motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:active:transform-none"
-        >
-          Start my subscription
-        </Link>
-        <Link
-          href="/pricing"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-border bg-background px-5 text-sm font-medium text-foreground shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-border/80 hover:bg-muted hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none"
-        >
-          View plans
-        </Link>
+        {hasPublishedMenu ? (
+          <div className="-mx-1 flex gap-4 overflow-x-auto px-1 pb-2 md:mx-0 md:grid md:overflow-visible md:px-0 md:pb-0 md:grid-cols-2 lg:grid-cols-4">
+            {previewItems.map((item, index) => (
+              <Card
+                key={item.id}
+                className="group flex min-w-[240px] flex-col overflow-hidden border border-border/60 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg md:min-w-0"
+              >
+                <div className="relative h-36 w-full overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#D4A574]/20 via-[#C19663]/20 to-[#8B4513]/20" />
+                  <div className="absolute inset-0 bg-[url('/patterns/burmese-pattern.svg')] opacity-20" />
+                  <div className="relative flex h-full items-center justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/80 text-[#8B4513] shadow-sm">
+                      <Sparkles className="h-6 w-6" aria-hidden="true" />
+                    </div>
+                  </div>
+                  <div className="absolute right-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8B4513] shadow-sm">
+                    {priceFormatter.format((item.price_cents ?? 0) / 100)}
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <div className="space-y-1">
+                    <p className="text-base font-semibold text-foreground">{item.name}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {item.description || "Chef-crafted Burmese favorite with seasonal sides."}
+                    </p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between text-xs font-medium text-muted-foreground">
+                    <span>Chef&apos;s pick #{index + 1}</span>
+                    <span className="rounded-full bg-muted px-3 py-1 text-[11px] text-foreground/70">
+                      Limited batch
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="rounded-2xl border border-dashed border-border bg-background/60 p-6 text-sm text-muted-foreground">
+            The chef-curated menu is being finalized. Check back soon or start your
+            subscription to get notified when it drops.
+          </Card>
+        )}
       </div>
     </section>
   );
