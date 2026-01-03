@@ -7,6 +7,19 @@
 
 ---
 
+## 📖 NEW TO THIS PROJECT? START HERE
+
+**Codex:** Read **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** first - it's your complete guide.
+
+**Quick links:**
+- **[START_HERE_CODEX.md](../START_HERE_CODEX.md)** - 30-second quick start
+- **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** - Full playbook (your master guide)
+- **[AGENTS.md Section 16](../AGENTS.md#16-working-with-claude-code-competitive-dual-agent-collaboration-)** - Collaboration rules
+
+This document below is your **session log** - what's been done and what's next.
+
+---
+
 ## 🚀 FOR CODEX: HOW TO ACCESS THIS WORK
 
 **CRITICAL: You must set up branch tracking before pulling!**
