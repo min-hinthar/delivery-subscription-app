@@ -28,10 +28,32 @@ describe('Button', () => {
       expect(button).toHaveClass('bg-secondary')
     })
 
+    it('renders with destructive variant', () => {
+      render(<Button variant="destructive">Delete</Button>)
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('bg-destructive')
+    })
+
     it('applies custom className', () => {
       render(<Button className="custom-class">Custom</Button>)
       const button = screen.getByRole('button')
       expect(button).toHaveClass('custom-class')
+    })
+
+    it('supports size variants', () => {
+      render(<Button size="sm">Small</Button>)
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('h-9')
+    })
+
+    it('supports icon size', () => {
+      render(
+        <Button size="icon" aria-label="Icon button">
+          ★
+        </Button>,
+      )
+      const button = screen.getByRole('button', { name: /icon button/i })
+      expect(button).toHaveClass('w-11')
     })
   })
 
@@ -54,6 +76,23 @@ describe('Button', () => {
       await user.click(screen.getByRole('button'))
 
       expect(handleClick).not.toHaveBeenCalled()
+    })
+
+    it('disables interactions while loading', async () => {
+      const handleClick = vi.fn()
+      const user = userEvent.setup()
+
+      render(
+        <Button loading onClick={handleClick}>
+          Submit
+        </Button>,
+      )
+      const button = screen.getByRole('button')
+      await user.click(button)
+
+      expect(handleClick).not.toHaveBeenCalled()
+      expect(button).toBeDisabled()
+      expect(screen.getByText(/loading/i)).toBeInTheDocument()
     })
 
     it('supports keyboard interaction (Enter)', async () => {

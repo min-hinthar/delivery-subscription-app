@@ -71,6 +71,7 @@ git push -u origin codex/design-system-2.0
 ### PR #1: Design System 2.0 — Foundation (P0)
 
 **Branch:** `claude/design-system-2.0` or `codex/design-system-2.0`
+**Status:** ✅ Completed by Codex on `codex/design-system-2.0`
 
 **What to Implement:**
 
