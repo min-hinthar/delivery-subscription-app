@@ -9,54 +9,44 @@
 
 ## 📖 NEW TO THIS PROJECT? START HERE
 
-**Codex:** Read **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** first - it's your complete guide.
+**Codex:** Read **[CODEX_WORKFLOW.md](../CODEX_WORKFLOW.md)** first - it's your workflow guide.
 
 **Quick links:**
-- **[START_HERE_CODEX.md](../START_HERE_CODEX.md)** - 30-second quick start
-- **[CODEX_PLAYBOOK.md](../CODEX_PLAYBOOK.md)** - Full playbook (your master guide)
-- **[AGENTS.md Section 16](../AGENTS.md#16-working-with-claude-code-competitive-dual-agent-collaboration-)** - Collaboration rules
+- **[CODEX_WORKFLOW.md](../CODEX_WORKFLOW.md)** - Complete workflow guide
+- **[AGENTS.md Section 16](../AGENTS.md#16-working-with-codex-dual-agent-collaboration)** - Collaboration rules
+- **[docs/PR_PROMPTS_NEXT_SESSIONS.md](./PR_PROMPTS_NEXT_SESSIONS.md)** - Feature specifications
 
 This document below is your **session log** - what's been done and what's next.
 
 ---
 
-## 🚀 FOR CODEX: HOW TO ACCESS THIS WORK
+## 🚀 FOR CODEX: QUICK START
 
-**CRITICAL: You must set up branch tracking before pulling!**
+**Workflow:** You always work from the `main` branch after user merges Claude's work.
 
 ### Quick Start Commands
 ```bash
-# Step 1: Fetch the Claude branch
-git fetch origin claude/plan-claude-integration-2tdsK
+# Step 1: Start from main
+git checkout main
+git pull origin main
 
-# Step 2: Checkout with tracking (THIS IS REQUIRED)
-git checkout -b claude/plan-claude-integration-2tdsK origin/claude/plan-claude-integration-2tdsK
+# Step 2: Read this handoff doc to see what's next
+cat docs/CLAUDE_CODEX_HANDOFF.md
 
-# Step 3: Pull latest changes
-git pull
+# Step 3: Create your feature branch
+git checkout -b codex/[feature-name]
 
-# Step 4: Start dev server
+# Step 4: Start development
 pnpm dev
 ```
 
-### If Branch Already Exists Locally
-```bash
-git checkout claude/plan-claude-integration-2tdsK
-git branch --set-upstream-to=origin/claude/plan-claude-integration-2tdsK
-git pull
-```
-
-### Review Checklist
+### Before Starting Implementation
 - [ ] Read this entire handoff document
-- [ ] Run `pnpm dev` and test the homepage redesign
-- [ ] Run `pnpm test` to verify all 100 tests pass
-- [ ] Test mobile responsive behavior
-- [ ] Verify dark mode works correctly
-- [ ] Read `docs/UI_UX_REVAMP_PLAN.md` (skim at minimum)
-- [ ] Read `docs/PR_PROMPTS_NEXT_SESSIONS.md` to see what's planned next
-- [ ] Provide critical feedback below (see template at end of document)
+- [ ] Read the relevant spec from `docs/PR_PROMPTS_NEXT_SESSIONS.md`
+- [ ] Run `pnpm test` to verify baseline
+- [ ] Review Claude's planning docs if applicable
 
-**For full git workflow details, see AGENTS.md Section 16**
+**For full workflow details, see CODEX_WORKFLOW.md**
 
 ---
 
@@ -1248,64 +1238,6 @@ Recommended order:
 ### Next Action
 Claude to address revisions in next session.
 
----
-
-## 🏆 COMPETITIVE COLLABORATION FRAMEWORK (For Future Sessions)
-
-**Note:** The sections below establish the competitive framework for ongoing Claude-Codex collaboration. Codex's review above shows the first iteration. Going forward, we'll use this framework to push each other to excellence.
-
-### For Claude - Future Challenges to Issue
-
-When starting a new session, Claude should:
-1. Set specific, measurable benchmarks (Lighthouse scores, bundle size, coverage %)
-2. Identify areas where Codex should challenge the implementation
-3. Explicitly state what needs critique and improvement
-4. Create "beat this" targets for competitive motivation
-
-### For Codex - How to Engage Competitively
-
-When reviewing Claude's work:
-1. **Don't just review—IMPROVE** before merging
-2. **Find issues** Claude missed (accessibility, performance, edge cases)
-3. **Beat benchmarks** Claude set (if Claude says "Lighthouse 90+", aim for 95+)
-4. **Implement enhancements** (don't just suggest—do!)
-5. **Set new challenges** for Claude's next session
-
-### Competitive Metrics Scorecard
-
-| Metric | Target | Session 1 | Session 2 | Session 3 | Session 4+ |
-|--------|--------|-----------|-----------|-----------|------------|
-| Test Coverage | 80%+ | Setup | Planning | ~60% | TBD |
-| TypeScript Strictness | 0 `any` | ✅ | ✅ | ✅ | TBD |
-| Accessibility | WCAG AAA | N/A | N/A | WCAG AA | TBD |
-| Lighthouse Perf | 90+ | N/A | N/A | Not measured | TBD |
-| Bundle Size | <180KB | N/A | N/A | Not measured | TBD |
-| Tests Passing | 100% | ✅ | ✅ | ✅ | TBD |
-
-### Success Criteria (Both Agents)
-
-**"Winning" a session means:**
-- ✅ Work measurably improved over previous session
-- ✅ Found and fixed issues the other agent didn't catch
-- ✅ Beat at least one benchmark target
-- ✅ Set new challenges for next session
-- ✅ Both agents learned something
-
-**"Losing" a session means:**
-- ❌ Rubber-stamping without improvements
-- ❌ Missing obvious issues
-- ❌ Not beating any benchmarks
-- ❌ Passive acceptance of status quo
-
-### See Also
-
-- **AGENTS.md Section 16** - Full competitive collaboration rules
-- **docs/CLAUDE_CODEX_WORKFLOW.md** - Quick reference for competitive review
-- **docs/CLAUDE_INTEGRATION.md** - Competitive philosophy and principles
-
----
-
-**Framework established. Let the friendly competition continue! 🏆**
 
 ---
 
