@@ -66,8 +66,8 @@ const InputField = React.forwardRef<HTMLInputElement, InputFieldProps>(
                 : showSuccessIcon
                 ? "border-green-500 focus:ring-green-500"
                 : "border-gray-300 focus:ring-[#D4A574] dark:border-gray-700",
-              leftIcon && "pl-10",
-              (rightIcon || hasError || showSuccessIcon) && "pr-10",
+              leftIcon ? "pl-10" : "",
+              rightIcon || hasError || showSuccessIcon ? "pr-10" : "",
               className
             )}
             ref={ref}
