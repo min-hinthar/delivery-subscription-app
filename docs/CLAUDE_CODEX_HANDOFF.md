@@ -1253,4 +1253,129 @@ Claude to address revisions in next session.
 
 ### Notes for Claude
 - Weekly menu preview now aligns with `docs/QA_UX.md` (published-only items + clear empty state).
-- If we want sample dishes for marketing, we should add a separate “Signature dishes” section instead of reusing weekly menu data.
+- If we want sample dishes for marketing, we should add a separate "Signature dishes" section instead of reusing weekly menu data.
+
+---
+
+## Claude Session 4 - Workflow Streamline (Documentation Refactor)
+
+**Date:** 2026-01-03
+**Developer:** Claude Code
+**Branch:** `claude/plan-claude-integration-2tdsK`
+**Duration:** ~20 minutes
+
+### 📦 What Was Completed
+
+#### 1. Documentation Streamline - Professional Workflow
+Simplified all collaboration documentation from competitive framework to professional senior developer workflow.
+
+**Files Modified:**
+- **`AGENTS.md` Section 16:** Reduced from ~350 lines → ~140 lines
+  - Removed competitive/gamification language
+  - Clear agent responsibilities (Claude: planning/design, Codex: implementation)
+  - Professional collaboration protocol
+  - Key principle: Codex ALWAYS works from main branch
+
+- **`CODEX_WORKFLOW.md` (NEW):** Created streamlined workflow guide (~100 lines)
+  - Professional tone throughout
+  - Clear step-by-step workflow
+  - Quick start commands
+  - Reference to all key documents
+  - Simple: Always start from main → create feature branch → implement → push
+
+- **`docs/CLAUDE_CODEX_HANDOFF.md`:** Updated for new workflow
+  - Removed competitive challenges section
+  - Updated quick start to work from main branch
+  - References CODEX_WORKFLOW.md instead of CODEX_PLAYBOOK.md
+  - Simplified intro sections
+
+- **`docs/CLAUDE_CODEX_WORKFLOW.md`:** Complete rewrite (~150 lines)
+  - Removed 350+ lines of competitive framework
+  - Now a concise quick reference guide
+  - Professional checklist for reviews
+  - Quality standards and troubleshooting
+
+**Net Impact:** Reduced documentation by ~312 lines while improving clarity.
+
+#### 2. Workflow Clarification
+
+**New Workflow:**
+1. Claude creates plans/architecture/designs → Pushes to `claude/*` branch
+2. User reviews and merges Claude's work to `main`
+3. Codex pulls `main` → Implements features → Pushes to `codex/*` branch
+4. User reviews and merges Codex's work to `main`
+5. Repeat
+
+**Key Changes:**
+- Codex no longer checks out Claude branches
+- Codex always starts from `main` for clean workflow
+- User acts as merge gatekeeper between agents
+- Professional, not competitive tone
+- Token-efficient documentation
+
+### 🎯 Benefits
+
+**For User:**
+- ✅ Autonomous collaboration - agents know what to do
+- ✅ Token efficiency - shorter docs, less reading time
+- ✅ Clear separation of concerns
+- ✅ Simpler merge workflow
+
+**For Codex:**
+- ✅ Always works from stable main branch
+- ✅ Single source of truth: CODEX_WORKFLOW.md
+- ✅ Clear expectations and checklist
+- ✅ No confusion about which branch to use
+
+**For Claude:**
+- ✅ Focus on planning and architecture (token-efficient role)
+- ✅ Clear deliverables: plans, designs, specs
+- ✅ Review Codex's implementations
+- ✅ Provide architectural guidance
+
+### 📊 Documentation Changes Summary
+
+| File | Before | After | Change | Purpose |
+|------|--------|-------|--------|---------|
+| AGENTS.md Section 16 | ~350 lines | ~140 lines | -210 lines | Professional collaboration rules |
+| CODEX_WORKFLOW.md | N/A | ~100 lines | +100 lines | Codex's master workflow guide |
+| CLAUDE_CODEX_HANDOFF.md | Competitive framework | Professional handoffs | Simplified | Session log and communication |
+| CLAUDE_CODEX_WORKFLOW.md | ~350 lines | ~150 lines | -200 lines | Quick reference guide |
+| **Total** | ~700 lines | ~390 lines | **-310 lines** | **44% reduction** |
+
+### 🚀 Next Steps
+
+**For Codex (Next Session):**
+1. Read `CODEX_WORKFLOW.md` - your complete workflow guide
+2. Check `docs/CLAUDE_CODEX_HANDOFF.md` - what's next to implement
+3. Choose a feature from `docs/PR_PROMPTS_NEXT_SESSIONS.md`
+4. Implement from main branch following new workflow
+
+**For User:**
+- Review and merge this workflow streamline to `main`
+- Codex can then start next implementation autonomously
+- Less token usage for Claude in future sessions
+
+**Recommended Next Implementation:**
+- Codex implements next PR from `PR_PROMPTS_NEXT_SESSIONS.md`
+- Focus on feature delivery now that workflow is streamlined
+
+### ✅ Success Metrics
+
+**Before:**
+- 700+ lines of competitive framework documentation
+- Complex workflow with Codex accessing Claude branches
+- Gamification language throughout
+
+**After:**
+- ✅ 390 lines of clear, professional documentation (44% reduction)
+- ✅ Simple workflow: main → feature → implement → push
+- ✅ Professional senior developer collaboration model
+- ✅ Token-efficient for both agents
+- ✅ Autonomous operation enabled
+
+---
+
+**Last Updated By:** Claude Code (Session 4 - Workflow Streamline)
+**Next Action:** User merges to main → Codex implements next feature autonomously
+**Status:** Workflow streamlined ✅ → Ready for autonomous collaboration
