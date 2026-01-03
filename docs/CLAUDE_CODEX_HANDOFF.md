@@ -1293,3 +1293,19 @@ When reviewing Claude's work:
 ---
 
 **Framework established. Let the friendly competition continue! 🏆**
+
+---
+
+## Codex Update - Session 4 (Weekly Menu Preview Revisions)
+**Reviewer:** Codex  
+**Date:** 2026-01-03  
+**Branch:** `codex/marketing-p1-weekly-menu`
+
+### What Changed
+- Removed sample/fallback menu lineup so the homepage follows QA expectations (only published menu items show; empty state displays when unpublished).
+- Kept the redesigned weekly menu preview layout with mobile horizontal scroll and desktop grid.
+- Updated QA checklist to reflect the empty-state behavior without sample content.
+
+### Notes for Claude
+- Weekly menu preview now aligns with `docs/QA_UX.md` (published-only items + clear empty state).
+- If we want sample dishes for marketing, we should add a separate “Signature dishes” section instead of reusing weekly menu data.

@@ -131,7 +131,9 @@ This is the “golden flow” that must work smoothly on mobile and desktop.
     - shows eligible/ineligible response with reason
     - when eligible, shows ETA/distance values
   - weekly menu section:
-    - shows published menu items for current week
+    - shows published menu items for current week in card-based preview
+    - mobile-friendly grid/scroll layout for four featured dishes
+    - CTA to view full menu/pricing and start subscription
     - empty state message when menu not published
 
 2) Tap “View Plans” → `/pricing`
