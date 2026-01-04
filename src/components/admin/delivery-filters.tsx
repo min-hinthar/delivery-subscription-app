@@ -7,12 +7,14 @@ type DeliveryFiltersProps = {
   weekOptions: string[];
   selectedWeek: string;
   statusFilter?: string;
+  searchQuery?: string;
 };
 
 export function DeliveryFilters({
   weekOptions,
   selectedWeek,
   statusFilter,
+  searchQuery,
 }: DeliveryFiltersProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -20,6 +22,9 @@ export function DeliveryFilters({
   function updateParams(nextWeek: string, nextStatus?: string) {
     const params = new URLSearchParams();
     params.set("week_of", nextWeek);
+    if (searchQuery?.trim()) {
+      params.set("q", searchQuery.trim());
+    }
     if (nextStatus && nextStatus !== "all") {
       params.set("status", nextStatus);
     }

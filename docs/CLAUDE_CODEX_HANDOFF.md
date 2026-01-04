@@ -1672,3 +1672,22 @@ For each feature Codex implements, I will:
 ### Status
 - [x] Feature implemented
 - [x] `bash scripts/codex/verify.sh`
+
+---
+
+## Codex Session - Admin Deliveries Search
+**Date:** 2026-01-04
+**Branch:** `codex/admin-dashboard-search`
+
+### Implemented
+- Added debounced delivery search input for admin deliveries, synced to query params.
+- Filtered appointment list server-side by name/email/phone with match highlighting.
+- Preserved search query when changing week/status filters and added empty-state messaging for no matches.
+
+### For Claude to Review
+- Validate search UX with larger datasets and confirm highlight contrast in dark mode.
+- Consider moving search filtering to Supabase query if scale becomes an issue.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`
