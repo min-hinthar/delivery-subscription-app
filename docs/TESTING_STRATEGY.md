@@ -529,12 +529,240 @@ jobs:
 4. ✅ Install Playwright
 5. ✅ Create example tests
 6. ✅ Set up GitHub Actions
-7. ⏳ Train team on testing practices
-8. ⏳ Add tests to existing critical code
-9. ⏳ Achieve 75% coverage baseline
+7. ✅ **PR #15: Live Tracking E2E Tests** (Codex, 2026-01-04)
+8. ⏳ Add unit tests for notification logic
+9. ⏳ Add tests to existing critical code
+10. ⏳ Achieve 75% coverage baseline
 
 ---
 
-**Last Updated:** 2026-01-03
+## 🎉 PR #15: Live Tracking Polish & Testing (COMPLETED)
+
+**Implemented by:** Codex
+**Date:** 2026-01-04
+**Branch:** `codex/update-tracking-and-testing-documentation`
+**Status:** ✅ Production-ready
+
+### What Was Built
+
+#### 1. E2E Test Harness (`src/components/track/tracking-e2e-harness.tsx`)
+**Purpose:** Deterministic tracking flow testing without Supabase Realtime
+
+**Features:**
+- Mock tracking stops with controlled state transitions
+- Button-driven test actions (Update ETA, Driver Nearby, Delivered, Advance Stop)
+- Real notification component integration
+- Visual timeline updates
+- Map placeholder (no Google Maps API calls)
+- Deterministic timestamps relative to base time
+
+**Why This Matters:**
+- ❌ Flaky: Real-time subscriptions with live database
+- ✅ Reliable: Controlled mock data with button triggers
+- ✅ Fast: No external dependencies
+- ✅ Isolated: Test harness only available in E2E environment
+
+#### 2. E2E Test Route (`src/app/(marketing)/__e2e__/tracking/page.tsx`)
+**Security:** Environment-gated, returns 404 in production
+
+```typescript
+if (!process.env.PLAYWRIGHT_E2E && process.env.CODEX_VERIFY !== "1") {
+  notFound(); // Zero prod exposure
+}
+```
+
+**Access:**
+- Playwright E2E tests: Set `PLAYWRIGHT_E2E=1`
+- Codex verification: Set `CODEX_VERIFY=1`
+- Production: Returns 404 (route doesn't exist)
+
+#### 3. Playwright E2E Tests (`tests/e2e/live-tracking.spec.ts`)
+**Coverage:**
+- Tracking page rendering (ETA, timeline, notifications)
+- ETA update flow
+- Driver nearby notification
+- Delivery completion flow
+- Timeline status updates
+
+**Example:**
+```typescript
+test('updates ETA and emits notifications', async ({ page }) => {
+  await page.goto('/__e2e__/tracking')
+
+  await page.getByTestId('tracking-update-eta').click()
+  await expect(page.getByTestId('tracking-eta')).toContainText('Arriving in 8 minutes')
+
+  await page.getByTestId('tracking-driver-nearby').click()
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Driver is approaching' }),
+  ).toBeVisible()
+})
+```
+
+#### 4. Performance Load Test (`tests/performance/tracking-load-test.ts`)
+**Purpose:** Test tracking UI with 100+ concurrent sessions for 60 minutes
+
+**Features:**
+- Configurable session count (default: 100)
+- Configurable duration (default: 60 minutes)
+- Memory usage snapshots every 60 seconds
+- Simulates varied user interactions
+- Detects memory leaks
+
+**Usage:**
+```bash
+# Run with custom parameters
+TRACKING_LOAD_USERS=50 \
+TRACKING_LOAD_DURATION_MINUTES=30 \
+TRACKING_LOAD_SNAPSHOT_INTERVAL_SECONDS=30 \
+node tests/performance/tracking-load-test.ts
+```
+
+**Metrics Captured:**
+- Heap memory usage (MB)
+- RSS memory usage (MB)
+- Snapshots every N seconds
+
+**Success Criteria:**
+- Memory stays stable (no continuous growth)
+- No crashes during test duration
+- 60fps UI performance maintained
+
+#### 5. Browser Notifications (`src/lib/notifications/browser-notifications.ts`)
+**Features:**
+- User-configurable settings (enabled, ETA threshold, DnD hours)
+- localStorage persistence
+- Do Not Disturb hours with overnight wraparound (21:00→07:00)
+- Permission request handling
+- Browser support detection
+
+**Settings:**
+```typescript
+type NotificationSettings = {
+  enabled: boolean;
+  etaThresholdMinutes: number; // Notify if ETA changes by this much
+  dndStart: string; // "21:00"
+  dndEnd: string;   // "07:00"
+};
+```
+
+**API:**
+```typescript
+// Check if browser supports notifications
+isBrowserNotificationSupported()
+
+// Request permission
+await requestNotificationPermission()
+
+// Check if can send (enabled + permission + not DnD)
+canSendBrowserNotification(settings)
+
+// Send notification
+sendBrowserNotification(title, options)
+```
+
+#### 6. Delivery Photo Upload (`src/components/driver/photo-upload.tsx`)
+**Features:**
+- Image compression with quality stepping (0.9→0.5)
+- Target size: ≤500KB
+- Max dimension: 1600px
+- Canvas-based compression (browser-native)
+- Live preview
+- Error handling
+- Upload progress feedback
+- Memory leak prevention (URL.revokeObjectURL)
+
+**Compression Algorithm:**
+```typescript
+1. Resize to max 1600px
+2. Try quality 0.9 → Check size
+3. If >500KB, try 0.8 → Check size
+4. Continue until ≤500KB or quality 0.5 reached
+5. Return best result
+```
+
+**Storage Path:**
+```
+delivery-proofs/route-stops/{stopId}/{timestamp}.jpg
+```
+
+#### 7. Photo URL API (`src/app/api/track/photo-url/route.ts`)
+**Purpose:** Generate signed URLs for delivery photos with privacy controls
+
+**Security:**
+- RLS check: Only customer can view their delivery photo
+- Signed URLs with 1-hour expiry
+- Admin client for storage access
+- No-cache headers on sensitive data
+
+**Flow:**
+```
+1. Customer requests photo URL
+2. API checks: delivery_stops.appointment.user_id === auth.uid()
+3. If authorized, generate signed URL (1-hour expiry)
+4. Return signed URL (not storage path)
+```
+
+### Playwright Config Updates
+
+**webServer command:**
+```bash
+PLAYWRIGHT_E2E=1 \
+NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co \
+NEXT_PUBLIC_SUPABASE_ANON_KEY=stub \
+SUPABASE_SERVICE_ROLE_KEY=stub \
+pnpm dev
+```
+
+**Why stub env vars:**
+- E2E tests don't need real Supabase connection
+- Test harness uses mock data
+- Prevents accidental database mutations during tests
+- Faster test execution
+
+### Test Infrastructure Summary
+
+| Test Type | Tool | Purpose | Location |
+|-----------|------|---------|----------|
+| **E2E** | Playwright | Live tracking UI flow | `tests/e2e/live-tracking.spec.ts` |
+| **Performance** | Playwright | Load testing (100+ sessions) | `tests/performance/tracking-load-test.ts` |
+| **Harness** | React | Deterministic test data | `src/components/track/tracking-e2e-harness.tsx` |
+| **Route** | Next.js | E2E-only page | `src/app/(marketing)/__e2e__/tracking/page.tsx` |
+
+### Recommended Follow-ups
+
+1. **Unit tests for notifications** (15 minutes)
+   ```typescript
+   describe('isWithinDoNotDisturb', () => {
+     it('handles overnight DnD (21:00-07:00)', () => {
+       const settings = { dndStart: "21:00", dndEnd: "07:00" };
+       expect(isWithinDoNotDisturb(settings, new Date('2026-01-04T22:00:00'))).toBe(true);
+       expect(isWithinDoNotDisturb(settings, new Date('2026-01-04T06:00:00'))).toBe(true);
+       expect(isWithinDoNotDisturb(settings, new Date('2026-01-04T12:00:00'))).toBe(false);
+     });
+   });
+   ```
+
+2. **E2E photo upload test** (10 minutes)
+   ```typescript
+   test('uploads delivery photo', async ({ page }) => {
+     await page.goto('/__e2e__/tracking');
+     await page.setInputFiles('input[type="file"]', './tests/fixtures/test-photo.jpg');
+     await expect(page.getByText('Photo uploaded')).toBeVisible();
+   });
+   ```
+
+3. **Accessibility tests** (10 minutes)
+   ```typescript
+   test('tracking page has no a11y violations', async ({ page }) => {
+     await page.goto('/__e2e__/tracking');
+     const violations = await new AxeBuilder({ page }).analyze();
+     expect(violations.violations).toEqual([]);
+   });
+   ```
+
+---
+
+**Last Updated:** 2026-01-04
 **Next Review:** 2026-01-10
-**Owner:** Claude Code
+**Owner:** Claude Code + Codex
