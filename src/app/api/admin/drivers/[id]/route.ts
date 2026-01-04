@@ -9,7 +9,11 @@ const statusSchema = z.object({
 
 const privateHeaders = { "Cache-Control": "no-store" };
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
   const { supabase, user, isAdmin } = await requireAdmin();
 
   if (!isAdmin || !user) {
@@ -27,7 +31,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   const { data: driver, error } = await supabase
     .from("driver_profiles")
     .update({ status: payload.status, updated_at: new Date().toISOString() })
-    .eq("id", params.id)
+    .eq("id", id)
     .select("id, status")
     .maybeSingle();
 

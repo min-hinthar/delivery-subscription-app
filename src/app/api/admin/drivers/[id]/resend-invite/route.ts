@@ -4,7 +4,11 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 const privateHeaders = { "Cache-Control": "no-store" };
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
   const { supabase, user, isAdmin } = await requireAdmin();
 
   if (!isAdmin || !user) {
@@ -14,7 +18,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const { data: driver } = await supabase
     .from("driver_profiles")
     .select("id, email, status")
-    .eq("id", params.id)
+    .eq("id", id)
     .maybeSingle();
 
   if (!driver) {
