@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Download, Route } from "lucide-react";
 
 import { DeliveryFilters } from "@/components/admin/delivery-filters";
+import { DeliverySearch } from "@/components/admin/delivery-search";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
@@ -60,10 +61,39 @@ function formatWindow(window: {
   return `${window.day_of_week} ${window.start_time}–${window.end_time}`;
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightMatch(value: string, query: string) {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return value;
+  }
+
+  const escaped = escapeRegExp(trimmed);
+  const regex = new RegExp(`(${escaped})`, "ig");
+  const parts = value.split(regex);
+  const lowerQuery = trimmed.toLowerCase();
+
+  return parts.map((part, index) =>
+    part.toLowerCase() === lowerQuery ? (
+      <mark
+        key={`${part}-${index}`}
+        className="rounded bg-amber-200/80 px-1 text-amber-950 dark:bg-amber-400/30 dark:text-amber-100"
+      >
+        {part}
+      </mark>
+    ) : (
+      <span key={`${part}-${index}`}>{part}</span>
+    ),
+  );
+}
+
 export default async function AdminDeliveriesPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ week_of?: string; status?: string }>;
+  searchParams?: Promise<{ week_of?: string; status?: string; q?: string }>;
 }) {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -90,6 +120,7 @@ export default async function AdminDeliveriesPage({
     ? (resolvedSearchParams?.week_of as string)
     : weekOptions[0];
   const statusFilter = resolvedSearchParams?.status;
+  const searchQuery = resolvedSearchParams?.q?.trim() ?? "";
 
   if (!selectedWeek) {
     return null;
@@ -144,6 +175,18 @@ export default async function AdminDeliveriesPage({
     }
   }
 
+  const normalizedSearch = searchQuery.toLowerCase();
+  const filteredAppointments = normalizedSearch
+    ? appointments.filter((appointment) => {
+        const name = appointment.profile?.full_name ?? "";
+        const email = appointment.profile?.email ?? "";
+        const phone = appointment.profile?.phone ?? "";
+        return [name, email, phone].some((value) =>
+          value.toLowerCase().includes(normalizedSearch),
+        );
+      })
+    : appointments;
+
   return (
     <div className="space-y-6">
       <Card className="flex flex-wrap items-center justify-between gap-4 bg-gradient-to-br from-white via-slate-50 to-emerald-50/70 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/30">
@@ -176,15 +219,30 @@ export default async function AdminDeliveriesPage({
       </Card>
 
       <Card className="space-y-4 bg-gradient-to-br from-white via-slate-50 to-amber-50/60 dark:from-slate-950 dark:via-slate-900/70 dark:to-amber-950/30">
-        <DeliveryFilters
-          weekOptions={weekOptions}
-          selectedWeek={selectedWeek}
-          statusFilter={statusFilter}
-        />
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <DeliveryFilters
+            weekOptions={weekOptions}
+            selectedWeek={selectedWeek}
+            statusFilter={statusFilter}
+            searchQuery={searchQuery}
+          />
+          <DeliverySearch
+            searchQuery={searchQuery}
+            selectedWeek={selectedWeek}
+            statusFilter={statusFilter}
+          />
+        </div>
         <div className="grid gap-3 md:grid-cols-3">
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
             <p className="text-muted-foreground">Appointments</p>
-            <p className="text-xl font-semibold">{appointments.length}</p>
+            <p className="text-xl font-semibold">
+              {filteredAppointments.length}
+            </p>
+            {normalizedSearch ? (
+              <p className="mt-1 text-xs text-muted-foreground">
+                Showing {filteredAppointments.length} of {appointments.length}
+              </p>
+            ) : null}
           </div>
           <div className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800">
             <p className="text-muted-foreground">Orders</p>
@@ -227,7 +285,7 @@ export default async function AdminDeliveriesPage({
       <Card className="space-y-4 p-6">
         <h2 className="text-lg font-semibold">Appointments</h2>
         <div className="space-y-3">
-          {appointments.map((appointment) => (
+          {filteredAppointments.map((appointment) => (
             <div
               key={appointment.id}
               className="rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800"
@@ -235,10 +293,21 @@ export default async function AdminDeliveriesPage({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="font-medium">
-                    {appointment.profile?.full_name ?? "Unnamed subscriber"}
+                    {highlightMatch(
+                      appointment.profile?.full_name ?? "Unnamed subscriber",
+                      searchQuery,
+                    )}
                   </p>
                   <p className="text-slate-500 dark:text-slate-400">
-                    {appointment.profile?.phone ?? "No phone"} · {appointment.profile?.email ?? ""}
+                    {highlightMatch(
+                      appointment.profile?.phone ?? "No phone",
+                      searchQuery,
+                    )}{" "}
+                    ·{" "}
+                    {highlightMatch(
+                      appointment.profile?.email ?? "",
+                      searchQuery,
+                    )}
                   </p>
                 </div>
                 <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-200">
@@ -278,20 +347,34 @@ export default async function AdminDeliveriesPage({
               ) : null}
             </div>
           ))}
-          {appointments.length === 0 ? (
+          {filteredAppointments.length === 0 ? (
             <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-              <p className="font-medium text-slate-700 dark:text-slate-200">
-                No appointments scheduled for this week.
-              </p>
-              <p className="mt-1">
-                Invite subscribers to book a weekend window and check back for new orders.
-              </p>
-              <Link
-                href="/admin/subscriptions"
-                className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
-              >
-                Review subscriptions
-              </Link>
+              {normalizedSearch ? (
+                <>
+                  <p className="font-medium text-slate-700 dark:text-slate-200">
+                    No deliveries match “{searchQuery}”.
+                  </p>
+                  <p className="mt-1">
+                    Try a different name, email, or phone number.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-slate-700 dark:text-slate-200">
+                    No appointments scheduled for this week.
+                  </p>
+                  <p className="mt-1">
+                    Invite subscribers to book a weekend window and check back for new
+                    orders.
+                  </p>
+                  <Link
+                    href="/admin/subscriptions"
+                    className="mt-3 inline-flex h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-xs font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:text-slate-100"
+                  >
+                    Review subscriptions
+                  </Link>
+                </>
+              )}
             </div>
           ) : null}
         </div>
