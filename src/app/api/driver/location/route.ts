@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { calculateRouteEtas } from "@/lib/maps/calculate-eta";
 
 const locationSchema = z.object({
   route_id: z.string().uuid(),
@@ -14,11 +15,6 @@ const locationSchema = z.object({
 });
 
 const privateHeaders = { "Cache-Control": "no-store" };
-
-function getClientIp(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  return forwardedFor?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "unknown";
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -135,7 +131,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // TODO: Trigger ETA recalculation (PR #11)
+    try {
+      await calculateRouteEtas({ routeId: location.route_id });
+    } catch (etaError) {
+      console.error("[Driver Location API] ETA recalculation failed:", {
+        route_id: location.route_id,
+        error: etaError instanceof Error ? etaError.message : etaError,
+      });
+    }
 
     return NextResponse.json({ ok: true }, { status: 200, headers: privateHeaders });
   } catch (error) {

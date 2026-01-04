@@ -2,62 +2,96 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { TrackingMap } from "@/components/track/tracking-map";
+import { EtaDisplay } from "@/components/track/eta-display";
+import { DeliveryTimeline } from "@/components/track/delivery-timeline";
+import { DriverInfo } from "@/components/track/driver-info";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { RouteMap } from "@/components/maps/route-map";
-import { KITCHEN_ORIGIN } from "@/lib/maps/route";
 
-type Stop = {
+export type TrackingStop = {
   id: string;
-  stop_order: number;
+  appointmentId: string;
+  stopOrder: number;
   status: string;
-  eta: string | null;
+  estimatedArrival: string | null;
+  completedAt: string | null;
+  lat: number | null;
+  lng: number | null;
+  isCustomerStop: boolean;
 };
 
-type StopDetail = Stop & {
-  displayAddress: string;
-  mapAddress: string;
-};
-
-type RouteSummary = {
+export type TrackingRoute = {
   id: string;
-  status: string;
+  status: string | null;
   polyline: string | null;
-  distance_meters: number | null;
-  duration_seconds: number | null;
+};
+
+export type TrackingDriver = {
+  name: string | null;
+};
+
+export type TrackingLocation = {
+  lat: number;
+  lng: number;
+  heading: number | null;
+  updatedAt: string | null;
 };
 
 type TrackingDashboardProps = {
-  route: RouteSummary | null;
-  initialStops: StopDetail[];
+  appointmentId: string;
+  route: TrackingRoute | null;
+  initialStops: TrackingStop[];
+  initialUpdatedAt?: string | null;
+  customerLocation: { lat: number; lng: number } | null;
+  driver: TrackingDriver | null;
+  initialDriverLocation: TrackingLocation | null;
+  isInTransit: boolean;
 };
 
-export function TrackingDashboard({ route, initialStops }: TrackingDashboardProps) {
-  const [stops, setStops] = useState<StopDetail[]>(initialStops);
-  const [status, setStatus] = useState<string | null>(null);
+const COMPLETED_STATUSES = new Set(["completed", "delivered"]);
+
+export function TrackingDashboard({
+  appointmentId,
+  route,
+  initialStops,
+  initialUpdatedAt = null,
+  customerLocation,
+  driver,
+  initialDriverLocation,
+  isInTransit,
+}: TrackingDashboardProps) {
+  const [stops, setStops] = useState<TrackingStop[]>(initialStops);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(() =>
+    initialUpdatedAt ? new Date(initialUpdatedAt) : null,
+  );
   const [connectionStatus, setConnectionStatus] = useState<
     "idle" | "connecting" | "connected" | "reconnecting" | "error"
   >(route?.id ? "connecting" : "idle");
+
   const sortedStops = useMemo(
-    () => [...stops].sort((a, b) => a.stop_order - b.stop_order),
+    () => [...stops].sort((a, b) => a.stopOrder - b.stopOrder),
     [stops],
   );
 
-  const mapStops = useMemo(
-    () =>
-      sortedStops.map((stop, index) => ({
-        label: String.fromCharCode(65 + index),
-        address: stop.mapAddress,
-      })),
+  const stopProgress = useMemo(() => {
+    const completedStops = sortedStops.filter(
+      (stop) => Boolean(stop.completedAt) || COMPLETED_STATUSES.has(stop.status),
+    ).length;
+    const currentStopIndex = sortedStops.findIndex(
+      (stop) => !Boolean(stop.completedAt) && !COMPLETED_STATUSES.has(stop.status),
+    );
+
+    return {
+      total: sortedStops.length,
+      completed: completedStops,
+      currentIndex: currentStopIndex,
+    };
+  }, [sortedStops]);
+
+  const customerStop = useMemo(
+    () => sortedStops.find((stop) => stop.isCustomerStop) ?? null,
     [sortedStops],
   );
-
-  const distanceMiles = route?.distance_meters
-    ? (route.distance_meters / 1609.34).toFixed(1)
-    : "0";
-  const durationSeconds = route?.duration_seconds ?? 0;
-  const durationHours = Math.floor(durationSeconds / 3600);
-  const durationMinutes = Math.round((durationSeconds % 3600) / 60);
-  const durationLabel = durationHours > 0 ? `${durationHours}h ${durationMinutes}m` : `${durationMinutes}m`;
 
   useEffect(() => {
     if (!route?.id) {
@@ -76,24 +110,52 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
           filter: `route_id=eq.${route.id}`,
         },
         (payload) => {
-          setStatus("Live update received.");
-          const updated = payload.new as Stop;
+          const updated = payload.new as {
+            id: string;
+            appointment_id: string;
+            stop_order: number;
+            status: string;
+            estimated_arrival: string | null;
+            completed_at: string | null;
+            geocoded_lat: number | null;
+            geocoded_lng: number | null;
+          };
+
           setStops((prev) => {
             const existing = prev.find((stop) => stop.id === updated.id);
+
             if (!existing) {
               return [
                 ...prev,
                 {
-                  ...updated,
-                  displayAddress: "Address pending",
-                  mapAddress: "",
+                  id: updated.id,
+                  appointmentId: updated.appointment_id,
+                  stopOrder: updated.stop_order,
+                  status: updated.status,
+                  estimatedArrival: updated.estimated_arrival,
+                  completedAt: updated.completed_at,
+                  lat: updated.geocoded_lat,
+                  lng: updated.geocoded_lng,
+                  isCustomerStop: updated.appointment_id === appointmentId,
                 },
               ];
             }
+
             return prev.map((stop) =>
-              stop.id === updated.id ? { ...stop, ...updated } : stop,
+              stop.id === updated.id
+                ? {
+                    ...stop,
+                    stopOrder: updated.stop_order,
+                    status: updated.status,
+                    estimatedArrival: updated.estimated_arrival,
+                    completedAt: updated.completed_at,
+                    lat: updated.geocoded_lat ?? stop.lat,
+                    lng: updated.geocoded_lng ?? stop.lng,
+                  }
+                : stop,
             );
           });
+          setLastUpdated(new Date());
         },
       )
       .subscribe((channelStatus) => {
@@ -111,96 +173,41 @@ export function TrackingDashboard({ route, initialStops }: TrackingDashboardProp
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [route?.id]);
+  }, [appointmentId, route?.id]);
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-blue-50/70 p-4 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:from-slate-950 dark:via-slate-900/70 dark:to-blue-950/30">
-          <p className="font-medium">Route overview</p>
-          <p className="text-slate-500 dark:text-slate-400">
-            Status: {route?.status ?? "Pending"}
-          </p>
-          <p className="text-slate-500 dark:text-slate-400">
-            Distance: {route?.distance_meters ? `${distanceMiles} mi` : "TBD"}
-          </p>
-          <p className="text-slate-500 dark:text-slate-400">
-            Duration: {route?.duration_seconds ? durationLabel : "TBD"}
-          </p>
-          <p className="mt-2 text-xs text-slate-400">
-            {route?.polyline ? "Live route synced from operations." : "Waiting for route build."}
-          </p>
-        </div>
-        <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-white via-amber-50/80 to-rose-50/70 p-4 text-sm shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:from-slate-950 dark:via-amber-950/30 dark:to-rose-950/30">
-          <p className="font-medium">Realtime updates</p>
-          <p className="text-slate-500 dark:text-slate-400">
-            {status ?? "Waiting for driver updates."}
-          </p>
-          <p className="mt-2 text-xs text-slate-400">
-            We&apos;ll refresh ETAs as each stop status changes.
-          </p>
-        </div>
-      </div>
-      {connectionStatus === "reconnecting" ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-          Reconnecting to live updates. We&apos;ll keep retrying in the background.
-        </div>
-      ) : null}
+      <EtaDisplay
+        estimatedArrival={customerStop?.estimatedArrival ?? null}
+        totalStops={stopProgress.total}
+        completedStops={stopProgress.completed}
+        currentStopIndex={stopProgress.currentIndex}
+        lastUpdated={lastUpdated}
+        isReconnecting={connectionStatus === "reconnecting"}
+      />
+
       {connectionStatus === "error" ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
           Live updates are temporarily unavailable. You can refresh this page to try again.
         </div>
       ) : null}
 
-      <div className="rounded-xl border border-slate-200 bg-white/80 p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950/40">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            Delivery map
-          </p>
-          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
-            {sortedStops.length} stops
-          </span>
-        </div>
-        <div className="mt-3">
-          <RouteMap polyline={route?.polyline ?? null} stops={mapStops} />
-        </div>
-        <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500 dark:text-slate-400">
-          <span>Origin: {KITCHEN_ORIGIN}</span>
-          <span>Distance: {distanceMiles} mi</span>
-          <span>Duration: {durationLabel}</span>
-        </div>
+      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+        <TrackingMap
+          routeId={route?.id ?? null}
+          polyline={route?.polyline ?? null}
+          customerLocation={customerLocation}
+          stops={sortedStops}
+          initialDriverLocation={initialDriverLocation}
+          showDriver={isInTransit}
+        />
+        <DeliveryTimeline
+          stops={sortedStops}
+          currentStopIndex={stopProgress.currentIndex}
+        />
       </div>
 
-      <div className="space-y-3">
-        {sortedStops.map((stop, index) => (
-          <div
-            key={stop.id}
-            className="flex items-center justify-between rounded-lg border border-slate-200 p-4 text-sm dark:border-slate-800"
-          >
-            <div>
-              <p className="font-medium">Stop {String.fromCharCode(65 + index)}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Status: {stop.status}
-              </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {stop.displayAddress}
-              </p>
-            </div>
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              ETA: {stop.eta ? new Date(stop.eta).toLocaleTimeString() : "TBD"}
-            </span>
-          </div>
-        ))}
-        {sortedStops.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-            <p className="font-medium text-slate-700 dark:text-slate-200">Tracking isn’t live yet.</p>
-            <p className="mt-1">
-              We’ll show your driver route here as soon as your stop is assigned. Check back
-              closer to delivery day.
-            </p>
-          </div>
-        ) : null}
-      </div>
+      <DriverInfo driverName={driver?.name ?? null} />
     </div>
   );
 }
