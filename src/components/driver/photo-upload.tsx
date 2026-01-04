@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const MAX_UPLOAD_BYTES = 500 * 1024;
 const MAX_DIMENSION = 1600;
 const QUALITY_STEPS = [0.9, 0.8, 0.7, 0.6, 0.5];
+const E2E_BYPASS_UPLOAD = process.env.NEXT_PUBLIC_PLAYWRIGHT_E2E === "1";
 
 type PhotoUploadProps = {
   stopId: string;
@@ -96,16 +97,20 @@ export function PhotoUpload({
         throw new Error("Compressed photo is still too large.");
       }
 
-      const supabase = createSupabaseBrowserClient();
       const filePath = `route-stops/${stopId}/${Date.now()}.jpg`;
+      if (!E2E_BYPASS_UPLOAD) {
+        const supabase = createSupabaseBrowserClient();
 
-      const { error } = await supabase.storage.from("delivery-proofs").upload(filePath, compressed, {
-        upsert: true,
-        contentType: "image/jpeg",
-      });
+        const { error } = await supabase.storage
+          .from("delivery-proofs")
+          .upload(filePath, compressed, {
+            upsert: true,
+            contentType: "image/jpeg",
+          });
 
-      if (error) {
-        throw new Error("Photo upload failed. Try again or skip.");
+        if (error) {
+          throw new Error("Photo upload failed. Try again or skip.");
+        }
       }
 
       const preview = URL.createObjectURL(compressed);

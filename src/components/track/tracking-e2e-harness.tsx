@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import { PhotoUpload } from "@/components/driver/photo-upload";
 import { EtaDisplay } from "@/components/track/eta-display";
 import {
   DeliveryNotificationContainer,
@@ -58,6 +59,7 @@ export function TrackingE2EHarness() {
   const [stops, setStops] = useState<TrackingStop[]>(initialStops);
   const [lastUpdated, setLastUpdated] = useState<Date>(BASE_TIME);
   const [notifications, setNotifications] = useState<DeliveryNotification[]>([]);
+  const [photoPath, setPhotoPath] = useState<string | null>(null);
 
   const customerStop = useMemo(
     () => stops.find((stop) => stop.isCustomerStop) ?? null,
@@ -190,6 +192,27 @@ export function TrackingE2EHarness() {
 
       <div data-testid="tracking-timeline">
         <DeliveryTimeline stops={stops} currentStopIndex={currentStopIndex} />
+      </div>
+
+      <div
+        className={cn(
+          "rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4",
+          "dark:border-slate-800 dark:bg-slate-900",
+        )}
+      >
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          Proof of delivery upload (E2E)
+        </p>
+        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+          Upload a sample photo to validate the driver upload flow in Playwright.
+        </p>
+        <div className="mt-3">
+          <PhotoUpload
+            stopId={customerStop?.id ?? "stop-2"}
+            value={photoPath}
+            onUpload={({ path }) => setPhotoPath(path)}
+          />
+        </div>
       </div>
 
       <div
