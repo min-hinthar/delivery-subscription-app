@@ -4,30 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 
 import { cn } from "@/lib/utils";
 
-type GoogleMaps = {
-  maps: {
-    geometry: {
-      encoding: {
-        decodePath: (value: string) => Array<{ lat: () => number; lng: () => number }>;
-      };
-    };
-    LatLngBounds: new () => { extend: (point: { lat: () => number; lng: () => number }) => void };
-    Map: new (
-      element: HTMLElement,
-      options: Record<string, unknown>,
-    ) => { fitBounds: (bounds: unknown, padding?: number) => void };
-    Polyline: new (
-      options: Record<string, unknown>,
-    ) => { setMap: (map: { fitBounds: (bounds: unknown, padding?: number) => void }) => void };
-    Marker: new (options: Record<string, unknown>) => unknown;
-    Geocoder: new () => {
-      geocode: (
-        request: { address: string },
-        callback: (results: Array<{ geometry?: { location?: unknown } }> | null, status: string) => void,
-      ) => void;
-    };
-  };
-};
+type GoogleMaps = typeof google;
 
 let googleMapsPromise: Promise<void> | null = null;
 
@@ -132,9 +109,7 @@ export function RouteMap({ polyline, className, stops }: RouteMapProps) {
             }
             geocoder.geocode({ address: stop.address }, (results, status) => {
               if (status === "OK" && results?.[0]?.geometry?.location) {
-                bounds.extend(
-                  results[0].geometry.location as { lat: () => number; lng: () => number },
-                );
+                bounds.extend(results[0].geometry.location);
                 new googleMaps.maps.Marker({
                   map,
                   position: results[0].geometry.location,

@@ -1,59 +1,107 @@
+import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { bad, ok } from "@/lib/api/response";
-import { directionsRoute } from "@/lib/maps/google";
 import { rateLimit } from "@/lib/security/rate-limit";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const directionsSchema = z.object({
-  origin: z.string().min(1),
-  destination: z.string().min(1),
-  waypoints: z.array(z.string().min(1)).optional().default([]),
+  origin: z.string(),
+  destination: z.string(),
+  waypoints: z.array(z.string()).optional(),
+  optimize: z.boolean().optional(),
 });
 
-export async function POST(request: Request) {
-  const supabase = await createSupabaseServerClient({ allowSetCookies: true });
-  const { data: auth, error: authError } = await supabase.auth.getUser();
+const privateHeaders = { "Cache-Control": "no-store" };
 
-  if (authError || !auth.user) {
-    return bad("Unauthorized", { status: 401 });
-  }
-
+function getClientIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
-  const clientIp =
-    forwardedFor?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "unknown";
-  const rate = rateLimit({
-    key: `maps:directions:${auth.user.id ?? clientIp}`,
-    max: 10,
-    windowMs: 60_000,
-  });
+  return forwardedFor?.split(",")[0]?.trim() ?? request.headers.get("x-real-ip") ?? "unknown";
+}
 
-  if (!rate.allowed) {
-    return bad("Too many map requests. Please wait and try again.", {
-      status: 429,
-      headers: {
-        "Retry-After": Math.ceil(rate.resetMs / 1000).toString(),
-      },
-    });
-  }
-
-  const body = await request.json().catch(() => null);
-  const parsed = directionsSchema.safeParse(body);
-
-  if (!parsed.success) {
-    return bad("Invalid directions payload.", { status: 422 });
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    const route = await directionsRoute({
-      origin: parsed.data.origin,
-      destination: parsed.data.destination,
-      waypoints: parsed.data.waypoints,
+    const rate = rateLimit({
+      key: `maps:directions:${getClientIp(request)}`,
+      max: 12,
+      windowMs: 60_000,
     });
 
-    return ok(route);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "RATE_LIMITED",
+            message: "Too many directions requests. Please try again shortly.",
+          },
+        },
+        {
+          status: 429,
+          headers: {
+            "Retry-After": Math.ceil(rate.resetMs / 1000).toString(),
+            ...privateHeaders,
+          },
+        },
+      );
+    }
+
+    const body = await request.json();
+    const params = directionsSchema.parse(body);
+
+    const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "MISSING_API_KEY",
+            message: "Google Maps server key is not configured.",
+          },
+        },
+        { status: 500, headers: privateHeaders },
+      );
+    }
+
+    const url = new URL("https://maps.googleapis.com/maps/api/directions/json");
+    url.searchParams.set("origin", params.origin);
+    url.searchParams.set("destination", params.destination);
+    url.searchParams.set("key", apiKey);
+
+    if (params.waypoints && params.waypoints.length > 0) {
+      const waypointsParam = params.optimize
+        ? `optimize:true|${params.waypoints.join("|")}`
+        : params.waypoints.join("|");
+      url.searchParams.set("waypoints", waypointsParam);
+    }
+
+    const response = await fetch(url.toString());
+    const data = await response.json();
+
+    if (data.status !== "OK") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: {
+            code: "DIRECTIONS_ERROR",
+            message: data.error_message || "Failed to get directions",
+          },
+        },
+        { status: 400, headers: privateHeaders },
+      );
+    }
+
+    return NextResponse.json({ ok: true, data }, { status: 200, headers: privateHeaders });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unable to build directions.";
-    return bad(message, { status: 422 });
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { ok: false, error: { code: "VALIDATION_ERROR", details: error.errors } },
+        { status: 422, headers: privateHeaders },
+      );
+    }
+
+    console.error("Directions API error:", error);
+    return NextResponse.json(
+      { ok: false, error: { code: "INTERNAL_ERROR", message: "Failed to fetch directions" } },
+      { status: 500, headers: privateHeaders },
+    );
   }
 }
