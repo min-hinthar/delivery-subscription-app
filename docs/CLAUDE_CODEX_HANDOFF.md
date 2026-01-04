@@ -1400,3 +1400,216 @@ Simplified all collaboration documentation from competitive framework to profess
 - [x] All tests passing
 - [x] Build verified
 - [x] Ready to merge to main
+
+---
+
+## Claude Session 5 - Speed-Optimized Workflow
+
+**Date:** 2026-01-04
+**Developer:** Claude Code
+**Branch:** `claude/design-system-2-speedup-Afci3`
+**Duration:** ~30 minutes
+
+### 📦 What Was Completed
+
+#### 1. GitHub Actions Fix - Deprecated Artifact Upload
+**Fixed:** Updated deprecated `actions/upload-artifact@v3` to `v4` in `.github/workflows/test.yml`
+
+**Changed:**
+- Line 67: Coverage artifact upload → v4
+- Line 102: Playwright report upload → v4
+- Line 134: Build artifact upload → v4
+
+**Impact:** GitHub Actions builds will no longer fail with deprecation error.
+
+#### 2. CODEX_WORKFLOW.md - Speed-Optimized Rewrite
+**Complete rewrite** of Codex workflow for maximum implementation speed:
+
+**Key Changes:**
+- ⚡ **Minimal Testing Only:** Only run `bash scripts/codex/verify.sh` (no comprehensive tests)
+- ⚡ **Skip Test Writing:** Claude will add tests during review phase
+- ⚡ **Fast Commits:** Commit and push as soon as feature works
+- ⚡ **Multiple PRs Per Session:** Implement 3-5 features instead of 1
+- ⚡ **Quality in Review:** Claude handles testing, edge cases, accessibility, docs
+
+**New Workflow Cycle:**
+```
+1. Claude: Creates plan/design
+2. User: Merges to main
+3. Codex: Implements 3-5 features FAST (minimal testing)
+4. Codex: Pushes all to codex/* branches
+5. Claude: Reviews, tests, revises, improves ALL
+6. User: Merges to main
+7. Repeat QUICKLY
+```
+
+**New Success Metrics:**
+- Old: 1 PR per session (2-3 hours each)
+- New: 3-5 PRs per session (30-45 min each)
+
+#### 3. Clear Division of Responsibilities
+
+**Codex (Speed):**
+- Implement features FAST
+- Make it work
+- Follow basic standards (TypeScript, no `any`)
+- Run verify only
+- Push and move on
+
+**Claude (Quality):**
+- Write comprehensive tests
+- Review and revise code
+- Fix bugs and edge cases
+- Add error handling
+- Improve accessibility
+- Update documentation
+
+---
+
+### 🎯 What Codex Should Do Next (SPEED MODE)
+
+#### Quick Start
+```bash
+git checkout main
+git pull origin main
+```
+
+#### Option A: Implement 3-5 Quick Features (RECOMMENDED)
+Choose **3-5 small features** from `docs/PR_PROMPTS_NEXT_SESSIONS.md` and implement them all in one session:
+
+**Suggested Quick Wins:**
+1. **PR #2 - Core Form Components** (Select, DatePicker)
+   - Branch: `codex/form-components-select-datepicker`
+   - Time: ~45 min
+   - Create Select and DatePicker components
+
+2. **PR #5 - Pricing Page Redesign**
+   - Branch: `codex/pricing-page-redesign`
+   - Time: ~30 min
+   - Apply Burmese design system to pricing page
+
+3. **PR #7 - Schedule Page Calendar**
+   - Branch: `codex/schedule-calendar-picker`
+   - Time: ~45 min
+   - Add visual calendar picker to schedule page
+
+4. **PR #8 - Admin Dashboard Search**
+   - Branch: `codex/admin-dashboard-search`
+   - Time: ~30 min
+   - Add search/filter to admin deliveries page
+
+5. **PR #9 - Admin Bulk Actions**
+   - Branch: `codex/admin-bulk-actions`
+   - Time: ~30 min
+   - Add bulk select/update for deliveries
+
+**Total Time:** ~3 hours for 5 features (vs 10+ hours with old workflow)
+
+#### Option B: Single Complex Feature
+If you prefer one larger feature:
+- **PR #10 - Google Maps Foundation** (slower, ~2 hours)
+
+---
+
+### 🚀 Speed Mode Instructions for Codex
+
+For each feature:
+```bash
+# 1. Create branch from main
+git checkout main && git pull
+git checkout -b codex/[feature-name]
+
+# 2. Implement feature (make it work)
+pnpm dev  # Test manually
+
+# 3. Verify only (minimal)
+bash scripts/codex/verify.sh
+
+# 4. Commit and push immediately
+git add -A
+git commit -m "feat: [feature-name]"
+git push -u origin codex/[feature-name]
+
+# 5. Move to next feature
+git checkout main
+```
+
+**At end of session:**
+Update this handoff doc with:
+```markdown
+## Codex Speed Session - [Date]
+**Implemented:**
+- Feature 1 (branch: codex/...)
+- Feature 2 (branch: codex/...)
+- Feature 3 (branch: codex/...)
+
+**For Claude:**
+- All features work in browser
+- All pass verify.sh
+- Ready for comprehensive review/testing
+```
+
+---
+
+### 📊 Speed Optimization Benefits
+
+**For User:**
+- ✅ 3-5x faster feature delivery
+- ✅ More PRs to review (but smaller, easier to review)
+- ✅ Faster iteration cycles
+
+**For Codex:**
+- ✅ Focus only on implementation
+- ✅ No test writing burden
+- ✅ No documentation burden
+- ✅ Clear, simple checklist
+
+**For Claude:**
+- ✅ Batch review multiple features
+- ✅ Add comprehensive tests efficiently
+- ✅ Improve code quality across multiple PRs
+- ✅ Better token efficiency (review mode vs planning mode)
+
+---
+
+### 🔍 What I (Claude) Will Do After Codex Implements
+
+For each feature Codex implements, I will:
+1. ✅ Review code quality and patterns
+2. ✅ Write comprehensive test suites
+3. ✅ Fix bugs and edge cases
+4. ✅ Add error handling
+5. ✅ Improve accessibility (ARIA, keyboard nav)
+6. ✅ Add documentation
+7. ✅ Optimize performance
+8. ✅ Ensure security best practices
+
+**User reviews both Codex's implementation AND Claude's improvements before merge.**
+
+---
+
+### ✅ Success Criteria
+
+**This Session:**
+- ✅ GitHub Actions fixed (no more v3 deprecation errors)
+- ✅ CODEX_WORKFLOW.md rewritten for speed
+- ✅ Clear workflow cycle defined
+- ⏳ Codex implements 3-5 features in next session
+
+**Next Session (Codex):**
+- ⏳ 3-5 features implemented
+- ⏳ All pass verify.sh
+- ⏳ All work in browser
+- ⏳ Ready for Claude review
+
+**Following Session (Claude):**
+- ⏳ Comprehensive tests added
+- ⏳ Code quality improved
+- ⏳ Documentation updated
+- ⏳ Ready for user merge
+
+---
+
+**Last Updated By:** Claude Code (Session 5 - Speed Optimization)
+**Next Action:** Codex implements 3-5 features in SPEED MODE
+**Status:** Workflow optimized ✅ → Ready for fast implementation
