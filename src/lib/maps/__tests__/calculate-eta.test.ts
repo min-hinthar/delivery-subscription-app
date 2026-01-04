@@ -15,7 +15,7 @@ describe("calculateRouteEtas", () => {
       const baseStopMinutes = 6;
       const expectedFactor = 1.2;
       const expectedDuration = baseStopMinutes * expectedFactor;
-      expect(expectedDuration).toBe(7.2);
+      expect(expectedDuration).toBeCloseTo(7.2, 5);
     });
 
     it("should apply 0.9x factor during midday (9am-11am)", () => {
@@ -23,7 +23,7 @@ describe("calculateRouteEtas", () => {
       const baseStopMinutes = 6;
       const expectedFactor = 0.9;
       const expectedDuration = baseStopMinutes * expectedFactor;
-      expect(expectedDuration).toBe(5.4);
+      expect(expectedDuration).toBeCloseTo(5.4, 5);
     });
 
     it("should apply 1.3x factor during evening rush hour (5pm-8pm)", () => {
@@ -31,7 +31,7 @@ describe("calculateRouteEtas", () => {
       const baseStopMinutes = 6;
       const expectedFactor = 1.3;
       const expectedDuration = baseStopMinutes * expectedFactor;
-      expect(expectedDuration).toBe(7.8);
+      expect(expectedDuration).toBeCloseTo(7.8, 5);
     });
 
     it("should apply 0.8x factor during late night (midnight-6am)", () => {
@@ -39,7 +39,7 @@ describe("calculateRouteEtas", () => {
       const baseStopMinutes = 6;
       const expectedFactor = 0.8;
       const expectedDuration = baseStopMinutes * expectedFactor;
-      expect(expectedDuration).toBe(4.8);
+      expect(expectedDuration).toBeCloseTo(4.8, 5);
     });
   });
 
