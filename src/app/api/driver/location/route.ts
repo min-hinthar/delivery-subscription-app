@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     // Verify route exists and driver is assigned to it
     const { data: route, error: routeError } = await supabase
-      .from("routes")
+      .from("delivery_routes")
       .select("id, driver_id")
       .eq("id", location.route_id)
       .single();

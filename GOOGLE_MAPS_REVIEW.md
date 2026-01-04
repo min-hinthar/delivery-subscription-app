@@ -9,7 +9,7 @@
 
 ✅ **Overall Assessment:** The Google Maps Foundation implementation is **solid and well-structured**. CODEX did excellent work on the core functionality.
 
-🔧 **Critical Issues Fixed:** 3
+🔧 **Critical Issues Fixed:** 4 (including 1 blocking migration error)
 ⚡ **Performance Enhancements:** 2
 🧪 **Test Coverage:** Significantly expanded
 🔒 **Security Improvements:** 3
@@ -17,6 +17,25 @@
 ---
 
 ## Critical Issues Found & Fixed
+
+### 0. Table Name Errors - Migration Would Fail ⚠️ BLOCKING
+
+**Issue:** The migration files referenced incorrect table names:
+- Used `routes` instead of `delivery_routes`
+- Used `appointments` instead of `delivery_appointments`
+
+**Impact:** **Migration would completely fail to run** with error: `ERROR: 42P01: relation "routes" does not exist`
+
+**Fix:** Updated all references:
+- `routes` → `delivery_routes` (3 locations in migration 013)
+- `appointments` → `delivery_appointments` (1 location in RLS policy)
+- Updated API endpoint to use correct table name
+
+**Files:**
+- `supabase/migrations/013_google_maps_foundation.sql:5,39,64-68`
+- `src/app/api/driver/location/route.ts:71`
+
+---
 
 ### 1. RLS Policies - Missing UPDATE Policy ⚠️ CRITICAL
 

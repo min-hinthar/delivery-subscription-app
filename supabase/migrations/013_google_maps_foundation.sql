@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS driver_locations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   driver_id uuid NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  route_id uuid REFERENCES routes(id) ON DELETE CASCADE,
+  route_id uuid REFERENCES delivery_routes(id) ON DELETE CASCADE,
   latitude numeric(10, 8) NOT NULL,
   longitude numeric(11, 8) NOT NULL,
   heading numeric(5, 2), -- 0-360 degrees
@@ -36,7 +36,7 @@ CREATE POLICY "Customers can view driver on their route"
   USING (
     EXISTS (
       SELECT 1 FROM delivery_stops ds
-      JOIN appointments a ON ds.appointment_id = a.id
+      JOIN delivery_appointments a ON ds.appointment_id = a.id
       WHERE ds.route_id = driver_locations.route_id
         AND a.user_id = auth.uid()
         AND a.status IN ('confirmed', 'in_transit')
@@ -60,12 +60,12 @@ CREATE INDEX IF NOT EXISTS idx_driver_locations_driver_id ON driver_locations(dr
 CREATE INDEX IF NOT EXISTS idx_driver_locations_route_id ON driver_locations(route_id);
 CREATE INDEX IF NOT EXISTS idx_driver_locations_updated_at ON driver_locations(updated_at DESC);
 
--- Update routes table
-ALTER TABLE routes ADD COLUMN IF NOT EXISTS driver_id uuid REFERENCES profiles(id);
-ALTER TABLE routes ADD COLUMN IF NOT EXISTS start_time timestamptz;
-ALTER TABLE routes ADD COLUMN IF NOT EXISTS end_time timestamptz;
-ALTER TABLE routes ADD COLUMN IF NOT EXISTS actual_distance integer; -- meters
-ALTER TABLE routes ADD COLUMN IF NOT EXISTS actual_duration integer; -- seconds
+-- Update delivery_routes table
+ALTER TABLE delivery_routes ADD COLUMN IF NOT EXISTS driver_id uuid REFERENCES profiles(id);
+ALTER TABLE delivery_routes ADD COLUMN IF NOT EXISTS start_time timestamptz;
+ALTER TABLE delivery_routes ADD COLUMN IF NOT EXISTS end_time timestamptz;
+ALTER TABLE delivery_routes ADD COLUMN IF NOT EXISTS actual_distance integer; -- meters
+ALTER TABLE delivery_routes ADD COLUMN IF NOT EXISTS actual_duration integer; -- seconds
 
 -- Update delivery_stops table
 ALTER TABLE delivery_stops ADD COLUMN IF NOT EXISTS estimated_arrival timestamptz;
