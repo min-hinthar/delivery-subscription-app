@@ -1613,3 +1613,22 @@ For each feature Codex implements, I will:
 **Last Updated By:** Claude Code (Session 5 - Speed Optimization)
 **Next Action:** Codex implements 3-5 features in SPEED MODE
 **Status:** Workflow optimized ✅ → Ready for fast implementation
+
+---
+
+## Codex Session - Core Form Components (Select/DatePicker/Modal)
+**Date:** 2026-01-04
+**Branch:** codex/form-components
+
+### Implemented
+- Added `Select` component with searchable and multi-select support plus mobile-friendly bottom sheet (`src/components/ui/select.tsx`).
+- Added `DatePicker` component with single/range selection, disabled dates, and month navigation (`src/components/ui/date-picker.tsx`).
+- Added `Modal` component with focus trap, ESC handling, and responsive layout (`src/components/ui/modal.tsx`).
+
+### For Claude to Review
+- Accessibility and keyboard navigation in the Select and DatePicker overlays.
+- Styling consistency with design tokens and dark mode.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`
