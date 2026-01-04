@@ -2,8 +2,18 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import {
+  DndContext,
+  DragEndEvent,
+  DragStartEvent,
+  DragOverEvent,
+  PointerSensor,
+  KeyboardSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
+import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 
 import { RouteBuilderMap } from "@/components/admin/route-builder-map";
 import { RouteDetails } from "@/components/admin/route-details";
@@ -36,7 +46,14 @@ export function RouteBuilderWorkspace({
   missingAddressCount,
 }: RouteBuilderWorkspaceProps) {
   const router = useRouter();
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 }, // Increased from 4px for better touch support
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
   const [isPending, startTransition] = useTransition();
   const [unassignedStops, setUnassignedStops] = useState<RouteStop[]>(initialUnassignedStops);
   const [routeStops, setRouteStops] = useState<RouteStop[]>([]);
@@ -49,6 +66,7 @@ export function RouteBuilderWorkspace({
   const [optimized, setOptimized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedRouteId, setSavedRouteId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
   const mapAssignedStops = routeStops.filter((stop) => stop.hasAddress);
   const mapUnassignedStops = unassignedStops.filter((stop) => stop.hasAddress);
@@ -75,7 +93,31 @@ export function RouteBuilderWorkspace({
     setRouteMetrics(DEFAULT_METRICS);
   };
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(String(event.active.id));
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    // This helps with screen reader announcements
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeContainer = findContainer(String(active.id));
+    const overContainer = findContainer(String(over.id));
+
+    if (activeContainer && overContainer && activeContainer !== overContainer) {
+      const activeStop = [...unassignedStops, ...routeStops].find(
+        (stop) => stop.id === active.id,
+      );
+      if (activeStop) {
+        const targetZone = overContainer === "route" ? "route stops" : "unassigned stops";
+        setStatusMessage(`Moving ${activeStop.name} to ${targetZone}`);
+      }
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
+    setActiveId(null);
     const { active, over } = event;
     if (!over) {
       return;
@@ -94,6 +136,7 @@ export function RouteBuilderWorkspace({
         const newIndex = unassignedStops.findIndex((stop) => stop.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
           setUnassignedStops((items) => arrayMove(items, oldIndex, newIndex));
+          setStatusMessage("Reordered stops in unassigned list");
         }
         return;
       }
@@ -103,6 +146,8 @@ export function RouteBuilderWorkspace({
       if (oldIndex !== -1 && newIndex !== -1) {
         setRouteStops((items) => arrayMove(items, oldIndex, newIndex));
         resetOptimization();
+        const movedStop = routeStops[oldIndex];
+        setStatusMessage(`Moved ${movedStop?.name ?? "stop"} to position ${newIndex + 1}`);
       }
       return;
     }
@@ -137,9 +182,11 @@ export function RouteBuilderWorkspace({
 
     if (overContainer === "unassigned") {
       setUnassignedStops(newDestinationItems);
+      setStatusMessage(`Removed ${activeStop.name} from route`);
     } else {
       setRouteStops(newDestinationItems);
       resetOptimization();
+      setStatusMessage(`Added ${activeStop.name} to route at position ${insertIndex + 1}`);
     }
   };
 
@@ -318,8 +365,45 @@ export function RouteBuilderWorkspace({
         <p className="text-xs text-rose-600">{missingAddressMessage}</p>
       ) : null}
 
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-        <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+        accessibility={{
+          announcements: {
+            onDragStart({ active }) {
+              const stop = [...unassignedStops, ...routeStops].find((s) => s.id === active.id);
+              return `Picked up ${stop?.name ?? "stop"}. Use arrow keys to move, Space to drop.`;
+            },
+            onDragOver({ active, over }) {
+              if (!over) return "";
+              const stop = [...unassignedStops, ...routeStops].find((s) => s.id === active.id);
+              const overContainer = findContainer(String(over.id));
+              const targetZone = overContainer === "route" ? "route stops" : "unassigned stops";
+              return `${stop?.name ?? "Stop"} is over ${targetZone}`;
+            },
+            onDragEnd({ active, over }) {
+              if (!over) {
+                const stop = [...unassignedStops, ...routeStops].find((s) => s.id === active.id);
+                return `${stop?.name ?? "Stop"} was dropped. No changes made.`;
+              }
+              const stop = [...unassignedStops, ...routeStops].find((s) => s.id === active.id);
+              return `${stop?.name ?? "Stop"} was moved successfully.`;
+            },
+            onDragCancel({ active }) {
+              const stop = [...unassignedStops, ...routeStops].find((s) => s.id === active.id);
+              return `Drag cancelled. ${stop?.name ?? "Stop"} was not moved.`;
+            },
+          },
+        }}
+      >
+        <div
+          className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)_320px] md:grid-cols-1"
+          role="region"
+          aria-label="Route builder workspace"
+        >
           <UnassignedStops stops={unassignedStops} />
           <Card className="space-y-4 p-4">
             <div>
