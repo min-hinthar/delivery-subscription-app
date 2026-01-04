@@ -1,0 +1,54 @@
+import AxeBuilder from '@axe-core/playwright'
+import { test, expect } from '@playwright/test'
+
+test.describe('Live Tracking (E2E Harness)', () => {
+  test('renders tracking summary and timeline', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    await expect(page.getByRole('heading', { name: /tracking qa harness/i })).toBeVisible()
+    await expect(page.getByTestId('tracking-eta')).toContainText('Arriving in 20 minutes')
+    await expect(page.getByTestId('tracking-timeline')).toContainText('Your delivery')
+  })
+
+  test('updates ETA and emits notifications', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    await page.getByTestId('tracking-update-eta').click()
+    await expect(page.getByTestId('tracking-eta')).toContainText('Arriving in 8 minutes')
+
+    await page.getByTestId('tracking-driver-nearby').click()
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Driver is approaching' }),
+    ).toBeVisible()
+
+    await page.getByTestId('tracking-delivered').click()
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Delivery Completed' }),
+    ).toBeVisible()
+    await expect(page.getByTestId('tracking-timeline')).toContainText('Delivered')
+  })
+
+  test('uploads delivery photo', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    const fileInput = page.locator('input[type="file"]')
+    const pngBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMBAgEJv9kAAAAASUVORK5CYII='
+
+    await fileInput.setInputFiles({
+      name: 'test-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(pngBase64, 'base64'),
+    })
+
+    await expect(page.getByText('Photo uploaded')).toBeVisible()
+  })
+
+  test('tracking page has no a11y violations', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    const results = await new AxeBuilder({ page }).analyze()
+
+    expect(results.violations).toEqual([])
+  })
+})

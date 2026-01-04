@@ -91,6 +91,10 @@ As admin:
 - [ ] Hammer `/api/maps/directions` quickly → rate limited after threshold
 - [ ] Rate-limit errors are user-friendly and retryable
 
+### 7.3 Media upload abuse controls (if implemented)
+- [ ] Hammer `/api/track/photo-url` quickly → rate limited after threshold
+- [ ] Rate-limit errors include `Retry-After` headers
+
 ## 8) Logging & PII
 - [ ] No logs print full address/phone
 - [ ] Webhook logs do not print raw payload or customer email in full

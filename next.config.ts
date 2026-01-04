@@ -66,6 +66,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/__e2e__/tracking",
+        destination: "/e2e/tracking",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

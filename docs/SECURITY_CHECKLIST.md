@@ -39,6 +39,9 @@ Use this checklist for PR review and before deployments.
 - [ ] Rate limit exists (by IP/user) or strong abuse prevention is in place (429 + Retry-After)
 - [ ] Caching considered for repeated addresses/routes
 
+## Media Uploads
+- [ ] Signed photo URL endpoints are rate limited (429 + Retry-After)
+
 ## Headers & CSP
 - [ ] Baseline security headers present
 - [ ] CSP Report-Only rolled out; enforce only after violations resolved

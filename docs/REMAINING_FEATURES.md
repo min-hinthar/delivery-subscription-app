@@ -250,8 +250,10 @@ Admin assigns route → Driver accesses route → Customer tracks delivery
 
 ### PR #7: Admin Dashboard Redesign (P1)
 - `tests/e2e/live-tracking.spec.ts` - E2E tracking tests
-- `src/lib/notifications/browser-notifications.ts` - Browser notification service (optional)
-- `src/components/driver/photo-upload.tsx` - Photo upload component (optional)
+- `src/components/track/tracking-e2e-harness.tsx` - Tracking E2E harness
+- `src/app/(marketing)/__e2e__/tracking/page.tsx` - E2E route (Playwright only)
+- `src/lib/notifications/browser-notifications.ts` - Browser notification service
+- `src/components/driver/photo-upload.tsx` - Photo upload component
 - `tests/performance/tracking-load-test.ts` - Performance test suite
 
 ---

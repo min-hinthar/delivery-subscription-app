@@ -40,6 +40,7 @@ src/app/(auth)/signup/page.tsx
 src/app/(marketing)/error.tsx
 src/app/(marketing)/layout.tsx
 src/app/(marketing)/loading.tsx
+src/app/(marketing)/e2e/tracking/page.tsx
 src/app/(marketing)/page.tsx
 src/app/(marketing)/pricing/loading.tsx
 src/app/(marketing)/pricing/page.tsx

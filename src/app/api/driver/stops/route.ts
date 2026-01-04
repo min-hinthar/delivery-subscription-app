@@ -7,7 +7,7 @@ const stopUpdateSchema = z.object({
   stop_id: z.string().uuid(),
   status: z.enum(["pending", "in_progress", "completed", "issue"]),
   driver_notes: z.string().max(1000).optional().nullable(),
-  photo_url: z.string().url().optional().nullable(),
+  photo_url: z.string().min(1).optional().nullable(),
 });
 
 const privateHeaders = { "Cache-Control": "no-store" };
