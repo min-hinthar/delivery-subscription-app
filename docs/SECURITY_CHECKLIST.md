@@ -11,6 +11,8 @@ Use this checklist for PR review and before deployments.
 - [ ] Users cannot access other users’ resources by guessing IDs
 - [ ] Admin pages and APIs require `profiles.is_admin = true`
 - [ ] Server-side checks exist for any cross-tenant access
+- [ ] Driver pages and APIs require active driver profiles
+- [ ] Driver routes are scoped to `delivery_routes.driver_id = auth.uid()` via RLS
 
 ## Supabase RLS
 - [ ] RLS enabled on all user-owned tables
@@ -22,6 +24,7 @@ Use this checklist for PR review and before deployments.
 - [ ] Every mutating API validates input (zod)
 - [ ] Errors do not leak secrets or full PII
 - [ ] Logs avoid PII (addresses, phones) or redact them
+- [ ] Driver invite/login flows are rate limited (invite + magic link)
 
 ## Stripe
 - [ ] Webhook signature verification is enforced

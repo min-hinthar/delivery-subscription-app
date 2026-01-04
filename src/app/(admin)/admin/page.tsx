@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ClipboardList, MapPinned, PackageCheck, Truck } from "lucide-react";
+import { ArrowRight, ClipboardList, MapPinned, PackageCheck, Truck, UserCheck } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
@@ -32,6 +32,7 @@ export default async function AdminHomePage() {
   let routesCount = 0;
   let mealsCount = 0;
   let subscriptionsCount = 0;
+  let driversCount = 0;
 
   try {
     const [
@@ -39,6 +40,7 @@ export default async function AdminHomePage() {
       routesResult,
       mealsResult,
       subscriptionsResult,
+      driversResult,
     ] = await withTimeout(
       Promise.all([
         weekOf
@@ -53,6 +55,7 @@ export default async function AdminHomePage() {
           .select("id", { count: "exact", head: true })
           .eq("is_active", true),
         supabase.from("subscriptions").select("id", { count: "exact", head: true }),
+        supabase.from("driver_profiles").select("id", { count: "exact", head: true }),
       ]),
       10000,
       "Timed out loading admin stats.",
@@ -62,6 +65,7 @@ export default async function AdminHomePage() {
     routesCount = routesResult.count ?? 0;
     mealsCount = mealsResult.count ?? 0;
     subscriptionsCount = subscriptionsResult.count ?? 0;
+    driversCount = driversResult.count ?? 0;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to load admin stats.";
     return (
@@ -96,7 +100,7 @@ export default async function AdminHomePage() {
         </div>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {[
           {
             label: "Deliveries this week",
@@ -125,6 +129,13 @@ export default async function AdminHomePage() {
             href: "/admin/subscriptions",
             accent: "from-purple-50/80 to-purple-100/40",
             icon: ClipboardList,
+          },
+          {
+            label: "Drivers",
+            value: driversCount ?? 0,
+            href: "/admin/drivers",
+            accent: "from-rose-50/80 to-rose-100/40",
+            icon: UserCheck,
           },
         ].map((card) => {
           const Icon = card.icon;

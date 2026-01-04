@@ -1,7 +1,7 @@
 # Claude ↔ Codex Handoff Document
 
 **Created:** 2026-01-03
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-04
 **Status:** Active Collaboration
 **Branch:** `claude/plan-claude-integration-2tdsK`
 
@@ -2450,3 +2450,32 @@ Now that PR #16 (Driver App) is complete and fixed, choose from:
 
 **TESTING:**
 - Not run in this session (follow-up required): `bash scripts/codex/verify.sh`.
+
+---
+
+## ✅ Codex Session Update — Driver Authentication & Management (PR #17)
+
+**Branch:** `codex/auth-p0-driver-auth`
+
+### What was implemented
+- Added driver authentication + management backend:
+  - Migration `017_driver_authentication.sql` with `driver_profiles`, `profiles.is_driver`, and RLS policies.
+  - Driver auth helper + guard enforcing active driver access and onboarding redirects.
+  - Admin driver invite, status update, and resend invite APIs with rate limiting.
+  - Driver onboarding + route list APIs with zod validation.
+- Built admin driver management UI at `/admin/drivers` with invite modal, status filter, search, and driver cards.
+- Built driver-facing pages:
+  - `/driver/login` (magic link)
+  - `/driver/onboarding` (profile completion)
+  - `/driver/dashboard` (assigned routes)
+  - moved `/driver/route/[id]` under driver route group
+- Added driver profile validation utilities + unit tests.
+- Updated docs: QA_UX, SECURITY_CHECKLIST, SECURITY_REPORT, CURRENT_APP_TREE, REMAINING_FEATURES.
+
+### Testing
+- `bash scripts/codex/verify.sh`
+
+### Notes for Claude
+- Admin dashboard now links to `/admin/drivers`.
+- Driver onboarding form doubles as profile edit (active drivers can revisit).
+- API rate limits are in-memory; consider persistent store if needed.

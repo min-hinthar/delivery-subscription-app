@@ -433,3 +433,25 @@ Happy path:
 Edge cases:
 - Non-admin blocked from admin routes
 - Missing menu shows clear empty state
+
+---
+
+## 6) Driver Flow QA (Operational)
+
+### 6.1 Driver Login
+- [ ] `/driver/login` loads without auth and shows magic link form
+- [ ] Valid email sends magic link and shows confirmation toast/message
+- [ ] Expired link routes back with friendly error messaging
+- [ ] Suspended driver sees a clear access-suspended message
+
+### 6.2 Driver Onboarding
+- [ ] Magic link redirects to `/driver/onboarding`
+- [ ] Full name + phone are required; validation errors are inline
+- [ ] Optional vehicle fields save successfully
+- [ ] Successful submission redirects to `/driver/dashboard`
+
+### 6.3 Driver Dashboard
+- [ ] Assigned routes appear with status, stop counts, and next stop
+- [ ] Empty state explains that routes will appear when assigned
+- [ ] “Profile” and “Logout” actions are reachable on mobile
+- [ ] Tapping a route opens `/driver/route/[id]` without auth errors
