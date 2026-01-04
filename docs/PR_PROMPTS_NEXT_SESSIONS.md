@@ -1016,11 +1016,197 @@ The following massive implementations are complete:
 
 ---
 
-## 📋 REMAINING WORK - Polish & Optimization Phase
+## 📋 REMAINING WORK - Final Critical Feature + Polish
 
-### 🚀 Next Priority Features
+### 🚀 NEXT PRIORITY: PR #17 - Driver Authentication & Management (P0 - CRITICAL!)
+
+**Branch:** `codex/driver-authentication`
+**Status:** 🔴 NOT STARTED - Ready for Implementation
+**Priority:** P0 (Critical - Blocks production deployment)
+**Estimated Effort:** 3-4 hours
+**Prerequisites:** PR #16 (Driver Route Tracking) - ✅ COMPLETED
 
 ---
+
+#### 🎯 Why This Is Critical
+
+**THE PROBLEM:**
+- PR #16 created the driver route tracking UI at `/driver/route/[id]`
+- But there's NO WAY for drivers to sign up, log in, or be invited
+- Admins can't manage drivers or assign them to routes
+- **The driver feature is 50% complete but 0% usable**
+
+**THE SOLUTION:**
+This PR adds:
+1. ✅ **Admin-initiated driver invites** via email (magic link)
+2. ✅ **Driver email confirmation** and authentication
+3. ✅ **Simple driver onboarding** (name, phone, vehicle info)
+4. ✅ **Driver dashboard** to view assigned routes
+5. ✅ **Admin driver management** interface
+6. ✅ **Complete RLS security** for driver data
+
+---
+
+#### 📦 Implementation Package (Ready to Use!)
+
+**Everything is prepared for you:**
+1. ✅ **Migration created:** `supabase/migrations/017_driver_authentication.sql`
+2. ✅ **Full implementation guide:** `CODEX_PR17_IMPLEMENTATION.md` (step-by-step)
+3. ✅ **Complete specification:** `docs/DRIVER_AUTH_SPEC.md`
+4. ✅ **Database schema:** `driver_profiles` table with RLS policies
+5. ✅ **API specs:** All 5 endpoints documented with code samples
+
+---
+
+#### 🚀 Quick Start Instructions
+
+```bash
+# Step 1: Create branch from main
+git checkout main
+git pull origin main
+git checkout -b codex/driver-authentication
+
+# Step 2: Review the implementation guide
+cat CODEX_PR17_IMPLEMENTATION.md
+
+# Step 3: Start implementing (follow guide phases 1-5)
+# Phase 1: Database (30 min) - Migration already created!
+# Phase 2: API Endpoints (60 min) - 5 endpoints with code samples
+# Phase 3: Admin UI (45 min) - Driver management pages
+# Phase 4: Driver UI (45 min) - Login, onboarding, dashboard
+# Phase 5: Auth & Routing (30 min) - Middleware and route groups
+
+# Step 4: Test thoroughly
+pnpm dev
+# Test admin invite flow
+# Test driver onboarding flow
+# Test driver dashboard
+# Test RLS policies
+
+# Step 5: Commit and push
+git add -A
+git commit -m "feat: implement driver authentication & management (PR #17)"
+git push -u origin codex/driver-authentication
+
+# Step 6: Create PR
+gh pr create --title "feat: PR #17 - Driver Authentication & Management" \
+  --body "Implements driver invite, onboarding, authentication, and admin management. See CODEX_PR17_IMPLEMENTATION.md for details."
+```
+
+---
+
+#### 📋 Implementation Checklist
+
+**Database (30 min):**
+- [x] Migration file created (`017_driver_authentication.sql`)
+- [ ] Test migration locally (`supabase db reset`)
+- [ ] Verify RLS policies work
+
+**API Endpoints (60 min):**
+- [ ] `POST /api/admin/drivers/invite` - Admin invites driver
+- [ ] `POST /api/driver/profile` - Driver completes onboarding
+- [ ] `GET /api/driver/routes` - Get driver's assigned routes
+- [ ] `PATCH /api/admin/drivers/[id]` - Admin updates driver status
+- [ ] `POST /api/admin/drivers/[id]/resend-invite` - Resend invite
+
+**Admin UI (45 min):**
+- [ ] `/admin/drivers` page - Driver list with search/filter
+- [ ] `InviteDriverModal` component
+- [ ] `DriverCard` component
+- [ ] `DriverList` component
+
+**Driver UI (45 min):**
+- [ ] `/driver/login` page - Magic link login
+- [ ] `/driver/onboarding` page - Profile completion
+- [ ] `/driver/dashboard` page - Route overview
+
+**Auth & Routing (30 min):**
+- [ ] Create `(driver)` route group
+- [ ] Driver auth middleware
+- [ ] Redirect logic (login → onboarding → dashboard)
+
+**Testing:**
+- [ ] Admin can invite driver
+- [ ] Driver receives email and confirms
+- [ ] Driver completes onboarding
+- [ ] Driver sees assigned routes
+- [ ] Admin can suspend/activate drivers
+- [ ] RLS policies prevent unauthorized access
+
+---
+
+#### 🎯 Acceptance Criteria
+
+**Admin Flow:**
+- [ ] Admin navigates to `/admin/drivers`
+- [ ] Admin clicks "Invite Driver" and enters email
+- [ ] System sends invite email (magic link)
+- [ ] Admin sees driver in "Pending" status
+- [ ] Admin can resend invite if needed
+- [ ] Admin can suspend/activate drivers
+- [ ] Admin can search and filter drivers
+
+**Driver Flow:**
+- [ ] Driver receives invite email
+- [ ] Driver clicks magic link → redirects to `/driver/onboarding`
+- [ ] Driver fills out name, phone, vehicle info
+- [ ] Driver submits → redirected to `/driver/dashboard`
+- [ ] Driver sees assigned routes
+- [ ] Driver clicks route → existing `/driver/route/[id]` page
+- [ ] Driver can logout and login again
+
+**Security:**
+- [ ] Only admins can access `/admin/drivers`
+- [ ] Only drivers can access `/driver/*` routes
+- [ ] Drivers can only see their own data
+- [ ] Magic links expire after 24 hours
+- [ ] RLS policies prevent data leaks
+
+---
+
+#### 📚 Reference Documents
+
+1. **Implementation Guide:** `CODEX_PR17_IMPLEMENTATION.md` ← START HERE
+2. **Full Specification:** `docs/DRIVER_AUTH_SPEC.md`
+3. **Migration File:** `supabase/migrations/017_driver_authentication.sql`
+4. **PR #16 Context:** Driver route tracking already complete
+
+---
+
+#### 💡 Pro Tips
+
+1. **Follow the implementation guide phases in order** - they build on each other
+2. **Test the API endpoints first** before building UI (use Postman/curl)
+3. **RLS policies are already in the migration** - just verify they work
+4. **Code samples provided** for all API endpoints - copy and adapt
+5. **Supabase Admin API** requires service role key (server-side only!)
+
+---
+
+#### 🆘 Need Help?
+
+**Stuck on:**
+- Auth flow? → See `CODEX_PR17_IMPLEMENTATION.md` Phase 2
+- UI components? → See `docs/DRIVER_AUTH_SPEC.md` lines 241-392
+- RLS policies? → Migration file has all policies with comments
+- Magic links? → Verify `NEXT_PUBLIC_SITE_URL` in `.env.local`
+
+---
+
+### 🎉 After PR #17: App is Production Ready!
+
+Once this PR is merged, the app will have:
+- ✅ Complete customer onboarding and scheduling
+- ✅ Admin route planning and driver assignment
+- ✅ Driver authentication and route tracking
+- ✅ Live delivery tracking for customers
+- ✅ Complete security (RLS policies for all roles)
+
+**Remaining work after PR #17:** Only polish and optimization! 🚀
+
+---
+
+### 📊 Other Remaining Features (Lower Priority)
 
 ## ⭐ ARCHIVED: Google Maps Foundation (PR #10) - COMPLETED
 
