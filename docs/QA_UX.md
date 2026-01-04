@@ -188,8 +188,9 @@ Checklist:
 6) From onboarding completion, tap “Schedule delivery” → `/schedule`
 - Expected:
   - shows next eligible `week_of`
+  - calendar highlights upcoming weekends; locked weekends are visually disabled
   - shows delivery windows (Sat 11–7, Sun 11–3)
-  - user can select time window and save
+  - user can select time window and save from the summary card
 
 Cutoff behavior:
 - [ ] If within cutoff window (after Friday 5pm PT), the UI shows “Locked for this weekend”
@@ -199,6 +200,7 @@ Checklist:
 - [ ] On save: pending state + success confirmation
 - [ ] If window full: user sees “Full” with alternative suggestion
 - [ ] If not subscribed: show CTA back to pricing (no confusing errors)
+- [ ] Calendar selector matches the chosen week in the summary
 
 ### 5.5 Track Delivery
 7) Visit `/track`
