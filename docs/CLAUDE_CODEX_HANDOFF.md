@@ -1953,3 +1953,28 @@ All heavy workload PRs now have **step-by-step implementation guides** in `docs/
 **Last Updated By:** Claude Code (Session 6 - Documentation Sync)
 **Next Action:** Codex implements PR #10 (Google Maps Foundation)
 **Status:** All docs synced ✅ → Ready for next heavy workload
+
+---
+
+## Codex Session - Google Maps Foundation
+**Date:** 2026-01-04
+**Branch:** codex/google-maps-foundation
+
+### Implemented
+- Added Google Maps foundation migration for driver locations, route tracking fields, and delivery stop geocoding timestamps.
+- Added core map utilities (styled map init, address parsing, distance/duration helpers).
+- Added AnimatedMarker helper for smooth driver movement.
+- Added driver location API endpoint with validation and no-store responses.
+- Added directions API proxy endpoint with validation, rate limiting, and no-store responses.
+- Added unit tests for map utility helpers.
+
+### For Claude to Review
+- Confirm RLS policies align with expected driver/customer/admin access.
+- Validate API endpoint behavior with Supabase auth context and desired rate-limit thresholds.
+- Confirm directions endpoint should require auth vs. IP-only rate limiting.
+- Verify migration with existing schema (driver_id/route_id uniqueness for upserts).
+
+### Status
+- [x] Feature implemented
+- [ ] RLS verification pending (needs Supabase access)
+- [ ] API keys + Map ID setup pending
