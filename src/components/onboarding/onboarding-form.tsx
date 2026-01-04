@@ -3,27 +3,39 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { AddressAutocomplete } from "@/components/onboarding/address-autocomplete";
+import { PreferencesStep } from "@/components/onboarding/preferences-step";
+import { WelcomeStep } from "@/components/onboarding/welcome-step";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { parseApiResponse } from "@/lib/api/client";
-import { addressInputSchema, onboardingInputSchema } from "@/lib/api/types";
+import {
+  addressInputSchema,
+  onboardingInputSchema,
+  onboardingPreferencesSchema,
+} from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 
 const DELIVERY_DAYS = ["Saturday", "Sunday"];
 
 const STEPS = [
+  { id: "welcome", label: "Welcome" },
   { id: "profile", label: "Profile" },
   { id: "address", label: "Address" },
-  { id: "done", label: "Done" },
+  { id: "preferences", label: "Preferences" },
 ] as const;
 
-type StepId = (typeof STEPS)[number]["id"];
+type StepId = (typeof STEPS)[number]["id"] | "done";
 
 type OnboardingFormProps = {
   initialProfile?: {
     full_name: string | null;
     phone: string | null;
     email: string | null;
+    household_size?: number | null;
+    preferred_delivery_day?: string | null;
+    preferred_time_window?: string | null;
+    dietary_restrictions?: string[] | null;
   } | null;
   primaryAddress?: {
     id: string;
@@ -42,6 +54,18 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   const router = useRouter();
   const [fullName, setFullName] = useState(initialProfile?.full_name ?? "");
   const [phone, setPhone] = useState(initialProfile?.phone ?? "");
+  const [householdSize, setHouseholdSize] = useState<number | null>(
+    initialProfile?.household_size ?? null,
+  );
+  const [preferredDeliveryDay, setPreferredDeliveryDay] = useState(
+    initialProfile?.preferred_delivery_day ?? "",
+  );
+  const [preferredTimeWindow, setPreferredTimeWindow] = useState(
+    initialProfile?.preferred_time_window ?? "",
+  );
+  const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>(
+    initialProfile?.dietary_restrictions ?? [],
+  );
   const [line1, setLine1] = useState(primaryAddress?.line1 ?? "");
   const [line2, setLine2] = useState(primaryAddress?.line2 ?? "");
   const [city, setCity] = useState(primaryAddress?.city ?? "");
@@ -55,7 +79,7 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   const [verifiedAddress, setVerifiedAddress] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [step, setStep] = useState<StepId>("profile");
+  const [step, setStep] = useState<StepId>("welcome");
   const fullNameRef = useRef<HTMLInputElement | null>(null);
   const phoneRef = useRef<HTMLInputElement | null>(null);
   const line1Ref = useRef<HTMLInputElement | null>(null);
@@ -67,10 +91,30 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
   const instructionsRef = useRef<HTMLInputElement | null>(null);
 
   const email = useMemo(() => initialProfile?.email ?? "", [initialProfile?.email]);
-  const stepIndex = STEPS.findIndex((item) => item.id === step);
+  const stepIndex =
+    step === "done"
+      ? STEPS.length - 1
+      : step === "preferences"
+        ? 3
+        : step === "address"
+          ? 2
+          : step === "profile"
+            ? 1
+            : 0;
   const progress = ((stepIndex + 1) / STEPS.length) * 100;
   const clearFieldError = (key: string) =>
     setFieldErrors((prev) => ({ ...prev, [key]: "" }));
+
+  const formatPhone = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    if (digits.length <= 3) {
+      return digits;
+    }
+    if (digits.length <= 6) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    }
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  };
 
   const handleNextFromProfile = () => {
     setFormError(null);
@@ -84,10 +128,13 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
 
     if (!profileParsed.success) {
       const flattened = profileParsed.error.flatten().fieldErrors;
-      const nextErrors = {
+      const nextErrors: Record<string, string> = {
         fullName: flattened.fullName?.[0] ?? "",
         phone: flattened.phone?.[0] ?? "",
       };
+      if (!householdSize) {
+        nextErrors.householdSize = "Select your household size.";
+      }
       setFieldErrors(nextErrors);
       setFormError("Please fix the highlighted fields and try again.");
       if (nextErrors.fullName) {
@@ -98,7 +145,53 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       return;
     }
 
+    if (!householdSize) {
+      setFieldErrors({ householdSize: "Select your household size." });
+      setFormError("Please select your household size to continue.");
+      return;
+    }
+
     setStep("address");
+  };
+
+  const handleNextFromAddress = () => {
+    setFormError(null);
+    setMessage(null);
+    setFieldErrors({});
+
+    if (!verifiedAddress) {
+      setFormError("Verify your address before continuing.");
+      return;
+    }
+
+    setStep("preferences");
+  };
+
+  const handleNextFromPreferences = () => {
+    setFormError(null);
+    setMessage(null);
+    setFieldErrors({});
+
+    const preferencesParsed = onboardingPreferencesSchema.safeParse({
+      householdSize: householdSize ?? undefined,
+      preferredDeliveryDay,
+      preferredTimeWindow,
+      dietaryRestrictions,
+    });
+
+    if (!preferencesParsed.success) {
+      const flattened = preferencesParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        householdSize: flattened.householdSize?.[0] ?? "",
+        preferredDeliveryDay: flattened.preferredDeliveryDay?.[0] ?? "",
+        preferredTimeWindow: flattened.preferredTimeWindow?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Please update your preferences before saving.");
+      return;
+    }
+
+    void handleSubmit();
   };
 
   const handleSubmit = async () => {
@@ -179,6 +272,26 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
       return;
     }
 
+    const preferencesParsed = onboardingPreferencesSchema.safeParse({
+      householdSize: householdSize ?? undefined,
+      preferredDeliveryDay,
+      preferredTimeWindow,
+      dietaryRestrictions,
+    });
+
+    if (!preferencesParsed.success) {
+      const flattened = preferencesParsed.error.flatten().fieldErrors;
+      const nextErrors = {
+        householdSize: flattened.householdSize?.[0] ?? "",
+        preferredDeliveryDay: flattened.preferredDeliveryDay?.[0] ?? "",
+        preferredTimeWindow: flattened.preferredTimeWindow?.[0] ?? "",
+      };
+      setFieldErrors(nextErrors);
+      setFormError("Please update your preferences before saving.");
+      setStep("preferences");
+      return;
+    }
+
     setIsSaving(true);
 
     const saveController = new AbortController();
@@ -193,6 +306,10 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
           full_name: fullName,
           phone,
           onboarding_completed: true,
+          household_size: householdSize,
+          preferred_delivery_day: preferredDeliveryDay,
+          preferred_time_window: preferredTimeWindow,
+          dietary_restrictions: dietaryRestrictions,
           address: {
             id: primaryAddress?.id ?? null,
             line1: addressParsed.data.line1,
@@ -361,22 +478,26 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="grid grid-cols-3 gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="flex items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
           {STEPS.map((item, index) => (
-            <div
-              key={item.id}
-              className={cn(
-                "rounded-full border px-2 py-1 text-center",
-                index <= stepIndex
-                  ? "border-slate-900 text-slate-900 dark:border-slate-100 dark:text-slate-100"
-                  : "border-slate-200 text-slate-400 dark:border-slate-800 dark:text-slate-500",
-              )}
-            >
-              {item.label}
+            <div key={item.id} className="flex flex-1 flex-col items-center gap-1">
+              <span
+                className={cn(
+                  "h-2 w-2 rounded-full",
+                  index <= stepIndex
+                    ? "bg-slate-900 dark:bg-slate-100"
+                    : "bg-slate-200 dark:bg-slate-800",
+                )}
+              />
+              <span className="text-center">{item.label}</span>
             </div>
           ))}
         </div>
       </div>
+
+      {step === "welcome" ? (
+        <WelcomeStep onContinue={() => setStep("profile")} />
+      ) : null}
 
       {step === "profile" ? (
         <div className="space-y-6">
@@ -426,7 +547,7 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                 <input
                   value={phone}
                   onChange={(event) => {
-                    setPhone(event.target.value);
+                    setPhone(formatPhone(event.target.value));
                     clearFieldError("phone");
                   }}
                   ref={phoneRef}
@@ -434,6 +555,7 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                   aria-describedby={fieldErrors.phone ? "onboarding-phone-error" : undefined}
                   className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus-visible:ring-slate-100"
                   placeholder="(555) 123-4567"
+                  inputMode="tel"
                 />
                 {fieldErrors.phone ? (
                   <span id="onboarding-phone-error" className="text-xs text-rose-600">
@@ -465,10 +587,45 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
                 </div>
                 <p className="text-xs">We’ll let you pick a specific window on the schedule page.</p>
               </div>
+              <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400 md:col-span-2">
+                <p className="font-medium text-slate-600 dark:text-slate-300">
+                  Household size
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[1, 2, 3, 4, 5, 6].map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      onClick={() => {
+                        setHouseholdSize(size);
+                        clearFieldError("householdSize");
+                      }}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-xs font-medium transition",
+                        householdSize === size
+                          ? "border-slate-900 bg-slate-900 text-white dark:border-slate-100 dark:bg-slate-100 dark:text-slate-900"
+                          : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300",
+                      )}
+                    >
+                      {size}
+                      {size === 6 ? "+" : ""}
+                    </button>
+                  ))}
+                </div>
+                {fieldErrors.householdSize ? (
+                  <span className="text-xs text-rose-600">{fieldErrors.householdSize}</span>
+                ) : null}
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button onClick={handleNextFromProfile}>Next: Address</Button>
+            <Button
+              onClick={() => setStep("welcome")}
+              className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
+            >
+              Back to welcome
+            </Button>
           </div>
         </div>
       ) : null}
@@ -495,6 +652,19 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
               </span>
               Primary delivery address
             </div>
+            <AddressAutocomplete
+              onSelect={(result) => {
+                setLine1(result.line1);
+                setCity(result.city);
+                setState(result.state);
+                setPostalCode(result.postalCode);
+                setCountry(result.country);
+                setLine2("");
+                setVerifiedAddress(null);
+                setFieldErrors({});
+              }}
+              onStartManual={() => setVerifiedAddress(null)}
+            />
             <div className="grid gap-4 md:grid-cols-2">
               <label className="space-y-2 text-sm font-medium text-slate-700 dark:text-slate-200 md:col-span-2">
                 Address line 1
@@ -649,8 +819,8 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
             </div>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Button onClick={handleSubmit} disabled={isSaving}>
-              {isSaving ? "Saving…" : "Save profile"}
+            <Button onClick={handleNextFromAddress} disabled={isSaving}>
+              Continue to preferences
             </Button>
             <Button
               onClick={handleVerifyAddress}
@@ -669,6 +839,59 @@ export function OnboardingForm({ initialProfile, primaryAddress }: OnboardingFor
               className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
             >
               Back to profile
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {step === "preferences" ? (
+        <div className="space-y-6">
+          {showSummary ? (
+            <div
+              className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200"
+              role="alert"
+            >
+              <p className="font-semibold">Please fix the highlighted fields:</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-xs">
+                {visibleErrors.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          <PreferencesStep
+            householdSize={householdSize}
+            preferredDeliveryDay={preferredDeliveryDay}
+            preferredTimeWindow={preferredTimeWindow}
+            dietaryRestrictions={dietaryRestrictions}
+            onHouseholdSizeChange={(value) => {
+              setHouseholdSize(value);
+              clearFieldError("householdSize");
+            }}
+            onPreferredDayChange={(value) => {
+              setPreferredDeliveryDay(value);
+              clearFieldError("preferredDeliveryDay");
+            }}
+            onPreferredTimeWindowChange={(value) => {
+              setPreferredTimeWindow(value);
+              clearFieldError("preferredTimeWindow");
+            }}
+            onDietaryRestrictionToggle={(value) => {
+              setDietaryRestrictions((prev) =>
+                prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value],
+              );
+            }}
+            fieldErrors={fieldErrors}
+          />
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={handleNextFromPreferences} disabled={isSaving}>
+              {isSaving ? "Saving…" : "Save profile"}
+            </Button>
+            <Button
+              onClick={() => setStep("address")}
+              className="bg-slate-200 text-slate-900 hover:shadow-md dark:bg-slate-800 dark:text-slate-100"
+            >
+              Back to address
             </Button>
           </div>
         </div>

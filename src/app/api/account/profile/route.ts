@@ -8,6 +8,10 @@ const profileUpdateSchema = z.object({
   full_name: z.string().min(1),
   phone: z.string().min(7),
   onboarding_completed: z.boolean().optional(),
+  household_size: z.number().int().min(1).optional(),
+  preferred_delivery_day: z.enum(["Saturday", "Sunday", "Either"]).optional(),
+  preferred_time_window: z.enum(["Morning", "Afternoon", "Evening"]).optional(),
+  dietary_restrictions: z.array(z.string()).optional(),
   address: z.object({
     id: z.string().uuid().optional().nullable(),
     line1: z.string().min(1),
@@ -36,7 +40,16 @@ export async function POST(request: Request) {
     return bad("Invalid profile payload.", { status: 422, headers: privateHeaders });
   }
 
-  const { full_name, phone, onboarding_completed, address } = parsed.data;
+  const {
+    full_name,
+    phone,
+    onboarding_completed,
+    household_size,
+    preferred_delivery_day,
+    preferred_time_window,
+    dietary_restrictions,
+    address,
+  } = parsed.data;
 
   if (address.id) {
     const { data: existingAddress } = await supabase
@@ -90,6 +103,10 @@ export async function POST(request: Request) {
     full_name,
     phone,
     onboarding_completed: onboarding_completed ?? undefined,
+    household_size: household_size ?? undefined,
+    preferred_delivery_day: preferred_delivery_day ?? undefined,
+    preferred_time_window: preferred_time_window ?? undefined,
+    dietary_restrictions: dietary_restrictions ?? undefined,
     updated_at: new Date().toISOString(),
   });
 

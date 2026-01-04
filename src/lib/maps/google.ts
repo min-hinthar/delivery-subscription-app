@@ -64,9 +64,21 @@ function buildAddress(components: GeocodeResult["components"]) {
 }
 
 function parseGeocodeResult(result: GeocodeApiResult): GeocodeResult {
+  const components = parseAddressComponents(result.address_components);
+
+  return {
+    formattedAddress: result.formatted_address,
+    location: result.geometry?.location,
+    components,
+  };
+}
+
+function parseAddressComponents(
+  addressComponents: GeocodeApiComponent[] = [],
+): GeocodeResult["components"] {
   const components: GeocodeResult["components"] = {};
 
-  for (const component of result.address_components ?? []) {
+  for (const component of addressComponents ?? []) {
     if (component.types?.includes("street_number")) {
       components.streetNumber = component.long_name;
     }
@@ -90,11 +102,7 @@ function parseGeocodeResult(result: GeocodeApiResult): GeocodeResult {
     }
   }
 
-  return {
-    formattedAddress: result.formatted_address,
-    location: result.geometry?.location,
-    components,
-  };
+  return components;
 }
 
 type GeocodeApiResponse = {
@@ -139,6 +147,82 @@ export async function geocodeAddress(address: string) {
   }
 
   return parseGeocodeResult(data.results[0]);
+}
+
+type PlacesAutocompletePrediction = {
+  description: string;
+  place_id: string;
+  structured_formatting?: {
+    main_text?: string;
+    secondary_text?: string;
+  };
+};
+
+type PlacesAutocompleteResponse = {
+  status: string;
+  error_message?: string;
+  predictions: PlacesAutocompletePrediction[];
+};
+
+type PlaceDetailsResult = {
+  formatted_address: string;
+  geometry: { location: { lat: number; lng: number } };
+  address_components: GeocodeApiComponent[];
+};
+
+type PlaceDetailsResponse = {
+  status: string;
+  error_message?: string;
+  result: PlaceDetailsResult;
+};
+
+export async function autocompleteAddress(input: string, options?: { country?: string }) {
+  const apiKey = getGoogleMapsKey();
+  const url = new URL("https://maps.googleapis.com/maps/api/place/autocomplete/json");
+  url.searchParams.set("input", input);
+  url.searchParams.set("types", "address");
+  if (options?.country) {
+    url.searchParams.set("components", `country:${options.country.toLowerCase()}`);
+  }
+  url.searchParams.set("key", apiKey);
+
+  const response = await fetchWithTimeout(url.toString());
+  const data = (await response.json()) as PlacesAutocompleteResponse;
+
+  if (data.status !== "OK") {
+    if (data.status === "ZERO_RESULTS") {
+      return [];
+    }
+    throw new Error(data.error_message || "Unable to fetch address suggestions.");
+  }
+
+  return data.predictions.map((prediction) => ({
+    placeId: prediction.place_id,
+    description: prediction.description,
+    primary: prediction.structured_formatting?.main_text ?? prediction.description,
+    secondary: prediction.structured_formatting?.secondary_text ?? "",
+  }));
+}
+
+export async function lookupPlaceDetails(placeId: string) {
+  const apiKey = getGoogleMapsKey();
+  const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
+  url.searchParams.set("place_id", placeId);
+  url.searchParams.set("fields", "address_component,formatted_address,geometry");
+  url.searchParams.set("key", apiKey);
+
+  const response = await fetchWithTimeout(url.toString());
+  const data = (await response.json()) as PlaceDetailsResponse;
+
+  if (data.status !== "OK" || !data.result) {
+    throw new Error(data.error_message || "Unable to fetch place details.");
+  }
+
+  return {
+    formattedAddress: data.result.formatted_address,
+    location: data.result.geometry?.location,
+    components: parseAddressComponents(data.result.address_components),
+  };
 }
 
 export function assertValidAddress(result: GeocodeResult) {

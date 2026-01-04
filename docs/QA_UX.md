@@ -164,16 +164,20 @@ Checklist:
 - [ ] Failure states are clear (card declined → show retry)
 - [ ] Canceling checkout returns user safely to pricing with a message
 
-### 5.3 Onboarding (Profile → Address)
+### 5.3 Onboarding (Welcome → Profile → Address → Preferences)
 5) Onboarding page
 - Expected:
   - step-based UX:
-    - Step 1: name + phone
-    - Step 2: address + validation
+    - Step 1: welcome overview + CTA
+    - Step 2: name, phone, household size
+    - Step 3: address search or manual entry + validation
+    - Step 4: delivery day + time window + dietary preferences
     - Done: confirmation + CTA to schedule
     - CTA routes to `/schedule` without compilation errors or redirect loops
 
 Address requirements:
+- [ ] Autocomplete suggestions pre-fill city/state/ZIP
+- [ ] Manual entry is available if suggestions fail
 - [ ] Address input validates format
 - [ ] Geocode:
   - success → store formatted address + lat/lng
