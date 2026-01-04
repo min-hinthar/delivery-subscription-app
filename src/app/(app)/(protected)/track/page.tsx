@@ -17,6 +17,7 @@ type RouteStopRow = {
   status: string;
   estimated_arrival: string | null;
   completed_at: string | null;
+  photo_url: string | null;
   geocoded_lat: number | null;
   geocoded_lng: number | null;
 };
@@ -35,6 +36,18 @@ type RouteRow = {
   driver_id: string | null;
   driver?: { full_name: string | null } | null;
 };
+
+async function resolvePhotoUrl(
+  admin: ReturnType<typeof createSupabaseAdminClient>,
+  photoPath: string,
+) {
+  if (photoPath.startsWith("http")) {
+    return photoPath;
+  }
+
+  const { data } = await admin.storage.from("delivery-proofs").createSignedUrl(photoPath, 60 * 60);
+  return data?.signedUrl ?? null;
+}
 
 export default async function TrackPage() {
   const hasSupabaseConfig =
@@ -129,7 +142,7 @@ export default async function TrackPage() {
   const { data: customerStop } = await supabase
     .from("delivery_stops")
     .select(
-      "id, route_id, appointment_id, stop_order, status, estimated_arrival, completed_at, geocoded_lat, geocoded_lng",
+      "id, route_id, appointment_id, stop_order, status, estimated_arrival, completed_at, photo_url, geocoded_lat, geocoded_lng",
     )
     .eq("appointment_id", appointment.id)
     .order("stop_order", { ascending: true })
@@ -137,14 +150,13 @@ export default async function TrackPage() {
     .maybeSingle<RouteStopRow>();
 
   const routeId = customerStop?.route_id ?? null;
+  const admin = routeId ? createSupabaseAdminClient() : null;
   let route: { id: string; status: string | null; polyline: string | null } | null = null;
   let driverName: string | null = null;
   let driverLocation: DriverLocationRow | null = null;
   let routeStops: RouteStopRow[] = [];
 
-  if (routeId) {
-    const admin = createSupabaseAdminClient();
-
+  if (routeId && admin) {
     const { data: routeRow } = await admin
       .from("delivery_routes")
       .select("id, status, polyline, driver_id, driver:profiles(full_name)")
@@ -164,7 +176,7 @@ export default async function TrackPage() {
     const { data: stops } = await admin
       .from("delivery_stops")
       .select(
-        "id, appointment_id, stop_order, status, estimated_arrival, completed_at, geocoded_lat, geocoded_lng",
+        "id, appointment_id, stop_order, status, estimated_arrival, completed_at, photo_url, geocoded_lat, geocoded_lng",
       )
       .eq("route_id", routeId)
       .order("stop_order", { ascending: true });
@@ -184,17 +196,26 @@ export default async function TrackPage() {
 
   const stopsForView = routeStops.length > 0 && routeId ? routeStops : customerStop ? [customerStop] : [];
 
-  const formattedStops = stopsForView.map((stop) => ({
-    id: stop.id,
-    appointmentId: stop.appointment_id,
-    stopOrder: stop.stop_order,
-    status: stop.status,
-    estimatedArrival: stop.estimated_arrival,
-    completedAt: stop.completed_at,
-    lat: stop.geocoded_lat,
-    lng: stop.geocoded_lng,
-    isCustomerStop: stop.appointment_id === appointment.id,
-  }));
+  const customerPhotoUrl =
+    admin && customerStop?.photo_url && customerStop.appointment_id === appointment.id
+      ? await resolvePhotoUrl(admin, customerStop.photo_url)
+      : null;
+
+  const formattedStops = stopsForView.map((stop) => {
+    const isCustomerStop = stop.appointment_id === appointment.id;
+    return {
+      id: stop.id,
+      appointmentId: stop.appointment_id,
+      stopOrder: stop.stop_order,
+      status: stop.status,
+      estimatedArrival: stop.estimated_arrival,
+      completedAt: stop.completed_at,
+      photoUrl: isCustomerStop ? customerPhotoUrl : null,
+      lat: stop.geocoded_lat,
+      lng: stop.geocoded_lng,
+      isCustomerStop,
+    };
+  });
 
   const customerLocation =
     customerStop?.geocoded_lat != null && customerStop?.geocoded_lng != null

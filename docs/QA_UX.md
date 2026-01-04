@@ -273,6 +273,8 @@ Checklist:
 - [ ] Timeline reflects completed/current/upcoming stops with clear labels
 - [ ] Driver info is collapsed by default with privacy-safe support contact
 - [ ] Reconnecting state appears if realtime updates drop
+- [ ] Browser notification settings available and respect Do Not Disturb hours
+- [ ] Delivery proof photo appears on customer stop once delivered (if provided)
 
 ### 5.6 Account & Billing
 8) Visit `/account`

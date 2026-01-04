@@ -1625,3 +1625,34 @@ describe('Map Utilities', () => {
 **Status:** Polish & Optimization Phase - App ~85% Complete
 **Owner:** Claude + Codex team
 **Next Recommended:** PR #7 (Admin Dashboard Redesign) or PR #11 (Real-Time ETA Engine)
+
+---
+
+## ✅ Update: PR #15 Live Tracking Polish & Testing (Completed)
+
+**Date:** 2026-01-05
+**Status:** ✅ Completed (E2E harness + Playwright tests)
+
+**Highlights:**
+- Added a Playwright-friendly tracking QA harness for deterministic UI updates.
+- Added E2E coverage for ETA changes, notifications, and timeline updates.
+- Scoped the harness to `PLAYWRIGHT_E2E`/`CODEX_VERIFY` to keep prod clean.
+
+**Remaining (Optional Enhancements):**
+- Browser notifications
+- Delivery photo upload
+- Performance/load testing suite
+
+## ✅ Update: PR #15 Tracking Enhancements (Notifications + Photos + Perf Harness)
+
+**Date:** 2026-01-05
+**Status:** ✅ Browser notifications + delivery photo upload implemented
+
+**Completed Additions:**
+- Browser notification settings (with Do Not Disturb hours + ETA change threshold)
+- Delivery proof photo upload with compression (<500KB)
+- Customer timeline displays delivery proof when delivered
+- Performance load test harness (`tests/performance/tracking-load-test.ts`)
+
+**Remaining (Manual QA):**
+- Run load test with 100+ sessions for 60 minutes and record memory/CPU results
