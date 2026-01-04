@@ -18,7 +18,7 @@ alter table public.delivery_routes
   alter column status type route_status using status::route_status;
 
 alter table public.delivery_routes
-  alter column status set default 'pending';
+  alter column status set default 'pending'::route_status;
 
 alter table public.delivery_stops
   add column if not exists driver_notes text,
