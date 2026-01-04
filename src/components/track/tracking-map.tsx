@@ -6,6 +6,8 @@ import { AnimatedMarker } from "@/lib/maps/animated-marker";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { TrackingStop, TrackingLocation } from "@/components/track/tracking-dashboard";
+import { cacheTrackingData, getCachedTrackingData } from "@/lib/tracking/offline-cache";
+import type { CachedDriverLocation } from "@/lib/tracking/offline-cache";
 
 type GoogleMaps = typeof google;
 
@@ -77,6 +79,9 @@ export function TrackingMap({
   const [connectionStatus, setConnectionStatus] = useState<
     "idle" | "connecting" | "connected" | "reconnecting" | "error"
   >(routeId && showDriver ? "connecting" : "idle");
+  const [autoTrackDriver, setAutoTrackDriver] = useState(true);
+  const lastManualInteractionRef = useRef<number>(0);
+  const isInitialLoadRef = useRef(true);
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
   const mapId = process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID;
@@ -88,6 +93,7 @@ export function TrackingMap({
     return null;
   }, [apiKey]);
 
+  // Memoize map stops to avoid unnecessary re-renders
   const mapStops = useMemo(
     () =>
       stops
@@ -101,6 +107,27 @@ export function TrackingMap({
         })),
     [stops],
   );
+
+  // For performance: limit visible stop markers on map to 25 closest to customer
+  const visibleMapStops = useMemo(() => {
+    if (mapStops.length <= 25 || !customerLocation) {
+      return mapStops;
+    }
+
+    // Calculate distance from customer location and sort
+    const stopsWithDistance = mapStops.map((stop) => {
+      const latDiff = stop.lat - customerLocation.lat;
+      const lngDiff = stop.lng - customerLocation.lng;
+      const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+      return { ...stop, distance };
+    });
+
+    // Sort by distance and take closest 25
+    return stopsWithDistance
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 25)
+      .map(({ distance, ...stop }) => stop);
+  }, [mapStops, customerLocation]);
 
   const updateRouteProgress = useCallback((position: google.maps.LatLng) => {
     const path = routePathRef.current;
@@ -121,6 +148,29 @@ export function TrackingMap({
 
     completedPolylineRef.current.setPath(path.slice(0, Math.max(closestIndex + 1, 1)));
     remainingPolylineRef.current.setPath(path.slice(closestIndex));
+  }, []);
+
+  const smoothPanToPosition = useCallback((map: google.maps.Map, position: google.maps.LatLng) => {
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(position);
+
+    // Add padding around the position for context
+    const offset = 0.005; // ~500m padding
+    bounds.extend(
+      new google.maps.LatLng(position.lat() + offset, position.lng() + offset),
+    );
+    bounds.extend(
+      new google.maps.LatLng(position.lat() - offset, position.lng() - offset),
+    );
+
+    // Smooth pan with animation
+    map.panTo(position);
+
+    // Adjust zoom if driver is getting close to edge
+    const currentBounds = map.getBounds();
+    if (!currentBounds?.contains(position)) {
+      map.fitBounds(bounds, { top: 80, bottom: 80, left: 80, right: 80 });
+    }
   }, []);
 
   useEffect(() => {
@@ -147,7 +197,7 @@ export function TrackingMap({
           ? new googleMaps.maps.LatLng(customerLocation.lat, customerLocation.lng)
           : new googleMaps.maps.LatLng(34.0522, -118.2437);
 
-        mapInstanceRef.current = new googleMaps.maps.Map(mapRef.current, {
+        const map = new googleMaps.maps.Map(mapRef.current, {
           mapId,
           center: initialCenter,
           zoom: 12,
@@ -156,6 +206,31 @@ export function TrackingMap({
           streetViewControl: false,
           fullscreenControl: true,
           mapTypeControl: false,
+        });
+
+        mapInstanceRef.current = map;
+
+        // Detect user interaction to disable auto-tracking temporarily
+        const handleUserInteraction = () => {
+          lastManualInteractionRef.current = Date.now();
+          setAutoTrackDriver(false);
+
+          // Re-enable auto-tracking after 10 seconds of no interaction
+          setTimeout(() => {
+            const timeSinceLastInteraction = Date.now() - lastManualInteractionRef.current;
+            if (timeSinceLastInteraction >= 10000) {
+              setAutoTrackDriver(true);
+            }
+          }, 10000);
+        };
+
+        map.addListener("dragstart", handleUserInteraction);
+        map.addListener("zoom_changed", () => {
+          // Only count as interaction if user manually zoomed (not programmatic)
+          const bounds = map.getBounds();
+          if (bounds && !isInitialLoadRef.current) {
+            handleUserInteraction();
+          }
         });
       })
       .catch((caught) => {
@@ -189,7 +264,8 @@ export function TrackingMap({
       markersRef.current.push(customerMarker);
     }
 
-    mapStops.forEach((stop) => {
+    // Only show visible stops to improve performance with long routes
+    visibleMapStops.forEach((stop) => {
       if (stop.isCustomerStop) {
         return;
       }
@@ -248,7 +324,15 @@ export function TrackingMap({
     }
 
     if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, 60);
+      // Smooth zoom animation on initial load, then allow auto-tracking
+      if (isInitialLoadRef.current) {
+        map.fitBounds(bounds, 60);
+        setTimeout(() => {
+          isInitialLoadRef.current = false;
+        }, 1000);
+      } else {
+        map.fitBounds(bounds, 60);
+      }
     }
 
     return () => {
@@ -257,7 +341,7 @@ export function TrackingMap({
       completedPolylineRef.current?.setMap(null);
       remainingPolylineRef.current?.setMap(null);
     };
-  }, [customerLocation, mapStops, polyline]);
+  }, [customerLocation, visibleMapStops, polyline]);
 
   useEffect(() => {
     if (!routeId || !showDriver || !mapInstanceRef.current) {
@@ -287,11 +371,33 @@ export function TrackingMap({
 
       if (!truckMarkerRef.current) {
         truckMarkerRef.current = new AnimatedMarker(map, newPosition, truckSymbol);
+        // Initial position - smooth zoom to show driver and route
+        if (isInitialLoadRef.current) {
+          setTimeout(() => smoothPanToPosition(map, newPosition), 500);
+        }
       } else {
-        truckMarkerRef.current.animateTo(newPosition, 1000).catch(() => undefined);
+        // Adaptive animation - duration auto-calculated based on distance
+        truckMarkerRef.current.animateTo(newPosition).catch(() => undefined);
       }
 
       updateRouteProgress(newPosition);
+
+      // Auto-track driver position if enabled and not recently manually panned
+      const timeSinceInteraction = Date.now() - lastManualInteractionRef.current;
+      if (autoTrackDriver && timeSinceInteraction > 10000) {
+        smoothPanToPosition(map, newPosition);
+      }
+
+      // Cache driver location for offline support
+      if (routeId) {
+        const cachedLocation: CachedDriverLocation = {
+          lat: location.lat,
+          lng: location.lng,
+          heading: location.heading,
+          updatedAt: location.updatedAt || new Date().toISOString(),
+        };
+        cacheTrackingData(routeId, cachedLocation, []);
+      }
     };
 
     if (initialDriverLocation) {
@@ -390,6 +496,20 @@ export function TrackingMap({
         <div className="absolute inset-x-4 top-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
           Live driver updates are temporarily unavailable.
         </div>
+      ) : null}
+      {showDriver && !autoTrackDriver ? (
+        <button
+          onClick={() => {
+            setAutoTrackDriver(true);
+            lastManualInteractionRef.current = 0;
+            if (truckMarkerRef.current && mapInstanceRef.current) {
+              smoothPanToPosition(mapInstanceRef.current, truckMarkerRef.current.getPosition());
+            }
+          }}
+          className="absolute bottom-4 right-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700 shadow-md transition-all hover:bg-emerald-100 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60"
+        >
+          Re-center on driver
+        </button>
       ) : null}
     </div>
   );

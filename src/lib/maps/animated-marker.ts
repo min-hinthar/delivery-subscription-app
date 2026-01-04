@@ -59,19 +59,17 @@ export class AnimatedMarker {
    * Animate marker to new position over duration
    *
    * @param newPosition - Target position to animate to
-   * @param duration - Animation duration in milliseconds (default: 1000ms)
+   * @param duration - Animation duration in milliseconds (default: auto-calculated)
    * @returns Promise that resolves when animation completes
    *
    * Note: Calling this method while an animation is in progress will cancel
-   * the previous animation and start a new one.
+   * the previous animation and start a new one. If duration is not provided,
+   * it will be calculated based on distance and time since last update for
+   * smoother animations.
    */
-  animateTo(newPosition: google.maps.LatLng, duration: number = 1000): Promise<void> {
+  animateTo(newPosition: google.maps.LatLng, duration?: number): Promise<void> {
     if (this.isDestroyed) {
       return Promise.reject(new Error("Cannot animate destroyed marker"));
-    }
-
-    if (duration < 0) {
-      return Promise.reject(new Error("Animation duration must be positive"));
     }
 
     return new Promise((resolve, reject) => {
@@ -81,19 +79,46 @@ export class AnimatedMarker {
           cancelAnimationFrame(this.animationFrameId);
         }
 
-        this.targetPosition = newPosition;
-        const startTime = Date.now();
-        const startLat = this.currentPosition.lat();
-        const startLng = this.currentPosition.lng();
-        const endLat = newPosition.lat();
-        const endLng = newPosition.lng();
-
         // Check if geometry library is loaded
         if (!google.maps.geometry || !google.maps.geometry.spherical) {
           throw new Error(
             "Google Maps Geometry library is not loaded. Add 'geometry' to the libraries parameter."
           );
         }
+
+        // Calculate distance between current and new position
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+          this.currentPosition,
+          newPosition,
+        );
+
+        // Auto-calculate duration if not provided
+        // Use adaptive duration based on distance:
+        // - Short distances (<50m): 500ms for responsive feel
+        // - Medium distances (50-200m): 1000-2000ms for smooth motion
+        // - Long distances (>200m): Cap at 3000ms to avoid sluggishness
+        let animationDuration: number;
+        if (duration !== undefined) {
+          if (duration < 0) {
+            return Promise.reject(new Error("Animation duration must be positive"));
+          }
+          animationDuration = duration;
+        } else {
+          if (distance < 50) {
+            animationDuration = 500;
+          } else if (distance < 200) {
+            animationDuration = 500 + (distance - 50) * 10; // 500ms to 2000ms
+          } else {
+            animationDuration = Math.min(2000 + (distance - 200) * 2, 3000);
+          }
+        }
+
+        this.targetPosition = newPosition;
+        const startTime = Date.now();
+        const startLat = this.currentPosition.lat();
+        const startLng = this.currentPosition.lng();
+        const endLat = newPosition.lat();
+        const endLng = newPosition.lng();
 
         // Calculate heading (rotation angle)
         const heading = google.maps.geometry.spherical.computeHeading(
@@ -108,9 +133,9 @@ export class AnimatedMarker {
           }
 
           const elapsed = Date.now() - startTime;
-          const progress = Math.min(elapsed / duration, 1);
+          const progress = Math.min(elapsed / animationDuration, 1);
 
-          // Easing function (ease-in-out cubic)
+          // Easing function (ease-in-out cubic for smooth motion)
           const eased =
             progress < 0.5
               ? 2 * progress * progress
