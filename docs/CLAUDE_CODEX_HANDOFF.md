@@ -198,6 +198,35 @@ This document facilitates seamless communication between **Claude Code (me!)** a
 - ❓ Are the example tests following the right patterns?
 - ❓ Do we need more setup for Supabase/Stripe mocking?
 
+---
+
+## ✅ Codex Session Summary (Visual Route Builder)
+
+**Implemented:**
+- Added a visual route builder workspace with drag-and-drop unassigned stops, a Google Map view, and route detail controls.
+- Added route optimization helper to call the Directions API and calculate route metrics.
+- Added admin PDF export endpoint for printable route sheets.
+- Added admin workflow documentation updates and basic component tests.
+
+**Files to Review:**
+- `src/components/admin/route-builder-workspace.tsx`
+- `src/components/admin/unassigned-stops.tsx`
+- `src/components/admin/route-details.tsx`
+- `src/components/admin/route-builder-map.tsx`
+- `src/lib/maps/route-optimizer.ts`
+- `src/app/(admin)/admin/routes/new/page.tsx`
+- `src/app/api/admin/routes/export-pdf/route.ts`
+- `src/app/api/admin/routes/build/route.ts`
+- `src/components/admin/tests/route-builder.test.tsx`
+- `docs/ADMIN_OPERATIONS.md`
+
+**Testing:**
+- Added component tests for route builder panels with Vitest + Testing Library.
+
+**Notes / Follow-ups:**
+- Export PDF uses Google Static Maps; verify server key is configured in environments.
+- Start/end times are saved when start time is provided on route creation.
+
 ### Review Request: CI/CD Workflow
 
 **What to Review:**
