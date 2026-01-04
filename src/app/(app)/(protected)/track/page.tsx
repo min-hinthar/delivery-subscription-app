@@ -203,8 +203,7 @@ export default async function TrackPage() {
 
   const isInTransit =
     appointment.status === "in_transit" ||
-    route?.status === "in_progress" ||
-    route?.status === "started";
+    route?.status === "active";
 
   const isRoutePending = !route && formattedStops.length === 0;
 

@@ -66,14 +66,44 @@ export function TrackingDashboard({
   initialDriverLocation,
   isInTransit,
 }: TrackingDashboardProps) {
-  const [stops, setStops] = useState<TrackingStop[]>(initialStops);
+  const [stops, setStops] = useState<TrackingStop[]>(() => {
+    if (!route?.id || typeof window === "undefined") {
+      return initialStops;
+    }
+
+    const cachedData = getCachedTrackingData(route.id);
+    if (!cachedData || cachedData.stops.length === 0) {
+      return initialStops;
+    }
+
+    const cachedStops = cachedData.stops.map((cached) => {
+      const existing = initialStops.find((s) => s.id === cached.id);
+      return (
+        existing || {
+          id: cached.id,
+          appointmentId: appointmentId,
+          stopOrder: cached.stopOrder,
+          status: cached.status,
+          estimatedArrival: cached.estimatedArrival,
+          completedAt: cached.completedAt,
+          lat: null,
+          lng: null,
+          isCustomerStop: false,
+        }
+      );
+    });
+
+    return cachedStops.length > initialStops.length ? cachedStops : initialStops;
+  });
   const [lastUpdated, setLastUpdated] = useState<Date | null>(() =>
     initialUpdatedAt ? new Date(initialUpdatedAt) : null,
   );
   const [connectionStatus, setConnectionStatus] = useState<
     "idle" | "connecting" | "connected" | "reconnecting" | "error"
   >(route?.id ? "connecting" : "idle");
-  const [isOffline, setIsOffline] = useState(false);
+  const [isOffline, setIsOffline] = useState(
+    typeof navigator === "undefined" ? false : !navigator.onLine,
+  );
   const [notifications, setNotifications] = useState<DeliveryNotification[]>([]);
   const previousStatusRef = useState<Record<string, string>>({});
 
@@ -102,38 +132,6 @@ export function TrackingDashboard({
     [sortedStops],
   );
 
-  // Load cached data on mount if offline
-  useEffect(() => {
-    if (!route?.id) {
-      return;
-    }
-
-    const cachedData = getCachedTrackingData(route.id);
-    if (cachedData && cachedData.stops.length > 0) {
-      // Use cached stops as fallback
-      const cachedStops = cachedData.stops.map((cached) => {
-        const existing = initialStops.find((s) => s.id === cached.id);
-        return (
-          existing || {
-            id: cached.id,
-            appointmentId: appointmentId,
-            stopOrder: cached.stopOrder,
-            status: cached.status,
-            estimatedArrival: cached.estimatedArrival,
-            completedAt: cached.completedAt,
-            lat: null,
-            lng: null,
-            isCustomerStop: false,
-          }
-        );
-      });
-
-      if (cachedStops.length > initialStops.length) {
-        setStops(cachedStops);
-      }
-    }
-  }, [route?.id, appointmentId, initialStops]);
-
   // Monitor online/offline status
   useEffect(() => {
     const handleOnline = () => setIsOffline(false);
@@ -141,8 +139,6 @@ export function TrackingDashboard({
 
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-
-    setIsOffline(!navigator.onLine);
 
     return () => {
       window.removeEventListener("online", handleOnline);

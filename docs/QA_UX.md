@@ -218,6 +218,45 @@ Checklist:
 
 ### 5.5 Track Delivery
 7) Visit `/track`
+
+---
+
+## 7) Driver Route Experience (Mobile)
+
+### 7.1 Start route
+1) Visit `/driver/route/[id]` on mobile
+- Expected:
+  - route summary (status, remaining stops)
+  - “Start route” CTA when pending
+  - live location tracker visible
+
+Checklist:
+- [ ] Start route updates status to active
+- [ ] Location tracking prompts for permission
+- [ ] Offline banner shows queued updates
+
+### 7.2 Stop management
+2) Tap a stop card
+- Expected:
+  - address and customer name visible
+  - Navigate button opens Google Maps
+  - Call button appears if phone is available
+  - Notes and photo upload available
+
+Checklist:
+- [ ] Mark delivered sets completed timestamp
+- [ ] Issue reporting logs notes
+- [ ] Photo upload handles failures gracefully
+
+### 7.3 End route
+3) Tap “End route”
+- Expected:
+  - route status moves to completed
+  - location tracking stops sending updates
+
+Checklist:
+- [ ] End route CTA disabled while saving
+- [ ] Completed route is read-only
 - Expected:
   - If no route assigned yet:
     - show friendly message: “We’ll update tracking when the driver is assigned”

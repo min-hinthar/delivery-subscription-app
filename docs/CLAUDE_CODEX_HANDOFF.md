@@ -2204,3 +2204,27 @@ You've accomplished something incredible:
 **What's left is just polish and optimization. The hard work is done!** 🚀
 
 ---
+
+## ✅ Codex Session Update — PR #16 Driver Mobile App (Location Sharing)
+
+**Summary:**
+- Added driver route page at `/driver/route/[id]` with route summary, next stop card, and stop management.
+- Implemented live location tracking with offline queueing and pause-when-stopped logic.
+- Added driver stop update + route status APIs and new RLS policies for driver access.
+- Documented driver QA checks in `docs/QA_UX.md`.
+
+**Key Files Updated/Added:**
+- `src/app/(app)/driver/route/[id]/page.tsx`
+- `src/components/driver/location-tracker.tsx`
+- `src/components/driver/route-view.tsx`
+- `src/components/driver/stop-actions.tsx`
+- `src/lib/driver/location-queue.ts`
+- `src/app/api/driver/route-status/route.ts`
+- `src/app/api/driver/stops/route.ts`
+- `supabase/migrations/015_driver_route_updates.sql`
+- `docs/QA_UX.md`
+
+**Notes:**
+- Route status enum migrated to `pending | active | completed | cancelled`.
+- Driver access scoped to assigned routes via new RLS policies for routes, stops, addresses, and profiles.
+- Photo uploads assume Supabase Storage bucket `delivery-proofs`.
