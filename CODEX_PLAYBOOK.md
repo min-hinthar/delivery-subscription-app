@@ -30,8 +30,8 @@ If you just finished work, go to **Section 4: Handoff Protocol**
 ### Current State
 - **Last Claude Session:** Session 3 - Homepage Redesign ✅
 - **Claude's Branch:** `claude/plan-claude-integration-2tdsK`
-- **Last Codex Session:** Weekly Menu Component Redesign ✅
-- **Your Branch:** `codex/collaborate-with-claude-on-app-improvements`
+- **Last Codex Session:** Onboarding Flow Enhancement ✅
+- **Your Branch:** `codex/onboarding-enhancement`
 - **Main Branch Status:** Needs sync
 
 ### What Claude Built (Session 3)
@@ -42,11 +42,12 @@ If you just finished work, go to **Section 4: Handoff Protocol**
 - ⚠️ Issues found by Codex: Nested interactive elements, hardcoded colors
 
 ### What Codex Built (Just Now)
-- ✅ Weekly Menu Component redesign
-- ✅ [Add details here after you complete]
+- ✅ Onboarding welcome + preferences steps
+- ✅ Address autocomplete + manual fallback
+- ✅ Household size + delivery preference capture
 
 ### What's Next
-**Priority 1:** Merge Weekly Menu work to main
+**Priority 1:** Review onboarding flow UX + verify new preferences storage
 **Priority 2:** Address Claude's Session 3 revisions
 **Priority 3:** Choose next feature from planning docs
 

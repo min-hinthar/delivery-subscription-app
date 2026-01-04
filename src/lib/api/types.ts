@@ -5,6 +5,20 @@ export const onboardingInputSchema = z.object({
   phone: z.string().min(7, "Phone is required"),
 });
 
+export const onboardingPreferencesSchema = z.object({
+  householdSize: z
+    .number({ invalid_type_error: "Household size is required" })
+    .int("Household size must be a whole number")
+    .min(1, "Household size is required"),
+  preferredDeliveryDay: z.enum(["Saturday", "Sunday", "Either"], {
+    required_error: "Select a preferred delivery day",
+  }),
+  preferredTimeWindow: z.enum(["Morning", "Afternoon", "Evening"], {
+    required_error: "Select a preferred time window",
+  }),
+  dietaryRestrictions: z.array(z.string()).optional(),
+});
+
 export const addressInputSchema = z.object({
   line1: z.string().min(1, "Address line 1 is required"),
   line2: z.string().optional().nullable(),

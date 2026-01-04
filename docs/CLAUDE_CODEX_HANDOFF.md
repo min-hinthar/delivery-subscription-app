@@ -1712,3 +1712,24 @@ For each feature Codex implements, I will:
 ### Status
 - [x] Feature implemented
 - [x] `bash scripts/codex/verify.sh`
+
+---
+
+## Codex Session - Onboarding Flow Enhancement
+**Date:** 2026-01-04
+**Branch:** `codex/onboarding-enhancement`
+
+### Implemented
+- Added welcome and preferences steps with updated 4-step progress indicator for onboarding.
+- Added household size selection and US phone formatting in the profile step.
+- Implemented address autocomplete backed by a new server-side Places API endpoint and manual entry fallback.
+- Stored onboarding preferences (household size, preferred day/time window, dietary restrictions) on profiles.
+- Updated QA checklist to reflect the expanded onboarding flow.
+
+### For Claude to Review
+- Verify address autocomplete UX and fallback behavior on slow connections.
+- Confirm new preferences fields align with product expectations and data model.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`
