@@ -198,6 +198,16 @@ Cutoff behavior:
 
 Checklist:
 - [ ] On save: pending state + success confirmation
+
+---
+
+## 6) Admin Operations QA (Deliveries)
+
+### Deliveries list management
+- [ ] Bulk select is available and shows selected count
+- [ ] Bulk actions (assign route, message, export CSV) are disabled without a selection
+- [ ] Desktop uses table layout; mobile uses cards with expandable details
+- [ ] Search highlights matching text in name, phone, and email
 - [ ] If window full: user sees “Full” with alternative suggestion
 - [ ] If not subscribed: show CTA back to pricing (no confusing errors)
 - [ ] Calendar selector matches the chosen week in the summary

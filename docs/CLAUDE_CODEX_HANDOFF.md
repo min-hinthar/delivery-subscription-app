@@ -1691,3 +1691,24 @@ For each feature Codex implements, I will:
 ### Status
 - [x] Feature implemented
 - [x] `bash scripts/codex/verify.sh`
+
+---
+
+## Codex Session - Deliveries Management Bulk Actions
+**Date:** 2026-01-04
+**Branch:** `codex/deliveries-management`
+
+### Implemented
+- Added bulk actions bar with select-all, assign route, message, and export CSV controls.
+- Introduced responsive delivery list (desktop table + mobile cards) with expandable details.
+- Enabled per-row selection, inline actions, and CSV export of selected deliveries.
+- Updated admin deliveries page to use the new list component data model.
+
+### For Claude to Review
+- Validate bulk action UX copy and disabled states.
+- Review assign-to-route behavior using query params.
+- Confirm dark mode contrast in table headers and action buttons.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`
