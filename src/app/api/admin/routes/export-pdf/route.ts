@@ -130,76 +130,196 @@ export async function POST(request: Request) {
 
     const doc = new jsPDF({ unit: "pt", format: "letter" });
     const pageWidth = doc.internal.pageSize.getWidth();
-    let cursorY = 40;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 50;
+    const contentWidth = pageWidth - 2 * margin;
+    let currentPage = 1;
 
-    doc.setFontSize(18);
-    doc.text(route.name ?? "Delivery Route", 40, cursorY);
-    cursorY += 18;
+    // Helper function to add footer with page numbers
+    const addFooter = () => {
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text(
+        `Page ${currentPage} • Generated ${new Date().toLocaleDateString()}`,
+        margin,
+        pageHeight - 30,
+      );
+      doc.text(
+        "For authorized drivers only • Confirm all deliveries in the system",
+        pageWidth - margin,
+        pageHeight - 30,
+        { align: "right" },
+      );
+    };
 
+    // Header section with branding
+    let cursorY = 50;
+
+    // Company/Service Header
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text("DELIVERY ROUTE SCHEDULE", margin, cursorY);
+    cursorY += 20;
+
+    // Route name - prominent
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text(route.name ?? "Delivery Route", margin, cursorY);
+    cursorY += 30;
+
+    // Metadata box with subtle background
+    const metadataBoxY = cursorY;
+    doc.setFillColor(248, 250, 252); // slate-50
+    doc.rect(margin, metadataBoxY, contentWidth, 90, "F");
+
+    cursorY = metadataBoxY + 20;
     doc.setFontSize(11);
-    doc.setTextColor("#475569");
-    doc.text(`Week of ${route.week_of}`, 40, cursorY);
-    cursorY += 16;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(71, 85, 105); // slate-600
+
+    doc.text(`Week of: ${route.week_of}`, margin + 15, cursorY);
+    cursorY += 20;
 
     const driverRecord = Array.isArray(route.driver)
       ? route.driver[0]
       : (route.driver as { full_name?: string | null } | null);
     const driverName = driverRecord?.full_name ?? null;
     if (driverName) {
-      doc.text(`Driver: ${driverName}`, 40, cursorY);
-      cursorY += 16;
+      doc.setFont("helvetica", "bold");
+      doc.text(`Driver: ${driverName}`, margin + 15, cursorY);
+      doc.setFont("helvetica", "normal");
+      cursorY += 20;
     }
 
     if (route.start_time) {
       doc.text(
-        `Start time: ${new Date(route.start_time).toLocaleString()}`,
-        40,
+        `Start Time: ${new Date(route.start_time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`,
+        margin + 15,
         cursorY,
       );
-      cursorY += 16;
+      cursorY += 20;
     }
 
-    doc.text("Driver instructions: Follow the optimized sequence and confirm arrivals.", 40, cursorY);
-    cursorY += 24;
+    doc.text(`Total Stops: ${formattedStops.length}`, margin + 15, cursorY);
 
+    cursorY = metadataBoxY + 105;
+
+    // Instructions section
+    doc.setFillColor(239, 246, 255); // blue-50
+    doc.rect(margin, cursorY, contentWidth, 50, "F");
+    doc.setFontSize(9);
+    doc.setTextColor(30, 64, 175); // blue-800
+    doc.text("📋 DRIVER INSTRUCTIONS", margin + 15, cursorY + 15);
+    doc.setFontSize(10);
+    doc.setTextColor(51, 65, 85); // slate-700
+    doc.text(
+      "Follow the optimized sequence below. Confirm each delivery in the system upon arrival.",
+      margin + 15,
+      cursorY + 32,
+    );
+    cursorY += 65;
+
+    // Route map with larger preview
     if (route.polyline) {
       const mapBase64 = await fetchStaticMap(route.polyline);
       if (mapBase64) {
-        doc.addImage(`data:image/png;base64,${mapBase64}`, "PNG", 40, cursorY, pageWidth - 80, 180);
-        cursorY += 200;
+        const mapHeight = 240;
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        doc.text("Route Overview", margin, cursorY);
+        cursorY += 15;
+
+        doc.addImage(
+          `data:image/png;base64,${mapBase64}`,
+          "PNG",
+          margin,
+          cursorY,
+          contentWidth,
+          mapHeight,
+        );
+        cursorY += mapHeight + 20;
       } else {
-        doc.text("Map preview unavailable. Use the route sheet for navigation.", 40, cursorY);
-        cursorY += 18;
+        doc.setFontSize(10);
+        doc.setTextColor(185, 28, 28); // red-700
+        doc.text("⚠ Map preview unavailable. Use GPS navigation for turn-by-turn directions.", margin, cursorY);
+        cursorY += 25;
       }
     }
 
-    doc.setTextColor("#0f172a");
-    doc.setFontSize(12);
-    doc.text("Stop list", 40, cursorY);
-    cursorY += 16;
+    // Stop list header
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text("Delivery Stops", margin, cursorY);
+    cursorY += 20;
 
-    doc.setFontSize(10);
-    formattedStops.forEach((stop) => {
-      if (cursorY > 720) {
+    // Add footer to first page
+    addFooter();
+
+    // Render each stop with professional formatting
+    doc.setFont("helvetica", "normal");
+    formattedStops.forEach((stop, index) => {
+      const stopHeight = 75; // Estimated height for each stop block
+
+      if (cursorY > pageHeight - 150) {
         doc.addPage();
-        cursorY = 40;
+        currentPage++;
+        cursorY = 50;
+        addFooter();
       }
 
-      doc.text(`${stop.order}. ${stop.name}`, 40, cursorY);
-      cursorY += 12;
-      if (stop.phone) {
-        doc.text(`Phone: ${stop.phone}`, 60, cursorY);
-        cursorY += 12;
-      }
-      if (stop.address) {
-        doc.text(stop.address, 60, cursorY);
-        cursorY += 12;
-      }
+      // Stop container with border
+      const stopBoxY = cursorY;
+      doc.setDrawColor(203, 213, 225); // slate-300
+      doc.setLineWidth(1);
+      doc.rect(margin, stopBoxY, contentWidth, stopHeight);
+
+      // Stop number badge
+      doc.setFillColor(99, 102, 241); // indigo-500
+      doc.circle(margin + 20, stopBoxY + 15, 12, "F");
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(255, 255, 255);
+      doc.text(`${stop.order}`, margin + 20, stopBoxY + 18, { align: "center" });
+
+      // Customer name
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text(stop.name, margin + 40, stopBoxY + 18);
+
+      // ETA badge (if available)
       if (stop.eta) {
-        doc.text(`ETA: ${stop.eta}`, 60, cursorY);
-        cursorY += 12;
+        doc.setFillColor(240, 253, 244); // green-50
+        doc.setDrawColor(134, 239, 172); // green-300
+        doc.roundedRect(pageWidth - margin - 85, stopBoxY + 8, 75, 20, 3, 3, "FD");
+        doc.setFontSize(9);
+        doc.setTextColor(22, 101, 52); // green-800
+        doc.text(`ETA: ${stop.eta}`, pageWidth - margin - 47, stopBoxY + 18, { align: "center" });
       }
-      cursorY += 8;
+
+      cursorY = stopBoxY + 35;
+
+      // Phone number
+      if (stop.phone) {
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`📞 ${stop.phone}`, margin + 15, cursorY);
+        cursorY += 15;
+      }
+
+      // Address
+      if (stop.address) {
+        doc.setFontSize(10);
+        doc.setTextColor(71, 85, 105);
+        doc.text(`📍 ${stop.address}`, margin + 15, cursorY, {
+          maxWidth: contentWidth - 30,
+        });
+      }
+
+      cursorY = stopBoxY + stopHeight + 15;
     });
 
     const pdfBuffer = Buffer.from(doc.output("arraybuffer"));
