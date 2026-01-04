@@ -58,3 +58,29 @@ Recommended practices:
 ### Admin writes failing
 - Confirm `SUPABASE_SERVICE_ROLE_KEY` exists in server env
 - Confirm you are logged in as an admin user
+
+## Route Planning Workflow (Visual Route Builder)
+Use the visual route builder to assign deliveries, optimize order, and export a driver sheet.
+
+### 1) Open route builder
+1) Go to `/admin/routes/new`
+2) Select the delivery week
+3) Confirm unassigned stops appear in the left panel
+
+### 2) Build the route
+1) Drag unassigned stops into the route panel
+2) Reorder stops as needed
+3) Click **Optimize Route** to auto-order via Google Maps
+
+### 3) Assign driver + start time
+1) Choose a driver from the dropdown
+2) Pick the route start time
+3) Click **Save Route** to persist stops and directions
+
+### 4) Export route sheet (PDF)
+1) Click **Export PDF** after saving the route
+2) Print or share the driver sheet
+
+### Troubleshooting
+- If stops cannot be assigned, check that each stop has a full address.
+- If optimization fails, retry after verifying Google Maps keys are configured.

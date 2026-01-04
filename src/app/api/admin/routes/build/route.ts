@@ -9,6 +9,8 @@ const buildRouteSchema = z.object({
   week_of: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   name: z.string().max(120).optional().nullable(),
   optimize: z.boolean().optional().default(true),
+  driver_id: z.string().uuid().optional().nullable(),
+  start_time: z.string().datetime().optional().nullable(),
   stop_order: z
     .array(
       z.object({
@@ -84,6 +86,8 @@ export async function POST(request: Request) {
     week_of: parsed.data.week_of,
     name: routeName,
     status: "planned",
+    driver_id: parsed.data.driver_id ?? null,
+    start_time: parsed.data.start_time ?? null,
     updated_at: new Date().toISOString(),
   };
 
@@ -206,6 +210,14 @@ export async function POST(request: Request) {
           polyline: directions.polyline,
           distance_meters: directions.distanceMeters,
           duration_seconds: directions.durationSeconds,
+          start_time: parsed.data.start_time ?? null,
+          end_time: parsed.data.start_time
+            ? new Date(
+                new Date(parsed.data.start_time).getTime() +
+                  directions.durationSeconds * 1000,
+              ).toISOString()
+            : null,
+          driver_id: parsed.data.driver_id ?? null,
           updated_at: new Date().toISOString(),
           status: "built",
         })
