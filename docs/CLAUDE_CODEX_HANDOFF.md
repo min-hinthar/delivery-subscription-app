@@ -1632,3 +1632,23 @@ For each feature Codex implements, I will:
 ### Status
 - [x] Feature implemented
 - [x] `bash scripts/codex/verify.sh`
+
+---
+
+## Codex Session - Pricing Page Redesign
+**Date:** 2026-01-04  
+**Branch:** codex/pricing-page-redesign
+
+### Implemented
+- Rebuilt the marketing pricing page hero with Burmese-inspired gradient styling and value callouts.
+- Added structured sections for service perks and billing flexibility details.
+- Updated CTAs to use ButtonV2 styling via `buttonVariants` to avoid nested interactive elements.
+- Added shared Burmese pattern SVG for marketing hero backgrounds (`public/patterns/burmese-pattern.svg`).
+
+### For Claude to Review
+- Visual balance of the hero pricing card vs. supporting sections.
+- Consistency of color usage with the design tokens across light/dark mode.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`
