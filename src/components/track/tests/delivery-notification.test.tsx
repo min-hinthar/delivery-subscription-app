@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   DeliveryNotificationToast,
@@ -10,6 +10,9 @@ import {
 describe("DeliveryNotification", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   describe("DeliveryNotificationToast", () => {
@@ -68,13 +71,11 @@ describe("DeliveryNotification", () => {
       render(<DeliveryNotificationToast notification={notification} onDismiss={onDismiss} />);
 
       // Fast-forward 5 seconds + animation time
-      vi.advanceTimersByTime(5300);
-
-      await waitFor(() => {
-        expect(onDismiss).toHaveBeenCalled();
+      await act(async () => {
+        await vi.runAllTimersAsync();
       });
 
-      vi.useRealTimers();
+      expect(onDismiss).toHaveBeenCalled();
     });
 
     it("should render different icons for different notification types", () => {

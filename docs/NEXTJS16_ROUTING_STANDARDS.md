@@ -32,12 +32,14 @@ We use route groups to separate concerns without changing URLs: :contentReferenc
 - `(auth)` — login/signup/magic link callback
 - `(app)` — authenticated customer experience
 - `(admin)` — admin-only experience
+- `(driver)` — authenticated driver experience
 
 Required layouts:
 - `src/app/(marketing)/layout.tsx`
 - `src/app/(auth)/layout.tsx`
 - `src/app/(app)/layout.tsx`
 - `src/app/(admin)/layout.tsx`
+- `src/app/(driver)/layout.tsx`
 
 Each group must define:
 - `loading.tsx`

@@ -2,6 +2,7 @@
 
 ```text
 src/app/(admin)/admin/deliveries/page.tsx
+src/app/(admin)/admin/drivers/page.tsx
 src/app/(admin)/admin/meals/page.tsx
 src/app/(admin)/admin/menus/page.tsx
 src/app/(admin)/admin/page.tsx
@@ -31,6 +32,7 @@ src/app/(app)/layout.tsx
 src/app/(app)/loading.tsx
 src/app/(app)/onboarding/loading.tsx
 src/app/(app)/onboarding/page.tsx
+src/app/(auth)/driver/login/page.tsx
 src/app/(auth)/auth/callback/route.ts
 src/app/(auth)/error.tsx
 src/app/(auth)/layout.tsx
@@ -44,8 +46,17 @@ src/app/(marketing)/e2e/tracking/page.tsx
 src/app/(marketing)/page.tsx
 src/app/(marketing)/pricing/loading.tsx
 src/app/(marketing)/pricing/page.tsx
+src/app/(driver)/driver/dashboard/page.tsx
+src/app/(driver)/driver/onboarding/page.tsx
+src/app/(driver)/driver/route/[id]/page.tsx
+src/app/(driver)/error.tsx
+src/app/(driver)/layout.tsx
+src/app/(driver)/loading.tsx
 src/app/api/account/profile/route.ts
 src/app/api/admin/manifest.csv/route.ts
+src/app/api/admin/drivers/[id]/resend-invite/route.ts
+src/app/api/admin/drivers/[id]/route.ts
+src/app/api/admin/drivers/invite/route.ts
 src/app/api/admin/meals/route.ts
 src/app/api/admin/routes/build/route.ts
 src/app/api/admin/routes/delete/route.ts
@@ -58,6 +69,9 @@ src/app/api/admin/weekly-menus/route.ts
 src/app/api/admin/weekly-menus/update/route.ts
 src/app/api/cron/generate-week/route.ts
 src/app/api/delivery/appointment/route.ts
+src/app/api/driver/login/route.ts
+src/app/api/driver/profile/route.ts
+src/app/api/driver/routes/route.ts
 src/app/api/maps/coverage/route.ts
 src/app/api/maps/directions/route.ts
 src/app/api/maps/geocode/route.ts

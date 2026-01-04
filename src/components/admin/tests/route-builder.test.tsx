@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { DndContext } from "@dnd-kit/core";
 import { describe, expect, it } from "vitest";
 
@@ -36,7 +36,9 @@ describe("Route builder panels", () => {
     );
 
     expect(screen.getByText("Unassigned stops")).toBeInTheDocument();
-    expect(screen.getByText(/2 stops waiting/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/2 of 2 stops are waiting to be assigned/i),
+    ).toBeInTheDocument();
     expect(screen.getByText("Jordan Lee")).toBeInTheDocument();
   });
 
@@ -62,8 +64,11 @@ describe("Route builder panels", () => {
     );
 
     expect(screen.getByText("Route details")).toBeInTheDocument();
-    expect(screen.getByText("2")).toBeInTheDocument();
+    const metricsGroup = screen.getByRole("group", { name: /route metrics/i });
+    expect(within(metricsGroup).getByText("2")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /save route/i })).toBeEnabled();
-    expect(screen.getByRole("button", { name: /export pdf/i })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: /export route as pdf/i }),
+    ).toBeEnabled();
   });
 });
