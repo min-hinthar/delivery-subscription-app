@@ -2385,3 +2385,50 @@ Now that PR #16 (Driver App) is complete and fixed, choose from:
 **Last Updated By:** Claude Code (Session 8 - Migration Fix)
 **Next Action:** User tests migration → Codex chooses polish/testing PR
 **Status:** Migration fixed ✅ → Driver app complete ✅ → Ready for final polish
+
+---
+
+## ✅ Codex Session Update — PR #15 Live Tracking Polish & Testing
+
+**Summary:**
+- Added a Playwright-only tracking QA harness with deterministic ETA/timeline updates.
+- Added E2E coverage for ETA changes, notifications, and delivery timeline updates.
+- Scoped the harness route to `PLAYWRIGHT_E2E`/`CODEX_VERIFY` to avoid prod exposure.
+- Updated Playwright webServer command to include stub Supabase env vars.
+
+**Key Files Updated/Added:**
+- `src/components/track/tracking-e2e-harness.tsx`
+- `src/app/(marketing)/__e2e__/tracking/page.tsx`
+- `tests/e2e/live-tracking.spec.ts`
+- `playwright.config.ts`
+- `docs/REMAINING_FEATURES.md`
+- `docs/PR_PROMPTS_NEXT_SESSIONS.md`
+
+**Notes:**
+- Optional enhancements (browser notifications, delivery photo upload, performance/load tests) remain deferred.
+
+---
+
+## ✅ Codex Session Update — PR #15 Enhancements (Notifications + Photos + Perf)
+
+**Summary:**
+- Added browser notification service with user-configurable settings and Do Not Disturb hours.
+- Added delivery photo upload component with compression (<=500KB) and privacy-safe storage paths.
+- Rendered delivery proof photo in customer tracking timeline when delivered.
+- Added Playwright-based performance load test harness for 100+ concurrent sessions.
+
+**Key Files Updated/Added:**
+- `src/lib/notifications/browser-notifications.ts`
+- `src/components/driver/photo-upload.tsx`
+- `src/components/driver/stop-actions.tsx`
+- `src/components/track/tracking-dashboard.tsx`
+- `src/components/track/delivery-timeline.tsx`
+- `src/app/(app)/(protected)/track/page.tsx`
+- `tests/performance/tracking-load-test.ts`
+- `docs/QA_UX.md`
+- `docs/REMAINING_FEATURES.md`
+- `docs/PR_PROMPTS_NEXT_SESSIONS.md`
+
+**Notes:**
+- Delivery photo URLs are now stored as storage paths; customer timeline uses signed URLs.
+- Performance load test is provided but not executed in this session.

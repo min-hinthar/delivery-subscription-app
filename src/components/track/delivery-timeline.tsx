@@ -62,6 +62,23 @@ const TimelineItem = memo(
           <p className="text-xs text-slate-500 dark:text-slate-400">
             {isCompleted ? "Delivered" : isCurrent ? "On the way to this stop" : "Upcoming"}
           </p>
+          {stop.isCustomerStop && stop.photoUrl && isCompleted ? (
+            <div className="mt-2 space-y-2">
+              <img
+                src={stop.photoUrl}
+                alt="Delivery proof"
+                className="max-h-40 w-full rounded-md border border-slate-200 object-cover dark:border-slate-800"
+              />
+              <a
+                href={stop.photoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-semibold text-emerald-600 hover:underline dark:text-emerald-300"
+              >
+                View full-size photo
+              </a>
+            </div>
+          ) : null}
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400">
           {formatTime(stop.estimatedArrival)}

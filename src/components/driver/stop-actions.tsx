@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import { PhotoUpload } from "@/components/driver/photo-upload";
 import { ButtonV2 } from "@/components/ui/button-v2";
 import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -14,42 +15,37 @@ type StopActionsProps = {
   onUpdate: (update: { status: string; driverNotes: string | null; photoUrl: string | null }) => void;
 };
 
-const MAX_UPLOAD_SIZE_MB = 5;
-
 export function StopActions({ stopId, status, driverNotes, photoUrl, onUpdate }: StopActionsProps) {
   const [notes, setNotes] = useState(driverNotes ?? "");
-  const [photo, setPhoto] = useState(photoUrl ?? "");
+  const [photoPath, setPhotoPath] = useState(photoUrl ?? "");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  async function uploadPhoto(file: File) {
-    setMessage(null);
-    if (file.size > MAX_UPLOAD_SIZE_MB * 1024 * 1024) {
-      setMessage(`Photo must be under ${MAX_UPLOAD_SIZE_MB}MB.`);
+  useEffect(() => {
+    if (!photoPath) {
+      setPhotoPreview(null);
       return;
     }
 
-    setIsUploading(true);
+    if (photoPath.startsWith("http")) {
+      setPhotoPreview(photoPath);
+      return;
+    }
+
     const supabase = createSupabaseBrowserClient();
-    const extension = file.name.split(".").pop() ?? "jpg";
-    const filePath = `route-stops/${stopId}/${Date.now()}.${extension}`;
-
-    const { error } = await supabase.storage.from("delivery-proofs").upload(filePath, file, {
-      upsert: true,
-      contentType: file.type,
-    });
-
-    if (error) {
-      setMessage("Photo upload failed. Try again or skip.");
-      setIsUploading(false);
-      return;
-    }
-
-    const { data } = supabase.storage.from("delivery-proofs").getPublicUrl(filePath);
-    setPhoto(data.publicUrl);
-    setIsUploading(false);
-  }
+    supabase.storage
+      .from("delivery-proofs")
+      .createSignedUrl(photoPath, 60 * 60)
+      .then(({ data, error }) => {
+        if (error || !data?.signedUrl) {
+          return;
+        }
+        setPhotoPreview(data.signedUrl);
+      })
+      .catch(() => undefined);
+  }, [photoPath]);
 
   async function submitUpdate(nextStatus: string) {
     setIsSaving(true);
@@ -62,7 +58,7 @@ export function StopActions({ stopId, status, driverNotes, photoUrl, onUpdate }:
           stop_id: stopId,
           status: nextStatus,
           driver_notes: notes || null,
-          photo_url: photo || null,
+          photo_url: photoPath || null,
         }),
       });
 
@@ -73,7 +69,7 @@ export function StopActions({ stopId, status, driverNotes, photoUrl, onUpdate }:
         return;
       }
 
-      onUpdate({ status: nextStatus, driverNotes: notes || null, photoUrl: photo || null });
+      onUpdate({ status: nextStatus, driverNotes: notes || null, photoUrl: photoPath || null });
       setMessage(nextStatus === "completed" ? "Marked delivered." : "Issue logged.");
     } catch {
       setMessage("Unable to update stop. Try again.");
@@ -96,32 +92,28 @@ export function StopActions({ stopId, status, driverNotes, photoUrl, onUpdate }:
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">
-          Proof of delivery photo (optional)
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(event) => {
-            const file = event.target.files?.[0];
-            if (file) {
-              void uploadPhoto(file);
-            }
-          }}
-          className="text-xs text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-slate-700 hover:file:bg-slate-200 dark:text-slate-300 dark:file:bg-slate-800 dark:file:text-slate-200 dark:hover:file:bg-slate-700"
-        />
-        {photo ? (
-          <a
-            href={photo}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300"
-          >
-            View uploaded photo
-          </a>
-        ) : null}
-      </div>
+      <PhotoUpload
+        stopId={stopId}
+        value={photoPath || null}
+        disabled={isSaving || status === "completed"}
+        onUpload={({ path, previewUrl }) => {
+          setPhotoPath(path);
+          setPhotoPreview(previewUrl);
+        }}
+        onError={(errorMessage) => setMessage(errorMessage)}
+        onUploadStateChange={setIsUploading}
+      />
+
+      {photoPreview ? (
+        <a
+          href={photoPreview}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-300"
+        >
+          View uploaded photo
+        </a>
+      ) : null}
 
       {message ? (
         <p className="rounded-md bg-slate-100 px-3 py-2 text-xs text-slate-600 dark:bg-slate-900 dark:text-slate-300">
