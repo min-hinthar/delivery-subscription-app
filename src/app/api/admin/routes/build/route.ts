@@ -85,7 +85,7 @@ export async function POST(request: Request) {
   const routePayload = {
     week_of: parsed.data.week_of,
     name: routeName,
-    status: "planned",
+    status: "pending",
     driver_id: parsed.data.driver_id ?? null,
     start_time: parsed.data.start_time ?? null,
     updated_at: new Date().toISOString(),
