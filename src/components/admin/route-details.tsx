@@ -66,33 +66,38 @@ export function RouteDetails({
         </p>
       </div>
 
-      <div className="grid gap-3 text-xs">
+      <div className="grid gap-3 text-xs" role="group" aria-label="Route metrics">
         <div className="rounded-lg border border-slate-200 p-3 text-xs dark:border-slate-800">
           <p className="text-slate-500 dark:text-slate-400">Stops</p>
-          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100" aria-live="polite">
             {stops.length}
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 p-3 text-xs dark:border-slate-800">
           <p className="text-slate-500 dark:text-slate-400">Distance</p>
-          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100" aria-live="polite">
             {metrics.distanceMeters > 0 ? `${distanceMiles} mi` : "—"}
           </p>
         </div>
         <div className="rounded-lg border border-slate-200 p-3 text-xs dark:border-slate-800">
           <p className="text-slate-500 dark:text-slate-400">Duration</p>
-          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+          <p className="text-lg font-semibold text-slate-900 dark:text-slate-100" aria-live="polite">
             {metrics.durationSeconds > 0 ? durationLabel : "—"}
           </p>
         </div>
       </div>
 
-      <label className="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+      <label
+        htmlFor="driver-select"
+        className="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400"
+      >
         Driver assignment
         <select
+          id="driver-select"
           className="rounded-md border border-slate-200 bg-white px-2 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950"
           value={driverId}
           onChange={(event) => onDriverChange(event.target.value)}
+          aria-label="Select driver for this route"
         >
           <option value="">Select driver</option>
           {driverOptions.map((driver) => (
@@ -103,34 +108,51 @@ export function RouteDetails({
         </select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+      <label
+        htmlFor="start-time"
+        className="flex flex-col gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400"
+      >
         Start time
         <input
+          id="start-time"
           type="time"
           className="rounded-md border border-slate-200 bg-white px-2 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950"
           value={startTime}
           onChange={(event) => onStartTimeChange(event.target.value)}
+          aria-label="Set route start time"
         />
       </label>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Route actions">
         <Button
           variant="secondary"
           onClick={onOptimize}
           disabled={stops.length < 2}
+          aria-label={stops.length < 2 ? "Add at least 2 stops to optimize route" : "Optimize route using Google Maps"}
         >
           Optimize route
         </Button>
-        <Button onClick={onSave} disabled={!optimized || stops.length === 0 || isSaving}>
+        <Button
+          onClick={onSave}
+          disabled={!optimized || stops.length === 0 || isSaving}
+          aria-label={!optimized ? "Optimize route before saving" : "Save route to database"}
+        >
           {isSaving ? "Saving..." : "Save route"}
         </Button>
-        <Button variant="ghost" onClick={onExport} disabled={!optimized}>
+        <Button
+          variant="ghost"
+          onClick={onExport}
+          disabled={!optimized}
+          aria-label={!optimized ? "Save and optimize route before exporting PDF" : "Export route as PDF for driver"}
+        >
           Export PDF
         </Button>
       </div>
 
       {statusMessage ? (
-        <p className="text-xs text-slate-500 dark:text-slate-400">{statusMessage}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400" role="status" aria-live="polite">
+          {statusMessage}
+        </p>
       ) : null}
 
       <div>
@@ -141,7 +163,9 @@ export function RouteDetails({
             optimized
               ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
               : "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-200",
-          )}>
+          )}
+          role="status"
+          aria-label={optimized ? "Route is optimized" : "Route needs optimization"}>
             {optimized ? "Optimized" : "Needs optimization"}
           </span>
         </div>
@@ -151,14 +175,18 @@ export function RouteDetails({
             "mt-3 space-y-3 rounded-lg border border-dashed border-slate-200 p-3 transition dark:border-slate-800",
             isOver && "border-blue-400 bg-blue-50/50 dark:border-blue-500/60 dark:bg-blue-950/30",
           )}
+          role="list"
+          aria-label="Route stop sequence"
         >
           <SortableContext items={stops.map((stop) => stop.id)} strategy={verticalListSortingStrategy}>
             {stops.map((stop, index) => (
-              <RouteStopCard key={stop.id} stop={stop} index={index} showIndex />
+              <div key={stop.id} role="listitem">
+                <RouteStopCard stop={stop} index={index} showIndex />
+              </div>
             ))}
           </SortableContext>
           {stops.length === 0 ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-xs text-slate-500 dark:text-slate-400" role="status">
               Drag stops here to start building a route.
             </p>
           ) : null}
