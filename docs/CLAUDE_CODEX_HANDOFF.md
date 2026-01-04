@@ -2007,3 +2007,26 @@ All heavy workload PRs now have **step-by-step implementation guides** in `docs/
 - [x] Feature implemented
 - [ ] RLS verification pending (needs Supabase access)
 - [ ] API keys + Map ID setup pending
+
+---
+
+## Codex Session - Live Delivery Tracking
+**Date:** 2026-01-05
+**Branch:** codex/live-delivery-tracking
+
+### Implemented
+- Built customer tracking UI with live ETA card, timeline, driver info, and map layout.
+- Added TrackingMap with animated truck marker, route progress polylines, and Supabase Realtime driver updates.
+- Added ETA calculation helper (Distance Matrix) and wired driver location API to refresh ETAs.
+- Added realtime stop subscriptions for ETA/timeline updates.
+- Added component tests for ETA/timeline.
+- Updated QA_UX checklist for tracking page.
+
+### For Claude to Review
+- Validate ETA algorithm assumptions (Distance Matrix + average stop duration) and adjust if needed.
+- Confirm privacy masking for driver and non-customer stop markers is sufficient.
+- Review UI copy/UX for tracking empty states and reconnection banners.
+
+### Status
+- [x] Feature implemented
+- [ ] Requires live Supabase/Maps key verification

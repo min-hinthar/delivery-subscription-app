@@ -230,6 +230,10 @@ Checklist:
 - [ ] Track works on mobile (map doesn’t overflow)
 - [ ] Updates are readable (status badges, timestamps)
 - [ ] No sensitive data leaked (e.g., other customers’ full addresses)
+- [ ] ETA card shows minutes + progress bar and updates when driver moves
+- [ ] Timeline reflects completed/current/upcoming stops with clear labels
+- [ ] Driver info is collapsed by default with privacy-safe support contact
+- [ ] Reconnecting state appears if realtime updates drop
 
 ### 5.6 Account & Billing
 8) Visit `/account`

@@ -9,6 +9,33 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
+type RouteStopRow = {
+  id: string;
+  appointment_id: string;
+  route_id?: string | null;
+  stop_order: number;
+  status: string;
+  estimated_arrival: string | null;
+  completed_at: string | null;
+  geocoded_lat: number | null;
+  geocoded_lng: number | null;
+};
+
+type DriverLocationRow = {
+  latitude: number;
+  longitude: number;
+  heading: number | null;
+  updated_at: string | null;
+};
+
+type RouteRow = {
+  id: string;
+  status: string | null;
+  polyline: string | null;
+  driver_id: string | null;
+  driver?: { full_name: string | null } | null;
+};
+
 export default async function TrackPage() {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
@@ -72,7 +99,7 @@ export default async function TrackPage() {
 
   const { data: appointment } = await supabase
     .from("delivery_appointments")
-    .select("id")
+    .select("id, status")
     .eq("user_id", auth.user.id)
     .eq("week_of", weekOf)
     .maybeSingle();
@@ -99,71 +126,90 @@ export default async function TrackPage() {
     );
   }
 
-  const { data: stops } = await supabase
+  const { data: customerStop } = await supabase
     .from("delivery_stops")
     .select(
-      "id, stop_order, status, eta, route_id, appointment:delivery_appointments(address:addresses(line1,line2,city,state,postal_code))",
+      "id, route_id, appointment_id, stop_order, status, estimated_arrival, completed_at, geocoded_lat, geocoded_lng",
     )
     .eq("appointment_id", appointment.id)
-    .order("stop_order", { ascending: true });
+    .order("stop_order", { ascending: true })
+    .limit(1)
+    .maybeSingle<RouteStopRow>();
 
-  const routeId = stops?.[0]?.route_id;
-  let route = null;
+  const routeId = customerStop?.route_id ?? null;
+  let route: { id: string; status: string | null; polyline: string | null } | null = null;
+  let driverName: string | null = null;
+  let driverLocation: DriverLocationRow | null = null;
+  let routeStops: RouteStopRow[] = [];
 
   if (routeId) {
     const admin = createSupabaseAdminClient();
+
     const { data: routeRow } = await admin
       .from("delivery_routes")
-      .select("id, status, polyline, distance_meters, duration_seconds")
+      .select("id, status, polyline, driver_id, driver:profiles(full_name)")
       .eq("id", routeId)
-      .maybeSingle();
-    route = routeRow ?? null;
+      .maybeSingle<RouteRow>();
+
+    route = routeRow
+      ? {
+          id: routeRow.id,
+          status: routeRow.status,
+          polyline: routeRow.polyline,
+        }
+      : null;
+
+    driverName = routeRow?.driver?.full_name ?? null;
+
+    const { data: stops } = await admin
+      .from("delivery_stops")
+      .select(
+        "id, appointment_id, stop_order, status, estimated_arrival, completed_at, geocoded_lat, geocoded_lng",
+      )
+      .eq("route_id", routeId)
+      .order("stop_order", { ascending: true });
+
+    routeStops = (stops ?? []) as RouteStopRow[];
+
+    const { data: location } = await admin
+      .from("driver_locations")
+      .select("latitude, longitude, heading, updated_at")
+      .eq("route_id", routeId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle<DriverLocationRow>();
+
+    driverLocation = location ?? null;
   }
 
-  const formattedStops = (
-    (stops ?? []) as unknown as Array<{
-      id: string;
-      stop_order: number;
-      status: string;
-      eta: string | null;
-      route_id: string;
-      appointment: {
-        address: {
-          line1: string | null;
-          line2: string | null;
-          city: string | null;
-          state: string | null;
-          postal_code: string | null;
-        } | null;
-      } | null;
-    }>
-  ).map((stop) => {
-    const address = stop.appointment?.address;
-    const cityState = [address?.city, address?.state].filter(Boolean).join(", ");
-    const displayAddress = cityState ? `Near ${cityState}` : "Address on file";
-    const mapAddress = [
-      address?.line1,
-      address?.line2,
-      [address?.city, address?.state, address?.postal_code].filter(Boolean).join(" "),
-    ]
-      .filter(Boolean)
-      .join(", ");
+  const stopsForView = routeStops.length > 0 && routeId ? routeStops : customerStop ? [customerStop] : [];
 
-    return {
-      id: stop.id,
-      stop_order: stop.stop_order,
-      status: stop.status,
-      eta: stop.eta,
-      route_id: stop.route_id,
-      displayAddress,
-      mapAddress,
-    };
-  });
+  const formattedStops = stopsForView.map((stop) => ({
+    id: stop.id,
+    appointmentId: stop.appointment_id,
+    stopOrder: stop.stop_order,
+    status: stop.status,
+    estimatedArrival: stop.estimated_arrival,
+    completedAt: stop.completed_at,
+    lat: stop.geocoded_lat,
+    lng: stop.geocoded_lng,
+    isCustomerStop: stop.appointment_id === appointment.id,
+  }));
+
+  const customerLocation =
+    customerStop?.geocoded_lat != null && customerStop?.geocoded_lng != null
+      ? { lat: customerStop.geocoded_lat, lng: customerStop.geocoded_lng }
+      : null;
+
+  const isInTransit =
+    appointment.status === "in_transit" ||
+    route?.status === "in_progress" ||
+    route?.status === "started";
 
   const isRoutePending = !route && formattedStops.length === 0;
 
   return (
-    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
         title="Track"
         description="Follow your driver progress and upcoming stop ETAs in real time."
@@ -181,7 +227,25 @@ export default async function TrackPage() {
           Tracking will appear once your delivery is assigned to a driver route.
         </div>
       ) : null}
-      <TrackingDashboard route={route} initialStops={formattedStops} />
+      <TrackingDashboard
+        appointmentId={appointment.id}
+        route={route}
+        initialStops={formattedStops}
+        initialUpdatedAt={new Date().toISOString()}
+        customerLocation={customerLocation}
+        driver={driverName ? { name: driverName } : null}
+        initialDriverLocation={
+          driverLocation
+            ? {
+                lat: driverLocation.latitude,
+                lng: driverLocation.longitude,
+                heading: driverLocation.heading,
+                updatedAt: driverLocation.updated_at,
+              }
+            : null
+        }
+        isInTransit={isInTransit}
+      />
     </div>
   );
 }
