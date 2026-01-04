@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import { rateLimit } from "@/lib/security/rate-limit";
+import { SimpleCache, generateCacheKey } from "@/lib/cache/simple-cache";
 
 const directionsSchema = z.object({
   origin: z.string(),
@@ -11,6 +12,9 @@ const directionsSchema = z.object({
 });
 
 const privateHeaders = { "Cache-Control": "no-store" };
+
+// Cache directions for 15 minutes (same route is likely to be requested multiple times)
+const directionsCache = new SimpleCache<unknown>(15 * 60 * 1000);
 
 function getClientIp(request: Request) {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -47,6 +51,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const params = directionsSchema.parse(body);
 
+    // Check cache first
+    const cacheKey = generateCacheKey({
+      origin: params.origin,
+      destination: params.destination,
+      waypoints: params.waypoints ?? [],
+      optimize: params.optimize ?? false,
+    });
+
+    const cachedData = directionsCache.get(cacheKey);
+    if (cachedData) {
+      return NextResponse.json(
+        { ok: true, data: cachedData, cached: true },
+        { status: 200, headers: privateHeaders }
+      );
+    }
+
     const apiKey = process.env.GOOGLE_MAPS_SERVER_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -77,19 +97,28 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
 
     if (data.status !== "OK") {
+      console.error("[Directions API] Google Maps API error:", {
+        status: data.status,
+        error_message: data.error_message,
+        params: { origin: params.origin, destination: params.destination },
+      });
       return NextResponse.json(
         {
           ok: false,
           error: {
             code: "DIRECTIONS_ERROR",
-            message: data.error_message || "Failed to get directions",
+            message: data.error_message || "Failed to get directions from Google Maps",
+            details: data.status,
           },
         },
         { status: 400, headers: privateHeaders },
       );
     }
 
-    return NextResponse.json({ ok: true, data }, { status: 200, headers: privateHeaders });
+    // Cache the successful response
+    directionsCache.set(cacheKey, data);
+
+    return NextResponse.json({ ok: true, data, cached: false }, { status: 200, headers: privateHeaders });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
