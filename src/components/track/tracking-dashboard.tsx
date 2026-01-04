@@ -6,7 +6,13 @@ import { TrackingMap } from "@/components/track/tracking-map";
 import { EtaDisplay } from "@/components/track/eta-display";
 import { DeliveryTimeline } from "@/components/track/delivery-timeline";
 import { DriverInfo } from "@/components/track/driver-info";
+import {
+  DeliveryNotificationContainer,
+  type DeliveryNotification,
+} from "@/components/track/delivery-notification";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { cacheTrackingData, getCachedTrackingData } from "@/lib/tracking/offline-cache";
+import type { CachedDeliveryStop } from "@/lib/tracking/offline-cache";
 
 export type TrackingStop = {
   id: string;
@@ -67,6 +73,9 @@ export function TrackingDashboard({
   const [connectionStatus, setConnectionStatus] = useState<
     "idle" | "connecting" | "connected" | "reconnecting" | "error"
   >(route?.id ? "connecting" : "idle");
+  const [isOffline, setIsOffline] = useState(false);
+  const [notifications, setNotifications] = useState<DeliveryNotification[]>([]);
+  const previousStatusRef = useState<Record<string, string>>({});
 
   const sortedStops = useMemo(
     () => [...stops].sort((a, b) => a.stopOrder - b.stopOrder),
@@ -92,6 +101,54 @@ export function TrackingDashboard({
     () => sortedStops.find((stop) => stop.isCustomerStop) ?? null,
     [sortedStops],
   );
+
+  // Load cached data on mount if offline
+  useEffect(() => {
+    if (!route?.id) {
+      return;
+    }
+
+    const cachedData = getCachedTrackingData(route.id);
+    if (cachedData && cachedData.stops.length > 0) {
+      // Use cached stops as fallback
+      const cachedStops = cachedData.stops.map((cached) => {
+        const existing = initialStops.find((s) => s.id === cached.id);
+        return (
+          existing || {
+            id: cached.id,
+            appointmentId: appointmentId,
+            stopOrder: cached.stopOrder,
+            status: cached.status,
+            estimatedArrival: cached.estimatedArrival,
+            completedAt: cached.completedAt,
+            lat: null,
+            lng: null,
+            isCustomerStop: false,
+          }
+        );
+      });
+
+      if (cachedStops.length > initialStops.length) {
+        setStops(cachedStops);
+      }
+    }
+  }, [route?.id, appointmentId, initialStops]);
+
+  // Monitor online/offline status
+  useEffect(() => {
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    setIsOffline(!navigator.onLine);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   useEffect(() => {
     if (!route?.id) {
@@ -124,36 +181,78 @@ export function TrackingDashboard({
           setStops((prev) => {
             const existing = prev.find((stop) => stop.id === updated.id);
 
-            if (!existing) {
-              return [
-                ...prev,
-                {
-                  id: updated.id,
-                  appointmentId: updated.appointment_id,
-                  stopOrder: updated.stop_order,
-                  status: updated.status,
-                  estimatedArrival: updated.estimated_arrival,
-                  completedAt: updated.completed_at,
-                  lat: updated.geocoded_lat,
-                  lng: updated.geocoded_lng,
-                  isCustomerStop: updated.appointment_id === appointmentId,
-                },
-              ];
+            // Check for status changes to trigger notifications
+            const isCustomerStop = updated.appointment_id === appointmentId;
+            const statusChanged = existing && existing.status !== updated.status;
+
+            if (statusChanged && isCustomerStop) {
+              // Create notification for customer's delivery status change
+              const notificationId = `${updated.id}-${Date.now()}`;
+              if (updated.status === "completed" || updated.status === "delivered") {
+                setNotifications((prevNotifs) => [
+                  ...prevNotifs,
+                  {
+                    id: notificationId,
+                    type: "delivered",
+                    title: "Delivery Completed! 🎉",
+                    message: "Your meal subscription has been delivered.",
+                    timestamp: new Date(),
+                  },
+                ]);
+              } else if (updated.status === "in_progress") {
+                setNotifications((prevNotifs) => [
+                  ...prevNotifs,
+                  {
+                    id: notificationId,
+                    type: "driver-nearby",
+                    title: "Driver is approaching",
+                    message: "Your delivery is next on the route!",
+                    timestamp: new Date(),
+                  },
+                ]);
+              }
             }
 
-            return prev.map((stop) =>
-              stop.id === updated.id
-                ? {
-                    ...stop,
+            const newStops = existing
+              ? prev.map((stop) =>
+                  stop.id === updated.id
+                    ? {
+                        ...stop,
+                        stopOrder: updated.stop_order,
+                        status: updated.status,
+                        estimatedArrival: updated.estimated_arrival,
+                        completedAt: updated.completed_at,
+                        lat: updated.geocoded_lat ?? stop.lat,
+                        lng: updated.geocoded_lng ?? stop.lng,
+                      }
+                    : stop,
+                )
+              : [
+                  ...prev,
+                  {
+                    id: updated.id,
+                    appointmentId: updated.appointment_id,
                     stopOrder: updated.stop_order,
                     status: updated.status,
                     estimatedArrival: updated.estimated_arrival,
                     completedAt: updated.completed_at,
-                    lat: updated.geocoded_lat ?? stop.lat,
-                    lng: updated.geocoded_lng ?? stop.lng,
-                  }
-                : stop,
-            );
+                    lat: updated.geocoded_lat,
+                    lng: updated.geocoded_lng,
+                    isCustomerStop: updated.appointment_id === appointmentId,
+                  },
+                ];
+
+            // Cache updated stops
+            const cachedStops: CachedDeliveryStop[] = newStops.map((stop) => ({
+              id: stop.id,
+              stopOrder: stop.stopOrder,
+              status: stop.status,
+              estimatedArrival: stop.estimatedArrival,
+              completedAt: stop.completedAt,
+            }));
+            cacheTrackingData(route.id, null, cachedStops);
+
+            return newStops;
           });
           setLastUpdated(new Date());
         },
@@ -175,9 +274,18 @@ export function TrackingDashboard({
     };
   }, [appointmentId, route?.id]);
 
+  const dismissNotification = (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
   return (
-    <div className="space-y-6">
-      <EtaDisplay
+    <>
+      <DeliveryNotificationContainer
+        notifications={notifications}
+        onDismiss={dismissNotification}
+      />
+      <div className="space-y-6">
+        <EtaDisplay
         estimatedArrival={customerStop?.estimatedArrival ?? null}
         totalStops={stopProgress.total}
         completedStops={stopProgress.completed}
@@ -186,7 +294,11 @@ export function TrackingDashboard({
         isReconnecting={connectionStatus === "reconnecting"}
       />
 
-      {connectionStatus === "error" ? (
+      {isOffline ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+          You&apos;re offline. Showing last known delivery status. Updates will resume when you&apos;re back online.
+        </div>
+      ) : connectionStatus === "error" ? (
         <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
           Live updates are temporarily unavailable. You can refresh this page to try again.
         </div>
@@ -207,7 +319,8 @@ export function TrackingDashboard({
         />
       </div>
 
-      <DriverInfo driverName={driver?.name ?? null} />
-    </div>
+        <DriverInfo driverName={driver?.name ?? null} />
+      </div>
+    </>
   );
 }

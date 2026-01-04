@@ -33,6 +33,41 @@ const COMPLETED_STATUSES = new Set(["completed", "delivered"]);
 
 const DEFAULT_STOP_DURATION_MINUTES = 6;
 
+// Time-of-day factors for more accurate ETAs
+// Peak hours have longer stop durations due to traffic, parking, etc.
+const TIME_OF_DAY_FACTORS = {
+  earlyMorning: { start: 6, end: 9, factor: 1.2 }, // 6am-9am: Rush hour
+  midday: { start: 9, end: 11, factor: 0.9 }, // 9am-11am: Lighter traffic
+  lunch: { start: 11, end: 14, factor: 1.1 }, // 11am-2pm: Lunch rush
+  afternoon: { start: 14, end: 17, factor: 0.9 }, // 2pm-5pm: Moderate
+  evening: { start: 17, end: 20, factor: 1.3 }, // 5pm-8pm: Evening rush
+  night: { start: 20, end: 24, factor: 1.0 }, // 8pm-midnight: Normal
+  lateNight: { start: 0, end: 6, factor: 0.8 }, // Midnight-6am: Fastest
+};
+
+// Day-of-week factors
+const DAY_OF_WEEK_FACTORS = {
+  weekday: 1.0, // Monday-Friday
+  saturday: 1.1, // Busier than weekdays
+  sunday: 0.9, // Typically lighter
+};
+
+function getTimeOfDayFactor(hour: number): number {
+  for (const period of Object.values(TIME_OF_DAY_FACTORS)) {
+    if (hour >= period.start && hour < period.end) {
+      return period.factor;
+    }
+  }
+  return 1.0;
+}
+
+function getDayOfWeekFactor(date: Date): number {
+  const day = date.getDay();
+  if (day === 0) return DAY_OF_WEEK_FACTORS.sunday;
+  if (day === 6) return DAY_OF_WEEK_FACTORS.saturday;
+  return DAY_OF_WEEK_FACTORS.weekday;
+}
+
 function getGoogleMapsKey() {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
 
@@ -54,9 +89,11 @@ function isStopIncomplete(stop: RouteStop) {
 export async function calculateRouteEtas({
   routeId,
   averageStopMinutes = DEFAULT_STOP_DURATION_MINUTES,
+  useTimeFactors = true,
 }: {
   routeId: string;
   averageStopMinutes?: number;
+  useTimeFactors?: boolean;
 }) {
   const supabase = createSupabaseAdminClient();
 
@@ -115,6 +152,7 @@ export async function calculateRouteEtas({
 
   let incompleteBefore = 0;
   const updates: Array<{ id: string; estimated_arrival: string }> = [];
+  let cumulativeSeconds = 0;
 
   stopsWithCoordinates.forEach((stop, index) => {
     const element = elements[index];
@@ -122,14 +160,32 @@ export async function calculateRouteEtas({
       return;
     }
 
-    const baseSeconds = element.duration_in_traffic?.value ?? element.duration?.value ?? 0;
-    const extraStopSeconds = incompleteBefore * averageStopMinutes * 60;
-    const etaSeconds = baseSeconds + extraStopSeconds;
-    const etaTimestamp = new Date(Date.now() + etaSeconds * 1000).toISOString();
+    // Base driving time with traffic
+    const baseDrivingSeconds = element.duration_in_traffic?.value ?? element.duration?.value ?? 0;
+
+    // Calculate adjusted stop duration based on time factors
+    let adjustedStopMinutes = averageStopMinutes;
+    if (useTimeFactors) {
+      const estimatedArrival = new Date(Date.now() + cumulativeSeconds * 1000 + baseDrivingSeconds * 1000);
+      const timeOfDayFactor = getTimeOfDayFactor(estimatedArrival.getHours());
+      const dayOfWeekFactor = getDayOfWeekFactor(estimatedArrival);
+      adjustedStopMinutes = averageStopMinutes * timeOfDayFactor * dayOfWeekFactor;
+    }
+
+    // Add driving time to current stop
+    cumulativeSeconds += baseDrivingSeconds;
+
+    // Add time for all previous incomplete stops
+    cumulativeSeconds += incompleteBefore * adjustedStopMinutes * 60;
+
+    const etaTimestamp = new Date(Date.now() + cumulativeSeconds * 1000).toISOString();
 
     if (isStopIncomplete(stop)) {
       updates.push({ id: stop.id, estimated_arrival: etaTimestamp });
       incompleteBefore += 1;
+
+      // Reset cumulative for next stop calculation
+      cumulativeSeconds = 0;
     }
   });
 
