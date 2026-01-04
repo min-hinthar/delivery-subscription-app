@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { bad, ok } from "@/lib/api/response";
+import { rateLimit } from "@/lib/security/rate-limit";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -20,6 +21,22 @@ export async function POST(request: Request) {
 
   if (authError || !user) {
     return bad("Not authenticated.", { status: 401, headers: privateHeaders });
+  }
+
+  const rate = rateLimit({
+    key: `track:photo-url:${user.id}`,
+    max: 15,
+    windowMs: 60_000,
+  });
+
+  if (!rate.allowed) {
+    return bad("Too many photo requests. Please wait a moment and try again.", {
+      status: 429,
+      headers: {
+        "Retry-After": Math.ceil(rate.resetMs / 1000).toString(),
+        ...privateHeaders,
+      },
+    });
   }
 
   const body = await request.json().catch(() => null);

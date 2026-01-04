@@ -2432,3 +2432,21 @@ Now that PR #16 (Driver App) is complete and fixed, choose from:
 **Notes:**
 - Delivery photo URLs are now stored as storage paths; customer timeline uses signed URLs.
 - Performance load test is provided but not executed in this session.
+
+---
+
+## ✅ Codex Session Update (PR15 Follow-ups)
+
+**COMPLETED:**
+- ✅ Added unit coverage for notification DnD overnight window (`src/lib/notifications/browser-notifications.test.ts`).
+- ✅ Added E2E photo upload + a11y coverage for tracking harness (`tests/e2e/live-tracking.spec.ts`).
+- ✅ Added rate limiting for `/api/track/photo-url` with `Retry-After` headers (`src/app/api/track/photo-url/route.ts`).
+- ✅ Added E2E upload section + Playwright bypass flag for photo uploads (`src/components/track/tracking-e2e-harness.tsx`, `src/components/driver/photo-upload.tsx`, `playwright.config.ts`).
+- ✅ Moved E2E harness route to `/e2e/tracking` with a rewrite for `/__e2e__/tracking` (`src/app/(marketing)/e2e/tracking/page.tsx`, `next.config.ts`).
+- ✅ Documented new rate-limit QA checklist items (`docs/SECURITY_QA.md`, `docs/SECURITY_CHECKLIST.md`).
+
+**DEPENDENCIES:**
+- Added `@axe-core/playwright` for a11y checks (dev dependency).
+
+**TESTING:**
+- Not run in this session (follow-up required): `bash scripts/codex/verify.sh`.

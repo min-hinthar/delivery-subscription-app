@@ -58,7 +58,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command:
-      'PLAYWRIGHT_E2E=1 NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=stub SUPABASE_SERVICE_ROLE_KEY=stub pnpm dev',
+      'PLAYWRIGHT_E2E=1 NEXT_PUBLIC_PLAYWRIGHT_E2E=1 NEXT_PUBLIC_SUPABASE_URL=https://example.supabase.co NEXT_PUBLIC_SUPABASE_ANON_KEY=stub SUPABASE_SERVICE_ROLE_KEY=stub pnpm dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { test, expect } from '@playwright/test'
 
 test.describe('Live Tracking (E2E Harness)', () => {
@@ -25,5 +26,29 @@ test.describe('Live Tracking (E2E Harness)', () => {
       page.getByRole('alert').filter({ hasText: 'Delivery Completed' }),
     ).toBeVisible()
     await expect(page.getByTestId('tracking-timeline')).toContainText('Delivered')
+  })
+
+  test('uploads delivery photo', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    const fileInput = page.locator('input[type="file"]')
+    const pngBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMBAgEJv9kAAAAASUVORK5CYII='
+
+    await fileInput.setInputFiles({
+      name: 'test-photo.png',
+      mimeType: 'image/png',
+      buffer: Buffer.from(pngBase64, 'base64'),
+    })
+
+    await expect(page.getByText('Photo uploaded')).toBeVisible()
+  })
+
+  test('tracking page has no a11y violations', async ({ page }) => {
+    await page.goto('/__e2e__/tracking')
+
+    const results = await new AxeBuilder({ page }).analyze()
+
+    expect(results.violations).toEqual([])
   })
 })

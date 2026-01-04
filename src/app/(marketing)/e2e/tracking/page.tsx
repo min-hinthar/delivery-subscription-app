@@ -4,7 +4,13 @@ import { PageHeader } from "@/components/layout/page-header";
 import { TrackingE2EHarness } from "@/components/track/tracking-e2e-harness";
 
 export default function TrackingE2EPage() {
-  if (!process.env.PLAYWRIGHT_E2E && process.env.CODEX_VERIFY !== "1") {
+  const isE2EEnabled =
+    process.env.PLAYWRIGHT_E2E === "1" ||
+    process.env.NEXT_PUBLIC_PLAYWRIGHT_E2E === "1" ||
+    process.env.CODEX_VERIFY === "1" ||
+    process.env.NODE_ENV === "development";
+
+  if (!isE2EEnabled) {
     notFound();
   }
 
