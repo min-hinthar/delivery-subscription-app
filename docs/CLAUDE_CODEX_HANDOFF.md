@@ -1652,3 +1652,23 @@ For each feature Codex implements, I will:
 ### Status
 - [x] Feature implemented
 - [x] `bash scripts/codex/verify.sh`
+
+---
+
+## Codex Session - Schedule Page Calendar Picker
+**Date:** 2026-01-04
+**Branch:** `codex/ui-p1-schedule-calendar`
+
+### Implemented
+- Added calendar picker, time-slot selector, and delivery summary card components for scheduling.
+- Updated schedule planner to use visual calendar selection and summary confirmation flow.
+- Refined QA checklist to cover the calendar selector UX.
+- Marked PR #5 as completed in PR prompts.
+
+### For Claude to Review
+- Visual balance and accessibility of the calendar picker legend and button states.
+- Summary card copy and CTA alignment with brand tone.
+
+### Status
+- [x] Feature implemented
+- [x] `bash scripts/codex/verify.sh`

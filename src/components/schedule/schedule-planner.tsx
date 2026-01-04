@@ -1,12 +1,15 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
+import { CalendarPicker } from "@/components/schedule/calendar-picker";
+import { DeliverySummaryCard } from "@/components/schedule/delivery-summary-card";
+import { TimeSlotSelector } from "@/components/schedule/time-slot-selector";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { parseApiResponse } from "@/lib/api/client";
+import { isAfterCutoff } from "@/lib/scheduling";
 
 type WeekOption = {
   value: string;
@@ -55,7 +58,6 @@ export function SchedulePlanner({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const windowRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const isInteractionDisabled = isSchedulingDisabled || isPending;
   const selected = useMemo(
@@ -75,6 +77,38 @@ export function SchedulePlanner({
   const availableWindows = windows.filter((window) => window.available > 0);
   const alternativeWindows = availableWindows.filter((window) => window.id !== selectedWindow);
 
+  useEffect(() => {
+    const windowIds = new Set(windows.map((window) => window.id));
+    if (appointment?.delivery_window_id && windowIds.has(appointment.delivery_window_id)) {
+      setSelectedWindow(appointment.delivery_window_id);
+      return;
+    }
+    if (selectedWindow && windowIds.has(selectedWindow)) {
+      return;
+    }
+    setSelectedWindow(windows[0]?.id ?? "");
+  }, [appointment?.delivery_window_id, selectedWindow, windows]);
+
+  const calendarWeeks = useMemo(
+    () =>
+      weekOptions.map((option) => {
+        const date = new Date(`${option.value}T00:00:00Z`);
+        return {
+          ...option,
+          date,
+          isCutoffPassed: isAfterCutoff(date),
+        };
+      }),
+    [weekOptions],
+  );
+
+  const selectedWeekLabel =
+    weekOptions.find((option) => option.value === selectedWeek)?.label ?? selectedWeek;
+
+  const selectedWindowLabel = selected
+    ? `${selected.day_of_week} ${selected.start_time}–${selected.end_time}`
+    : null;
+
   function handleWeekChange(value: string) {
     setError(null);
     setStatus(null);
@@ -92,10 +126,6 @@ export function SchedulePlanner({
 
     if (!selectedWindow) {
       setError("Select a delivery window to continue.");
-      const firstAvailable = availableWindows[0];
-      if (firstAvailable) {
-        windowRefs.current[firstAvailable.id]?.focus();
-      }
       return;
     }
 
@@ -148,50 +178,17 @@ export function SchedulePlanner({
   return (
     <div className="space-y-6">
       <Card className="space-y-4 p-6">
-        <div>
-          <h2 className="text-xl font-semibold">Schedule delivery</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Select a weekend delivery window before the Friday 5PM PT cutoff.
-          </p>
-          {nextEligibleWeekLabel ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Next eligible week: {nextEligibleWeekLabel}
-            </p>
-          ) : null}
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            Week of
-            <select
-              className="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-950"
-              value={selectedWeek}
-              onChange={(event) => handleWeekChange(event.target.value)}
-              disabled={isInteractionDisabled}
-            >
-              {weekOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div className="flex flex-col gap-2 text-sm">
-            <span className="font-medium">Cutoff</span>
-            <span className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-              {cutoffAt}
-            </span>
-            {isCutoffPassed ? (
-              <span className="text-xs text-rose-600">
-                Cutoff passed — contact support for changes.
-              </span>
-            ) : null}
-            {isSchedulingDisabled ? (
-              <span className="text-xs text-rose-600">
-                Subscription required — activate a plan to schedule deliveries.
-              </span>
-            ) : null}
-          </div>
-        </div>
+        <CalendarPicker
+          weeks={calendarWeeks}
+          selectedWeek={selectedWeek}
+          onSelect={handleWeekChange}
+          disabled={isInteractionDisabled}
+          helperText={
+            nextEligibleWeekLabel
+              ? `Next eligible week: ${nextEligibleWeekLabel}`
+              : undefined
+          }
+        />
       </Card>
 
       <Card className="space-y-4 p-6">
@@ -201,114 +198,54 @@ export function SchedulePlanner({
             Availability updates as other subscribers book.
           </p>
         </div>
-        {windows.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-200 p-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">
-            <p className="font-medium text-slate-700 dark:text-slate-200">
-              No delivery windows published yet.
-            </p>
-            <p className="mt-1">
-              Try another week or check back once the operations team opens windows for this
-              schedule.
-            </p>
-            {nextWeekOption && nextWeekOption.value !== selectedWeek ? (
-              <Button
-                className="mt-3"
-                onClick={() => handleWeekChange(nextWeekOption.value)}
-                disabled={isInteractionDisabled}
-              >
-                View {nextWeekOption.label}
-              </Button>
-            ) : null}
-          </div>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {windows.map((window) => {
-              const isSelected = window.id === selectedWindow;
-              const isUnavailable = window.available <= 0;
-              return (
-                <label
-                  key={window.id}
-                  className={`flex cursor-pointer flex-col gap-2 rounded-lg border p-4 text-sm transition ${
-                    isSelected
-                      ? "border-slate-900 bg-slate-50 dark:border-slate-200 dark:bg-slate-900"
-                      : "border-slate-200 dark:border-slate-800"
-                  } ${
-                    isUnavailable || isSchedulingDisabled
-                      ? "opacity-60"
-                      : "hover:border-slate-400"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">
-                      {window.day_of_week} {window.start_time}–{window.end_time}
-                    </span>
-                    <input
-                      type="radio"
-                      name="delivery_window"
-                      value={window.id}
-                      checked={isSelected}
-                      onChange={() => {
-                        setSelectedWindow(window.id);
-                        setError(null);
-                      }}
-                      disabled={isUnavailable || isSchedulingDisabled}
-                      ref={(element) => {
-                        windowRefs.current[window.id] = element;
-                      }}
-                    />
-                  </div>
-                  {isUnavailable ? (
-                    <span className="text-xs font-semibold text-rose-600">Full</span>
-                  ) : null}
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
-                    {window.available} of {window.capacity} slots remaining
-                  </span>
-                </label>
-              );
-            })}
-          </div>
-        )}
-        <div className="flex flex-col gap-2">
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              !selectedWindow ||
-              windows.length === 0 ||
-              isFull ||
-              isCutoffPassed ||
-              isSchedulingDisabled ||
-              isSaving
-            }
-          >
-            {isSaving ? "Saving…" : appointment ? "Update appointment" : "Confirm appointment"}
-          </Button>
-          {status ? <p className="text-sm text-slate-600 dark:text-slate-300">{status}</p> : null}
-          {error ? (
-            <p className="text-sm text-rose-600" role="alert">
-              {error}
-            </p>
-          ) : null}
-          {isFull ? (
-            <p className="text-xs text-rose-600">
-              Selected window is full. Try{" "}
-              {alternativeWindows.length > 0
-                ? alternativeWindows
-                    .map(
-                      (window) => `${window.day_of_week} ${window.start_time}–${window.end_time}`,
-                    )
-                    .join(", ")
-                : "another week"}{" "}
-              instead.
-            </p>
-          ) : null}
-          {isCutoffPassed ? (
-            <p className="text-xs text-rose-600">
-              This week is locked after the Friday cutoff. Pick a future weekend or contact
-              support.
-            </p>
-          ) : null}
-        </div>
+        <TimeSlotSelector
+          windows={windows}
+          selectedWindow={selectedWindow}
+          onSelect={(value) => {
+            setSelectedWindow(value);
+            setError(null);
+          }}
+          disabled={isInteractionDisabled || isSchedulingDisabled}
+          nextWeekOption={
+            nextWeekOption && nextWeekOption.value !== selectedWeek ? nextWeekOption : undefined
+          }
+          onSelectWeek={handleWeekChange}
+        />
+        {isFull ? (
+          <p className="text-xs text-rose-600">
+            Selected window is full. Try{" "}
+            {alternativeWindows.length > 0
+              ? alternativeWindows
+                  .map(
+                    (window) => `${window.day_of_week} ${window.start_time}–${window.end_time}`,
+                  )
+                  .join(", ")
+              : "another week"}{" "}
+            instead.
+          </p>
+        ) : null}
       </Card>
+
+      <DeliverySummaryCard
+        selectedWeekLabel={selectedWeekLabel}
+        selectedWindowLabel={selectedWindowLabel}
+        cutoffAt={cutoffAt}
+        status={status}
+        error={error}
+        hasAppointment={Boolean(appointment)}
+        isCutoffPassed={isCutoffPassed}
+        isSchedulingDisabled={isSchedulingDisabled}
+        isSaving={isSaving}
+        confirmDisabled={
+          !selectedWindow ||
+          windows.length === 0 ||
+          isFull ||
+          isCutoffPassed ||
+          isSchedulingDisabled ||
+          isSaving
+        }
+        onConfirm={handleSubmit}
+      />
     </div>
   );
 }

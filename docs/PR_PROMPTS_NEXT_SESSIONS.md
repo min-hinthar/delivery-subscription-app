@@ -304,6 +304,7 @@ git push -u origin codex/design-system-2.0
 ### PR #5: Schedule Page with Calendar Picker (P1)
 
 **Branch:** `claude/schedule-calendar-picker`
+**Status:** ✅ Completed by Codex on `codex/ui-p1-schedule-calendar`
 
 **What to Implement:**
 
