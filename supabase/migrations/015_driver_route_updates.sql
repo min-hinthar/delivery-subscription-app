@@ -14,11 +14,17 @@ set status = 'pending'
 where status is null
   or status not in ('pending', 'active', 'completed', 'cancelled');
 
+-- Drop the existing default ('draft'::text) before altering column type
+alter table public.delivery_routes
+  alter column status drop default;
+
+-- Now we can safely alter the column type
 alter table public.delivery_routes
   alter column status type route_status using status::route_status;
 
+-- Set the new default value with explicit enum cast
 alter table public.delivery_routes
-  alter column status set default 'pending';
+  alter column status set default 'pending'::route_status;
 
 alter table public.delivery_stops
   add column if not exists driver_notes text,
