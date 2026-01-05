@@ -15,14 +15,14 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
 
 const variantClasses: Record<ButtonVariant, string> = {
   default:
-    "bg-gradient-to-r from-primary via-primary/90 to-primary text-primary-foreground shadow-sm hover:from-primary/90 hover:via-primary hover:to-primary/80",
+    "bg-gradient-to-r from-primary via-primary to-primary/95 text-primary-foreground shadow-sm hover:from-primary hover:via-primary/95 hover:to-primary/90 hover:shadow-lg",
   ghost:
-    "bg-transparent text-muted-foreground hover:bg-accent hover:text-foreground",
+    "bg-transparent text-muted-foreground hover:bg-gradient-to-r hover:from-accent/50 hover:to-accent hover:text-foreground",
   secondary:
-    "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+    "bg-secondary text-secondary-foreground shadow-sm hover:bg-gradient-to-r hover:from-secondary/90 hover:to-secondary/80",
   destructive:
-    "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-  burmese: "bg-[#D4A574] text-white hover:bg-[#C4956B] shadow-md",
+    "bg-destructive text-destructive-foreground shadow-sm hover:bg-gradient-to-r hover:from-destructive/95 hover:to-destructive/85",
+  burmese: "bg-gradient-to-r from-primary via-primary to-primary/95 text-primary-foreground hover:from-primary hover:via-primary/95 hover:to-primary/90 shadow-md",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
