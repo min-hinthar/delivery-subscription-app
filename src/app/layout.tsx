@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { getLocale } from "next-intl/server";
 import { Noto_Sans, Noto_Sans_Myanmar } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import "./globals.css";
 
@@ -92,6 +93,7 @@ export default async function RootLayout({
           {children}
           <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
