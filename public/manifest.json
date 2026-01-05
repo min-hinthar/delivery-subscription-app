@@ -1,0 +1,50 @@
+{
+  "name": "Mandalay Morning Star - Burmese Kitchen",
+  "short_name": "Mandalay Star",
+  "description": "Weekly Burmese food delivery in Los Angeles. Authentic Mandalay cuisine delivered every Saturday.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#D4A574",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["food", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "This Week's Menu",
+      "short_name": "Menu",
+      "description": "View this week's Burmese dishes",
+      "url": "/menu/weekly",
+      "icons": [
+        {
+          "src": "/icons/app-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Track Delivery",
+      "short_name": "Track",
+      "description": "Track your order in real-time",
+      "url": "/track",
+      "icons": [
+        {
+          "src": "/icons/app-icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}

@@ -84,6 +84,18 @@
 
 ## Workstream: UI / UX
 
+### P0 — Mobile UX Enhancement
+**Problem:** Mobile experience needs bottom navigation, touch-friendly tap targets, and PWA support.  
+**Acceptance:**
+- Bottom navigation available on mobile
+- Tap targets ≥44px
+- Swipeable modals + pull-to-refresh supported
+- PWA manifest + install prompt enabled
+- Safe area support for notched devices
+
+**Planned PR:** `codex/mobile-ux-optimization`  
+**Status:** 🟡 In progress
+
 ### P1 — Mobile nav overlay background/z-index issues
 **Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  
 **Acceptance:**

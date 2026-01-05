@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-export type ButtonVariant = "default" | "ghost" | "secondary" | "destructive";
-export type ButtonSize = "sm" | "default" | "lg" | "icon";
+export type ButtonVariant = "default" | "ghost" | "secondary" | "destructive" | "burmese";
+export type ButtonSize = "sm" | "default" | "lg" | "icon" | "mobile";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -20,6 +20,7 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
   destructive:
     "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
+  burmese: "bg-[#D4A574] text-white hover:bg-[#C4956B] shadow-md",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -27,6 +28,7 @@ const sizeClasses: Record<ButtonSize, string> = {
   default: "h-11 px-4 text-sm",
   lg: "h-12 px-6 text-base",
   icon: "h-11 w-11 p-0",
+  mobile: "h-12 px-6 text-base md:h-11 md:px-4",
 };
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { TrackingMap } from "@/components/track/tracking-map";
 import { EtaDisplay } from "@/components/track/eta-display";
@@ -22,6 +23,7 @@ import {
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cacheTrackingData, getCachedTrackingData } from "@/lib/tracking/offline-cache";
 import type { CachedDeliveryStop } from "@/lib/tracking/offline-cache";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 
 export type TrackingStop = {
   id: string;
@@ -76,6 +78,7 @@ export function TrackingDashboard({
   initialDriverLocation,
   isInTransit,
 }: TrackingDashboardProps) {
+  const router = useRouter();
   const [stops, setStops] = useState<TrackingStop[]>(() => {
     if (!route?.id || typeof window === "undefined") {
       return initialStops;
@@ -375,159 +378,169 @@ export function TrackingDashboard({
     setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
+  const handleRefresh = async () => {
+    router.refresh();
+  };
+
   return (
     <>
       <DeliveryNotificationContainer
         notifications={notifications}
         onDismiss={dismissNotification}
       />
-      <div className="space-y-6">
-        <EtaDisplay
-          estimatedArrival={customerStop?.estimatedArrival ?? null}
-          totalStops={stopProgress.total}
-          completedStops={stopProgress.completed}
-          currentStopIndex={stopProgress.currentIndex}
-          lastUpdated={lastUpdated}
-          isReconnecting={connectionStatus === "reconnecting"}
-        />
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-6">
+          <EtaDisplay
+            estimatedArrival={customerStop?.estimatedArrival ?? null}
+            totalStops={stopProgress.total}
+            completedStops={stopProgress.completed}
+            currentStopIndex={stopProgress.currentIndex}
+            lastUpdated={lastUpdated}
+            isReconnecting={connectionStatus === "reconnecting"}
+          />
 
-      <div className="rounded-xl border border-slate-200 bg-white/90 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/60">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Notification settings
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Control browser alerts for delivery updates.
-            </p>
-          </div>
-          {notificationsSupported ? (
-            <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-              <input
-                type="checkbox"
-                checked={notificationSettings.enabled}
-                onChange={(event) => {
-                  const nextEnabled = event.target.checked;
-                  if (!nextEnabled) {
-                    setNotificationSettings((prev) => ({
-                      ...prev,
-                      enabled: false,
-                    }));
-                    return;
-                  }
+          <div className="rounded-xl border border-slate-200 bg-white/90 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/60">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Notification settings
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Control browser alerts for delivery updates.
+                </p>
+              </div>
+              {notificationsSupported ? (
+                <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  <input
+                    type="checkbox"
+                    checked={notificationSettings.enabled}
+                    onChange={(event) => {
+                      const nextEnabled = event.target.checked;
+                      if (!nextEnabled) {
+                        setNotificationSettings((prev) => ({
+                          ...prev,
+                          enabled: false,
+                        }));
+                        return;
+                      }
 
-                  void requestNotificationPermission().then((permission) => {
-                    if (permission !== "granted") {
+                      void requestNotificationPermission().then((permission) => {
+                        if (permission !== "granted") {
+                          setNotificationSettings((prev) => ({
+                            ...prev,
+                            enabled: false,
+                          }));
+                          return;
+                        }
+
+                        setNotificationSettings((prev) => ({
+                          ...prev,
+                          enabled: true,
+                        }));
+                      });
+                    }}
+                    className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                  />
+                  Enable browser notifications
+                </label>
+              ) : null}
+            </div>
+
+            {!notificationsSupported ? (
+              <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+                Browser notifications aren&apos;t supported in this browser.
+              </p>
+            ) : null}
+
+            {notificationSettings.enabled ? (
+              <div className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_1fr]">
+                <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Do not disturb start
+                  <input
+                    type="time"
+                    value={notificationSettings.dndStart}
+                    onChange={(event) =>
                       setNotificationSettings((prev) => ({
                         ...prev,
-                        enabled: false,
-                      }));
-                      return;
+                        dndStart: event.target.value,
+                      }))
                     }
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </label>
+                <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  Do not disturb end
+                  <input
+                    type="time"
+                    value={notificationSettings.dndEnd}
+                    onChange={(event) =>
+                      setNotificationSettings((prev) => ({
+                        ...prev,
+                        dndEnd: event.target.value,
+                      }))
+                    }
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </label>
+                <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+                  ETA change threshold (minutes)
+                  <input
+                    type="number"
+                    min={5}
+                    max={60}
+                    value={notificationSettings.etaThresholdMinutes}
+                    onChange={(event) =>
+                      setNotificationSettings((prev) => ({
+                        ...prev,
+                        etaThresholdMinutes: Number(event.target.value || 10),
+                      }))
+                    }
+                    className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </label>
+              </div>
+            ) : null}
 
-                    setNotificationSettings((prev) => ({
-                      ...prev,
-                      enabled: true,
-                    }));
-                  });
-                }}
-                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              Enable browser notifications
-            </label>
-          ) : null}
-        </div>
-
-        {!notificationsSupported ? (
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Browser notifications aren&apos;t supported in this browser.
-          </p>
-        ) : null}
-
-        {notificationSettings.enabled ? (
-          <div className="mt-4 grid gap-4 md:grid-cols-[1fr_1fr_1fr]">
-            <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              Do not disturb start
-              <input
-                type="time"
-                value={notificationSettings.dndStart}
-                onChange={(event) =>
-                  setNotificationSettings((prev) => ({
-                    ...prev,
-                    dndStart: event.target.value,
-                  }))
-                }
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-              />
-            </label>
-            <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              Do not disturb end
-              <input
-                type="time"
-                value={notificationSettings.dndEnd}
-                onChange={(event) =>
-                  setNotificationSettings((prev) => ({
-                    ...prev,
-                    dndEnd: event.target.value,
-                  }))
-                }
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-              />
-            </label>
-            <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
-              ETA change threshold (minutes)
-              <input
-                type="number"
-                min={5}
-                max={60}
-                value={notificationSettings.etaThresholdMinutes}
-                onChange={(event) =>
-                  setNotificationSettings((prev) => ({
-                    ...prev,
-                    etaThresholdMinutes: Number(event.target.value || 10),
-                  }))
-                }
-                className="w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
-              />
-            </label>
+            {notificationSettings.enabled &&
+            notificationsSupported &&
+            Notification.permission === "denied" ? (
+              <p className="mt-3 text-xs text-rose-600 dark:text-rose-300">
+                Browser notifications are blocked. Enable them in your browser settings to
+                receive alerts.
+              </p>
+            ) : null}
           </div>
-        ) : null}
 
-        {notificationSettings.enabled && notificationsSupported && Notification.permission === "denied" ? (
-          <p className="mt-3 text-xs text-rose-600 dark:text-rose-300">
-            Browser notifications are blocked. Enable them in your browser settings to
-            receive alerts.
-          </p>
-        ) : null}
-      </div>
+          {isOffline ? (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
+              You&apos;re offline. Showing last known delivery status. Updates will resume
+              when you&apos;re back online.
+            </div>
+          ) : connectionStatus === "error" ? (
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
+              Live updates are temporarily unavailable. You can refresh this page to try
+              again.
+            </div>
+          ) : null}
 
-      {isOffline ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 shadow-sm dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-          You&apos;re offline. Showing last known delivery status. Updates will resume when you&apos;re back online.
+          <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+            <TrackingMap
+              routeId={route?.id ?? null}
+              polyline={route?.polyline ?? null}
+              customerLocation={customerLocation}
+              stops={sortedStops}
+              initialDriverLocation={initialDriverLocation}
+              showDriver={isInTransit}
+            />
+            <DeliveryTimeline
+              stops={sortedStops}
+              currentStopIndex={stopProgress.currentIndex}
+            />
+          </div>
+
+          <DriverInfo driverName={driver?.name ?? null} />
         </div>
-      ) : connectionStatus === "error" ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 shadow-sm dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
-          Live updates are temporarily unavailable. You can refresh this page to try again.
-        </div>
-      ) : null}
-
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
-        <TrackingMap
-          routeId={route?.id ?? null}
-          polyline={route?.polyline ?? null}
-          customerLocation={customerLocation}
-          stops={sortedStops}
-          initialDriverLocation={initialDriverLocation}
-          showDriver={isInTransit}
-        />
-        <DeliveryTimeline
-          stops={sortedStops}
-          currentStopIndex={stopProgress.currentIndex}
-        />
-      </div>
-
-        <DriverInfo driverName={driver?.name ?? null} />
-      </div>
+      </PullToRefresh>
     </>
   );
 }

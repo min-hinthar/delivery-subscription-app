@@ -25,7 +25,7 @@
 ## 🚀 What's Next (Priority Order)
 
 ### Week 1: Production Essentials (P0)
-- [ ] **PR #24:** Mobile UX Enhancement (2-3 hours)
+- [ ] **PR #24:** Mobile UX Enhancement (2-3 hours) — 🟡 In progress
   - Bottom navigation, touch optimization, PWA
   - 📖 Guide: `docs/01-active/implementation-guides/mobile-ux.md`
 
@@ -94,7 +94,7 @@ See detailed workstreams and acceptance criteria in:
 - None blocking! 🎉
 
 ### P1 (High Value)
-- Mobile UX (conversion, retention)
+- Mobile UX (conversion, retention) — 🟡 In progress
 - Weekly Menu System (core business model)
 - Burmese i18n (community requirement)
 - Admin Dashboard Polish (operational efficiency)

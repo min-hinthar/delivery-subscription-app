@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert } from "@/components/ui/alert";
 import { toast } from "@/components/ui/use-toast";
 import { parseApiResponse } from "@/lib/api/client";
+import { hapticError, hapticMedium, hapticSuccess } from "@/lib/haptics";
 
 import type { AddressOption, DeliveryAppointmentDTO, DeliveryWindowOption } from "./types";
 
@@ -29,6 +30,7 @@ export type AppointmentDetailsProps = {
   cutoffLabel?: string | null;
   onClose?: () => void; // for modal
   closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
+  showCloseButton?: boolean;
 };
 
 export function AppointmentDetails(props: AppointmentDetailsProps) {
@@ -42,6 +44,7 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
     cutoffLabel,
     onClose,
     closeButtonRef,
+    showCloseButton = true,
   } = props;
 
   const [deliveryWindowId, setDeliveryWindowId] = React.useState(appointment.deliveryWindowId);
@@ -64,10 +67,12 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
 
     if (!payload.success) {
       setError("Please fix the highlighted fields and try again.");
+      hapticError();
       return;
     }
 
     setPending(true);
+    hapticMedium();
     try {
       const res = await fetch("/api/delivery/appointment", {
         method: "POST",
@@ -79,6 +84,7 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
 
       if (!result.ok) {
         setError(result.message);
+        hapticError();
         toast({
           title: "Unable to save appointment",
           description: result.message,
@@ -88,12 +94,14 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
       }
 
       setSuccess("Appointment updated.");
+      hapticSuccess();
       toast({
         title: "Appointment updated",
         description: "Your changes are saved for this week.",
       });
     } catch {
       setError("Network error. Please check your connection and retry.");
+      hapticError();
     } finally {
       setPending(false);
     }
@@ -114,7 +122,7 @@ export function AppointmentDetails(props: AppointmentDetailsProps) {
           ) : null}
         </div>
 
-        {mode === "modal" && onClose ? (
+        {mode === "modal" && onClose && showCloseButton ? (
           <Button
             ref={closeButtonRef}
             variant="ghost"
