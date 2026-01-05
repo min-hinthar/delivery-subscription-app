@@ -98,6 +98,22 @@
 **Review:** See `docs/08-archive/completed-prs/PR-80-mobile-ux-optimization-review.md`
 **Rating:** 8.5/10 - Production-ready with minor test coverage improvements recommended
 
+---
+
+## Workstream: Community / Localization
+
+### P0 — Burmese language support (next-intl)
+**Problem:** Burmese-speaking customers need a fully localized UI with proper font support.  
+**Acceptance:**
+- Language switcher available in the header, preserving locale across routes.
+- Locale-prefixed routes work for Burmese (`/my/...`) with English default (`/`).
+- Burmese font styling (Noto Sans Myanmar) applied with readable typography.
+- Weekly menu + package selector use translations and localized dish/package fields with English fallback.
+- Migration adds Burmese columns for dishes/categories and helper functions for locale-aware names.
+
+**Planned PR:** `codex/burmese-language-support`  
+**Status:** 🟡 In progress
+
 ### P1 — Mobile nav overlay background/z-index issues
 **Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  
 **Acceptance:**

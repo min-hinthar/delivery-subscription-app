@@ -47,6 +47,8 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-display)", "serif"],
         body: ["var(--font-body)", "sans-serif"],
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        myanmar: ["var(--font-myanmar)", "system-ui", "sans-serif"],
       },
       boxShadow: {
         soft: "0 8px 30px -20px rgba(15, 23, 42, 0.35)",

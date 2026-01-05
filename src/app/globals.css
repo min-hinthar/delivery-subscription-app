@@ -155,15 +155,40 @@ body {
    BURMESE FONT OPTIMIZATIONS
    ============================================ */
 
+.font-myanmar {
+  font-family: var(--font-myanmar), system-ui, sans-serif;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
 [lang="my"] {
+  font-size: 16px;
   line-height: 1.8;
   letter-spacing: 0.01em;
 }
 
 [lang="my"] button,
 [lang="my"] input,
-[lang="my"] select {
+[lang="my"] select,
+[lang="my"] textarea {
   font-size: 17px;
+}
+
+[lang="my"] h1 {
+  font-size: 2.5rem;
+}
+
+[lang="my"] h2 {
+  font-size: 2rem;
+}
+
+[lang="my"] h3 {
+  font-size: 1.75rem;
+}
+
+[lang="my"] .tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .font-display {

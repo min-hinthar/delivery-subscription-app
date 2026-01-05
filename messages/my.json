@@ -1,0 +1,199 @@
+{
+  "branding": {
+    "appName": "မော်နင်း စတား ပို့ဆောင်မှု"
+  },
+  "common": {
+    "loading": "ခဏစောင့်ပါ...",
+    "error": "တစ်ခုခု မှားယွင်းနေပါသည်",
+    "save": "သိမ်းရန်",
+    "cancel": "ပယ်ဖျက်ရန်",
+    "delete": "ဖျက်ရန်",
+    "edit": "ပြင်ဆင်ရန်",
+    "close": "ပိတ်ရန်",
+    "back": "နောက်သို့",
+    "next": "ရှေ့သို့",
+    "submit": "တင်သွင်းရန်",
+    "search": "ရှာဖွေရန်",
+    "filter": "စစ်ထုတ်ရန်",
+    "viewAll": "အားလုံးကြည့်ရန်",
+    "navigation": "မီနူး"
+  },
+  "nav": {
+    "menu": "မီနူး",
+    "schedule": "အချိန်စာရင်း",
+    "track": "ခြေရာခံ",
+    "account": "အကောင့်",
+    "admin": "စီမံခန့်ခွဲမှု",
+    "driver": "ယာဉ်မောင်းစီမံခန့်ခွဲမှု",
+    "howItWorks": "အလုပ်လုပ်ပုံ",
+    "pricing": "စျေးနှုန်း",
+    "login": "ဝင်ရန်",
+    "billing": "ငွေချေမှု",
+    "dashboard": "ဒက်ရှ်ဘုတ်",
+    "deliveries": "ပို့ဆောင်မှုများ",
+    "routes": "လမ်းကြောင်းများ",
+    "menus": "မီနူးများ",
+    "meals": "ဟင်းလျာများ",
+    "subscriptions": "အဖွဲ့ဝင်မှုများ"
+  },
+  "support": {
+    "needHelp": "အကူအညီလိုပါသလား? support@morningstardelivery.com သို့ အီးမေးလ်ပို့ပါ"
+  },
+  "days": {
+    "sunday": "တနင်္ဂနွေ",
+    "monday": "တနင်္လာ",
+    "tuesday": "အင်္ဂါ",
+    "wednesday": "ဗုဒ္ဓဟူး",
+    "thursday": "ကြာသပတေး",
+    "friday": "သောကြာ",
+    "saturday": "စနေ"
+  },
+  "weeklyMenu": {
+    "title": "ဒီအပတ်ရဲ့ မီနူး",
+    "noMenuAvailable": "မီနူးမရှိသေးပါ",
+    "noMenuDescription": "ဒီအပတ်ရဲ့ မီနူးကို မထုတ်ဝေရသေးပါ။ နောက်မှ ပြန်စစ်ကြည့်ပါ။",
+    "orderBy": "ဗုဒ္ဓဟူးနေ့ ည ၁၁:၅၉ မတိုင်မီ မှာယူပါ",
+    "hoursRemaining": "{hours} နာရီ ကျန်သည်",
+    "ordersClosed": "အော်ဒါပိတ်ပြီ",
+    "deliveryDate": "ပို့ဆောင်မည့်နေ့: {date}",
+    "dishNumber": "ဟင်း {number}",
+    "soldOut": "ကုန်သွားပြီ",
+    "portionsRemaining": "{count} ပိုင်း ကျန်သည်"
+  },
+  "packages": {
+    "choosePackage": "သင့်အစီအစဉ်ကို ရွေးချယ်ပါ",
+    "chooseDescription": "တစ်ရက်လျှင် ဘယ်နှစ်မျိုး စားချင်သည်ကို ရွေးပါ",
+    "packageA": "အစီအစဉ် A",
+    "packageB": "အစီအစဉ် B",
+    "packageC": "အစီအစဉ် C",
+    "dishesPerDay": "တစ်ရက်လျှင် ဟင်း {count} မျိုး",
+    "totalDishes": "စုစုပေါင်း ဟင်း {count} မျိုး",
+    "perWeek": "/အပတ်",
+    "saturdayDelivery": "စနေနေ့ ပို့ဆောင်မည်",
+    "freshAuthentic": "လတ်ဆတ်ပြီး စစ်မှန်သော",
+    "mostPopular": "လူကြိုက်အများဆုံး",
+    "bestValue": "အကောင်းဆုံး တန်ဖိုး",
+    "selected": "ရွေးထားပြီး",
+    "selectPackage": "အစီအစဉ် ရွေးပါ",
+    "continueToCheckout": "ငွေချေရန် ဆက်သွားပါ"
+  },
+  "checkout": {
+    "title": "ငွေချေမည်",
+    "orderSummary": "အော်ဒါအကျဉ်း",
+    "package": "အစီအစဉ်",
+    "weekOf": "{date} အပတ်",
+    "deliveryAddress": "ပို့ဆောင်မည့်လိပ်စာ",
+    "selectAddress": "လိပ်စာ ရွေးပါ",
+    "addNewAddress": "လိပ်စာအသစ် ထည့်ပါ",
+    "deliveryWindow": "ပို့ဆောင်မည့်အချိန်",
+    "selectWindow": "အချိန်ကို ရွေးပါ",
+    "morning": "နံနက် ၈:၀၀ - ၁၂:၀၀",
+    "afternoon": "မွန်းလွဲ ၁၂:၀၀ - ၄:၀၀",
+    "evening": "ညနေ ၄:၀၀ - ၈:၀၀",
+    "deliveryInstructions": "ပို့ဆောင်ရေး ညွှန်ကြားချက်များ",
+    "instructionsPlaceholder": "ဂိတ်ကုဒ်၊ ကားရပ်နားရာ စသည်",
+    "paymentMethod": "ငွေပေးချေမှု နည်းလမ်း",
+    "total": "စုစုပေါင်း",
+    "placeOrder": "အော်ဒါမှာမည်",
+    "processing": "လုပ်ဆောင်နေသည်..."
+  },
+  "auth": {
+    "signIn": "ဝင်ရောက်ရန်",
+    "signOut": "ထွက်ရန်",
+    "signUp": "အကောင့်ဖွင့်ရန်",
+    "email": "အီးမေးလ်",
+    "password": "စကားဝှက်",
+    "forgotPassword": "စကားဝှက် မေ့သွားပြီလား?",
+    "noAccount": "အကောင့်မရှိသေးဘူးလား?",
+    "haveAccount": "အကောင့်ရှိပြီးသားလား?",
+    "emailPlaceholder": "သင့်အီးမေးလ်",
+    "passwordPlaceholder": "စကားဝှက် ရိုက်ထည့်ပါ",
+    "signInWithEmail": "အီးမေးလ်ဖြင့် ဝင်ရောက်ပါ",
+    "signUpWithEmail": "အီးမေးလ်ဖြင့် အကောင့်ဖွင့်ပါ"
+  },
+  "account": {
+    "myAccount": "ကျွန်ုပ်၏ အကောင့်",
+    "profile": "ကိုယ်ရေးအချက်အလက်",
+    "orders": "အော်ဒါများ",
+    "addresses": "လိပ်စာများ",
+    "settings": "ဆက်တင်များ",
+    "orderHistory": "အော်ဒါမှတ်တမ်း",
+    "noOrders": "အော်ဒါ မရှိသေးပါ",
+    "noOrdersDescription": "အော်ဒါမှာလျှင် ဤနေရာတွင် ပေါ်လာပါမည်",
+    "viewOrder": "အော်ဒါကြည့်ရန်",
+    "orderStatus": {
+      "pending": "စောင့်ဆိုင်းဆဲ",
+      "confirmed": "အတည်ပြုပြီး",
+      "preparing": "ပြင်ဆင်နေသည်",
+      "outForDelivery": "ပို့ဆောင်နေသည်",
+      "delivered": "ပို့ဆောင်ပြီး",
+      "cancelled": "ပယ်ဖျက်ပြီး"
+    }
+  },
+  "tracking": {
+    "title": "ပို့ဆောင်မှုကို ခြေရာခံပါ",
+    "eta": "ရောက်ရှိမည့် အချိန်ခန့်မှန်း",
+    "driverName": "ယာဉ်မောင်း",
+    "driverPhone": "ယာဉ်မောင်းကို ဆက်သွယ်ရန်",
+    "orderNumber": "အော်ဒါနံပါတ် #{number}",
+    "noActiveDelivery": "ပို့ဆောင်နေသော အော်ဒါ မရှိပါ",
+    "noActiveDescription": "လောလောဆယ် ပို့ဆောင်နေသော အော်ဒါ မရှိပါ"
+  },
+  "admin": {
+    "dashboard": "စီမံခန့်ခွဲမှု",
+    "menus": "မီနူးများ",
+    "templates": "မီနူး ပုံစံများ",
+    "createTemplate": "ပုံစံအသစ် ဖန်တီးရန်",
+    "generateMenu": "အပတ်စဉ် မီနူး ဖန်တီးရန်",
+    "orders": "အော်ဒါများ",
+    "customers": "ဖောက်သည်များ",
+    "drivers": "ယာဉ်မောင်းများ",
+    "dishes": "ဟင်းလျာများ",
+    "analytics": "ခွဲခြမ်းစိတ်ဖြာမှု",
+    "settings": "ဆက်တင်များ"
+  },
+  "driver": {
+    "dashboard": "ယာဉ်မောင်း စီမံခန့်ခွဲမှု",
+    "myDeliveries": "ကျွန်ုပ်၏ ပို့ဆောင်မှုများ",
+    "upcomingDeliveries": "လာမည့် ပို့ဆောင်မှုများ",
+    "completedDeliveries": "ပြီးသော ပို့ဆောင်မှုများ",
+    "startRoute": "လမ်းကြောင်း စတင်ရန်",
+    "markDelivered": "ပို့ဆောင်ပြီး ဟု မှတ်ရန်",
+    "contactCustomer": "ဖောက်သည်ကို ဆက်သွယ်ရန်",
+    "deliveryAddress": "ပို့ဆောင်မည့်လိပ်စာ",
+    "deliveryInstructions": "ပို့ဆောင်ရေး ညွှန်ကြားချက်များ",
+    "noDeliveries": "ပို့ဆောင်ရန် မရှိပါ",
+    "noDeliveriesDescription": "ပို့ဆောင်ရန် တာဝန်ပေးခြင်းကို စောင့်ပါ"
+  },
+  "email": {
+    "orderConfirmation": {
+      "subject": "အော်ဒါအတည်ပြုပြီး - {date} အပတ်",
+      "greeting": "မင်္ဂလာပါ {name}",
+      "confirmMessage": "သင့်အော်ဒါကို အတည်ပြုပြီးပါပြီ!",
+      "packageSelected": "ရွေးချယ်ထားသော အစီအစဉ်",
+      "deliveryDate": "ပို့ဆောင်မည့်နေ့",
+      "deliveryWindow": "ပို့ဆောင်မည့်အချိန်",
+      "total": "စုစုပေါင်း ပေးချေပြီး",
+      "viewOrder": "အော်ဒါအသေးစိတ် ကြည့်ရန်",
+      "questions": "မေးခွန်းရှိပါက support@mandalaymorningstar.com သို့ ဆက်သွယ်ပါ"
+    },
+    "deliveryReminder": {
+      "subject": "မနက်ဖြန် ပို့ဆောင်မည် - {package}",
+      "greeting": "မင်္ဂလာပါ {name}",
+      "reminderMessage": "သင့်အရသာရှိသော မြန်မာ့အစားအစာကို မနက်ဖြန် ပို့ဆောင်ပေးပါမည်!",
+      "prepareFor": "ပို့ဆောင်မှုအတွက် ပြင်ဆင်ထားပါ",
+      "trackDelivery": "ပို့ဆောင်မှုကို ခြေရာခံပါ"
+    }
+  },
+  "errors": {
+    "unauthorized": "ဒီစာမျက်နှာကို ကြည့်ရှုရန် အကောင့်ဝင်ရန် လိုအပ်ပါသည်",
+    "forbidden": "သင့်တွင် ဤစာမျက်နှာကို ကြည့်ရှုခွင့် မရှိပါ",
+    "notFound": "စာမျက်နှာ မတွေ့ပါ",
+    "serverError": "တစ်ခုခု မှားယွင်းသွားပါသည်။ နောက်မှ ပြန်လည်ကြိုးစားပါ။",
+    "networkError": "ကွန်ရက် အမှား။ သင့်ချိတ်ဆက်မှုကို စစ်ဆေးပါ။",
+    "validationError": "သင့်ရိုက်ထည့်မှုကို စစ်ဆေးပြီး ပြန်လည်ကြိုးစားပါ",
+    "orderDeadlinePassed": "စိတ်မကောင်းပါဘူး၊ အော်ဒါမှာရန် သတ်မှတ်ချိန် ကျော်လွန်သွားပြီ",
+    "alreadyOrdered": "သင့်တွင် ဒီအပတ်အတွက် အော်ဒါ ရှိပြီးသားဖြစ်သည်",
+    "soldOut": "ဒီဟင်းလျာ ကုန်သွားပြီ"
+  }
+}

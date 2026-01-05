@@ -35,7 +35,7 @@
   - ⚠️ Note: Follow-up needed for email notifications and admin order management
 
 ### Week 2: Community Features (P0)
-- [ ] **PR #26:** Burmese Language Support (3-4 hours)
+- [ ] **PR #26:** Burmese Language Support (3-4 hours) — 🟡 In progress
   - next-intl integration, translations, bilingual UI
   - 📖 Guide: `docs/01-active/implementation-guides/burmese-i18n.md`
 

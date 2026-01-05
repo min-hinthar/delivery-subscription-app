@@ -21,39 +21,43 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { LogoutButton } from "@/components/auth/logout-button";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { type Locale } from "@/i18n";
+import { stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { getMotionTransition, getSlideMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type NavLink = {
-  label: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 };
 
 const PUBLIC_LINKS: NavLink[] = [
-  { label: "How it Works", href: "/#how-it-works", icon: Sparkles },
-  { label: "Pricing", href: "/pricing", icon: BadgeDollarSign },
-  { label: "Login", href: "/login", icon: LogIn },
+  { labelKey: "nav.howItWorks", href: "/#how-it-works", icon: Sparkles },
+  { labelKey: "nav.pricing", href: "/pricing", icon: BadgeDollarSign },
+  { labelKey: "nav.login", href: "/login", icon: LogIn },
 ];
 
 const AUTH_LINKS: NavLink[] = [
-  { label: "Account", href: "/account", icon: User },
-  { label: "Menu", href: "/menu/weekly", icon: UtensilsCrossed },
-  { label: "Schedule", href: "/schedule", icon: CalendarCheck },
-  { label: "Track", href: "/track", icon: MapPinned },
-  { label: "Billing", href: "/billing", icon: CreditCard },
+  { labelKey: "nav.account", href: "/account", icon: User },
+  { labelKey: "nav.menu", href: "/menu/weekly", icon: UtensilsCrossed },
+  { labelKey: "nav.schedule", href: "/schedule", icon: CalendarCheck },
+  { labelKey: "nav.track", href: "/track", icon: MapPinned },
+  { labelKey: "nav.billing", href: "/billing", icon: CreditCard },
 ];
 
 const ADMIN_LINKS: NavLink[] = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Deliveries", href: "/admin/deliveries", icon: Truck },
-  { label: "Routes", href: "/admin/routes", icon: Route },
-  { label: "Menus", href: "/admin/menus", icon: ChefHat },
-  { label: "Meals", href: "/admin/meals", icon: ChefHat },
-  { label: "Subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
+  { labelKey: "nav.dashboard", href: "/admin", icon: LayoutDashboard },
+  { labelKey: "nav.deliveries", href: "/admin/deliveries", icon: Truck },
+  { labelKey: "nav.routes", href: "/admin/routes", icon: Route },
+  { labelKey: "nav.menus", href: "/admin/menus", icon: ChefHat },
+  { labelKey: "nav.meals", href: "/admin/meals", icon: ChefHat },
+  { labelKey: "nav.subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
 ];
 
 const APP_ROUTES = new Set([
@@ -78,7 +82,10 @@ function isActiveRoute(pathname: string, href: string) {
 }
 
 export function SiteHeader() {
+  const t = useTranslations();
+  const locale = useLocale() as Locale;
   const pathname = usePathname();
+  const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
   const [openPathname, setOpenPathname] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const isOpen = openPathname === pathname;
@@ -109,10 +116,13 @@ export function SiteHeader() {
     };
   }, [isOpen]);
 
-  const isAdminRoute = pathname.startsWith("/admin") && pathname !== "/admin/login";
+  const isAdminRoute =
+    normalizedPathname.startsWith("/admin") && normalizedPathname !== "/admin/login";
   const isAppRoute = useMemo(
-    () => APP_ROUTES.has(pathname) || Array.from(APP_ROUTES).some((route) => pathname.startsWith(`${route}/`)),
-    [pathname],
+    () =>
+      APP_ROUTES.has(normalizedPathname) ||
+      Array.from(APP_ROUTES).some((route) => normalizedPathname.startsWith(`${route}/`)),
+    [normalizedPathname],
   );
 
   const navLinks = isAdminRoute ? ADMIN_LINKS : isAppRoute ? AUTH_LINKS : PUBLIC_LINKS;
@@ -122,7 +132,7 @@ export function SiteHeader() {
     <header className="border-b border-border/60 bg-background/95 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link href="/" className="text-lg font-semibold text-foreground">
-          Morning Star Delivery
+          {t("branding.appName")}
         </Link>
         <nav className="hidden items-center gap-4 text-sm md:flex">
           {navLinks.map((link) => {
@@ -133,17 +143,18 @@ export function SiteHeader() {
                 href={link.href}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:transform-none",
-                  isActiveRoute(pathname, link.href)
+                  isActiveRoute(normalizedPathname, link.href)
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             );
           })}
           {showLogout ? <LogoutButton /> : null}
+          <LanguageSwitcher />
           <ThemeToggle />
         </nav>
         <button
@@ -174,7 +185,9 @@ export function SiteHeader() {
               transition={transition}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-foreground">Menu</p>
+                <p className="text-sm font-semibold text-foreground">
+                  {t("common.navigation")}
+                </p>
                 <button
                   onClick={() => setOpenPathname(null)}
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
@@ -194,23 +207,24 @@ export function SiteHeader() {
                       onClick={() => setOpenPathname(null)}
                       className={cn(
                         "flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-medium transition motion-reduce:transition-none",
-                        isActiveRoute(pathname, link.href)
+                        isActiveRoute(normalizedPathname, link.href)
                           ? "bg-primary text-primary-foreground shadow-sm"
                           : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   );
                 })}
               </div>
               <div className="flex flex-col gap-3">
                 {showLogout ? <LogoutButton /> : null}
+                <LanguageSwitcher />
                 <ThemeToggle />
               </div>
               <p className="mt-auto text-xs text-muted-foreground">
-                Need help? Email support@morningstardelivery.com
+                {t("support.needHelp")}
               </p>
             </motion.div>
           </div>

@@ -34,12 +34,19 @@ We use route groups to separate concerns without changing URLs: :contentReferenc
 - `(admin)` — admin-only experience
 - `(driver)` — authenticated driver experience
 
+All groups live under the locale segment:
+- `src/app/[locale]/(marketing)`
+- `src/app/[locale]/(auth)`
+- `src/app/[locale]/(app)`
+- `src/app/[locale]/(admin)`
+- `src/app/[locale]/(driver)`
+
 Required layouts:
-- `src/app/(marketing)/layout.tsx`
-- `src/app/(auth)/layout.tsx`
-- `src/app/(app)/layout.tsx`
-- `src/app/(admin)/layout.tsx`
-- `src/app/(driver)/layout.tsx`
+- `src/app/[locale]/(marketing)/layout.tsx`
+- `src/app/[locale]/(auth)/layout.tsx`
+- `src/app/[locale]/(app)/layout.tsx`
+- `src/app/[locale]/(admin)/layout.tsx`
+- `src/app/[locale]/(driver)/layout.tsx`
 
 Each group must define:
 - `loading.tsx`
@@ -58,10 +65,10 @@ Parallel routes are recommended for dashboards with persistent navigation/sideba
 - `@panel` — secondary panel (e.g., route preview/map)
 
 Example folder shape:
-- `src/app/(admin)/admin/layout.tsx`
-- `src/app/(admin)/admin/@nav/page.tsx`
-- `src/app/(admin)/admin/@content/page.tsx`
-- `src/app/(admin)/admin/@modal/default.tsx` (empty default)
+- `src/app/[locale]/(admin)/admin/layout.tsx`
+- `src/app/[locale]/(admin)/admin/@nav/page.tsx`
+- `src/app/[locale]/(admin)/admin/@content/page.tsx`
+- `src/app/[locale]/(admin)/admin/@modal/default.tsx` (empty default)
 
 We allow **slot-only layouts** where `children` is omitted and the shell is entirely slot-driven. :contentReference[oaicite:7]{index=7}
 
@@ -74,14 +81,14 @@ Use intercepting routes + a `@modal` parallel slot to open details as overlays w
 - From `/schedule` list → open appointment details/edit as modal:
   - Canonical page: `/appointment/[id]`
   - Intercepted modal from schedule:
-    - `src/app/(app)/schedule/@modal/(..)appointment/[id]/page.tsx`
+    - `src/app/[locale]/(app)/schedule/@modal/(..)appointment/[id]/page.tsx`
   - Schedule page renders `{modal}` slot.
 
 ### Admin examples (recommended)
 - From `/admin/deliveries` list → open stop detail modal:
   - Canonical page: `/admin/stops/[id]` (or `/stops/[id]` under admin group)
   - Intercepted modal from deliveries:
-    - `src/app/(admin)/admin/deliveries/@modal/(..)stops/[id]/page.tsx`
+    - `src/app/[locale]/(admin)/admin/deliveries/@modal/(..)stops/[id]/page.tsx`
 
 Requirements:
 - Modal route must be shareable (canonical URL works directly)
