@@ -56,17 +56,19 @@
 ### 🎯 NEXT UP (Week 3-4)
 
 #### Priority 0 (P0) - Critical
-- [ ] **Platform/DevEx Improvements**
+- [x] **Platform/DevEx Improvements** — ✅ Complete
   - Make verify/build work in ephemeral environments
-  - Branch: `codex/platform-p0-devex`
-  - ⏱️ Estimated: 1-2 hours
-  - 📖 Spec: `.github/codex/prompts/platform-p0-devex.md`
+  - Scripts: `scripts/codex/load-env.sh`, `scripts/codex/git-sync-main.sh`
+  - Documentation: `docs/07-workflow/codex-devex.md`
+  - Status: Fully implemented and verified (bash scripts/codex/verify.sh passes)
+  - **Completed:** 2026-01-05
 
-- [ ] **Admin Login Redirect Loop Fix**
+- [x] **Admin Login Redirect Loop Fix** — ✅ Complete
   - Fix infinite redirect on /admin/login
-  - Branch: `codex/auth-p0-admin-login-fix`
-  - ⏱️ Estimated: 1-2 hours
-  - 📖 Spec: `.github/codex/prompts/auth-p0-admin-login-fix.md`
+  - Solution: Route groups `(admin-auth)` for login, `(admin)` for protected pages
+  - Error messages: Friendly auth errors implemented (no user enumeration)
+  - Status: Working correctly with AdminGuard server-side protection
+  - **Completed:** 2026-01-05
 
 #### Priority 1 (P1) - High Value
 - [ ] **UI Polish - Navigation & Contrast**
@@ -138,6 +140,8 @@ See detailed workstreams and acceptance criteria in:
 📖 **[Active Backlog](./01-active/BACKLOG.md)**
 
 ### P0 (Critical)
+- ✅ Platform/DevEx — Complete (verify/build works in ephemeral environments)
+- ✅ Admin Login Fix — Complete (route groups prevent redirect loops)
 - None blocking! 🎉
 
 ### P1 (High Value)

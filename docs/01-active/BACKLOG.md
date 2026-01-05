@@ -12,22 +12,32 @@
 ## Workstream: Platform / DevEx
 
 ### P0 — Verify/build must pass in ephemeral environments
-**Problem:** `pnpm build` fails in Codex/CI due to missing env vars and strict env throw.  
+**Problem:** `pnpm build` fails in Codex/CI due to missing env vars and strict env throw.
 **Acceptance:**
 - `bash scripts/codex/verify.sh` passes with no real secrets provided
 - Strict runtime env checks remain in real env (Vercel), not weakened
 - Documented in `docs/CODEX_DEVEX.md`
 
-**Planned PR:** `codex/platform-p0-devex`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Created `scripts/codex/load-env.sh` with safe stub env values
+- Updated `scripts/codex/verify.sh` to source load-env.sh
+- Updated `src/lib/supabase/env.ts` to be tolerant during CODEX_VERIFY
+- Documented in `docs/07-workflow/codex-devex.md`
+- Verification: `bash scripts/codex/verify.sh` passes ✅
 
 ### P0 — Best-effort sync to latest main in Codex
-**Problem:** Codex environments may not have `origin/main`.  
+**Problem:** Codex environments may not have `origin/main`.
 **Acceptance:**
 - Provide `scripts/codex/git-sync-main.sh`
 - AGENTS.md requires best-effort sync
 - PRs note base if origin unavailable
 
-**Planned PR:** `codex/platform-p0-devex`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Created `scripts/codex/git-sync-main.sh` with best-effort sync logic
+- Script handles missing origin/main gracefully
+- Documented in workflow files
 
 ---
 
@@ -54,13 +64,20 @@
 **Planned PR:** `codex/routing-r1-groups-boundaries`
 
 ### P0 — Fix /admin/login redirect loop and compilation crashes
-**Problem:** admin login nested under admin-gated layout causes loop/crash.  
+**Problem:** admin login nested under admin-gated layout causes loop/crash.
 **Acceptance:**
 - `/admin/login` loads reliably, no infinite redirects
 - Admin pages remain protected server-side (`profiles.is_admin`)
 - Manual QA step documented in PR
 
-**Planned PR:** `codex/auth-p0-admin-login-fix`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Created route group `(admin-auth)` for `/admin/login` (no protection)
+- Created route group `(admin)` for admin pages (AdminGuard protection)
+- AdminGuard redirects unauthenticated users to `/admin/login`
+- Admin login redirects authenticated users to `/admin`
+- Server-side protection via `profiles.is_admin` check in AdminGuard
+- No redirect loops confirmed
 
 ### P0 — Fix onboarding redirect loop after magic link confirm
 **Problem:** auth callback redirects loop between `/auth/callback` and `/onboarding`.  
@@ -73,12 +90,17 @@
 **Status:** ✅ Done
 
 ### P1 — Friendly auth errors (no user enumeration)
-**Problem:** confusing auth errors; missing account should show signup guidance.  
+**Problem:** confusing auth errors; missing account should show signup guidance.
 **Acceptance:**
-- Use message: “No active account found or credentials are incorrect. Please sign up.”
+- Use message: "No active account found or credentials are incorrect. Please sign up."
 - Same message for invalid vs no user (avoid enumeration)
 
-**Planned PR:** `codex/auth-p0-admin-login-fix`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Created `src/lib/auth/errorMessages.ts` with `friendlyAuthError()` function
+- Returns "No active account found or credentials are incorrect. Please sign up." for invalid credentials
+- Used in both `/login` and `/admin/login` via AuthForm component
+- Prevents user enumeration by showing same message for invalid/non-existent accounts
 
 ---
 

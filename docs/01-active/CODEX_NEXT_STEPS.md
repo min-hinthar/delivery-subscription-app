@@ -19,14 +19,14 @@
 
 ---
 
-## 🚨 Priority 0 (P0) - CRITICAL - DO THESE FIRST
+## 🚨 Priority 0 (P0) - CRITICAL - COMPLETED ✅
 
-### 1. Platform/DevEx Improvements 🔴
+### 1. Platform/DevEx Improvements 🟢
 
-**Branch:** `codex/platform-p0-devex`
-**Time:** 1-2 hours
-**Status:** 🔴 Not Started
-**Why Critical:** Blocks Codex workflow in ephemeral environments
+**Branch:** N/A (Already implemented)
+**Time:** Completed
+**Status:** 🟢 Complete (2026-01-05)
+**Why Critical:** Was blocking Codex workflow in ephemeral environments
 
 #### What to Build
 Create infrastructure for Codex to work without real secrets:
@@ -36,26 +36,26 @@ Create infrastructure for Codex to work without real secrets:
 - Documentation for DevEx
 
 #### Tasks Checklist
-- [ ] Create `scripts/codex/load-env.sh`
-  - Add safe stub values for all required env vars
-  - Set `CODEX_VERIFY=1` flag
-  - Document each stub value
-- [ ] Update `scripts/codex/verify.sh`
-  - Source load-env.sh at start
-  - Pass CODEX_VERIFY to build process
-  - Ensure all checks pass
-- [ ] Create `scripts/codex/git-sync-main.sh`
-  - Best-effort sync to origin/main
-  - Handle missing remote gracefully
-  - Document usage
-- [ ] Update `src/lib/supabase/env.ts`
-  - Strict checks in production
-  - Tolerant during CODEX_VERIFY=1
-  - Keep runtime safety
-- [ ] Document in `docs/07-workflow/codex-devex.md`
-  - How env loading works
-  - When to use verify mode
-  - Troubleshooting guide
+- [x] Create `scripts/codex/load-env.sh`
+  - ✅ Add safe stub values for all required env vars
+  - ✅ Set `CODEX_VERIFY=1` flag
+  - ✅ Document each stub value
+- [x] Update `scripts/codex/verify.sh`
+  - ✅ Source load-env.sh at start
+  - ✅ Pass CODEX_VERIFY to build process
+  - ✅ Ensure all checks pass
+- [x] Create `scripts/codex/git-sync-main.sh`
+  - ✅ Best-effort sync to origin/main
+  - ✅ Handle missing remote gracefully
+  - ✅ Document usage
+- [x] Update `src/lib/supabase/env.ts`
+  - ✅ Strict checks in production
+  - ✅ Tolerant during CODEX_VERIFY=1
+  - ✅ Keep runtime safety
+- [x] Document in `docs/07-workflow/codex-devex.md`
+  - ✅ How env loading works
+  - ✅ When to use verify mode
+  - ✅ Troubleshooting guide
 
 #### Success Criteria
 - ✅ `bash scripts/codex/verify.sh` passes without real secrets
@@ -75,12 +75,12 @@ Create infrastructure for Codex to work without real secrets:
 
 ---
 
-### 2. Admin Login Redirect Loop Fix 🔴
+### 2. Admin Login Redirect Loop Fix 🟢
 
-**Branch:** `codex/auth-p0-admin-login-fix`
-**Time:** 1-2 hours
-**Status:** 🔴 Not Started
-**Why Critical:** Admin can't log in, infinite redirect loop
+**Branch:** N/A (Already implemented)
+**Time:** Completed
+**Status:** 🟢 Complete (2026-01-05)
+**Why Critical:** Was blocking admin access with infinite redirect loop
 
 #### What to Build
 Fix admin login by moving it out of protected layout:
@@ -90,26 +90,26 @@ Fix admin login by moving it out of protected layout:
 - Test auth flows
 
 #### Tasks Checklist
-- [ ] Restructure `/admin/login` route
-  - Move out of `(admin)` layout protection
-  - Keep URL as `/admin/login`
-  - Use Next.js 14 route groups
-- [ ] Keep admin protection on other pages
-  - Verify `(admin)/layout.tsx` server-side gating
-  - Test admin pages require `is_admin=true`
-  - Ensure non-admins blocked
-- [ ] Improve login error messaging
-  - Create auth error helper
-  - Message: "No active account found or credentials are incorrect. Please sign up."
-  - Same message for invalid vs missing user (prevent enumeration)
-- [ ] Apply to both `/login` and `/admin/login`
-  - Consistent error messaging
-  - Same UX patterns
-- [ ] Test thoroughly
-  - Admin can log in without redirect loop
-  - Non-admin blocked from admin pages
-  - Friendly error messages work
-  - No user enumeration vulnerability
+- [x] Restructure `/admin/login` route
+  - ✅ Moved to `(admin-auth)` route group (no protection)
+  - ✅ Keep URL as `/admin/login`
+  - ✅ Use Next.js 14 route groups
+- [x] Keep admin protection on other pages
+  - ✅ Verified `(admin)/layout.tsx` server-side gating
+  - ✅ Test admin pages require `is_admin=true`
+  - ✅ Ensure non-admins blocked
+- [x] Improve login error messaging
+  - ✅ Created `src/lib/auth/errorMessages.ts` helper
+  - ✅ Message: "No active account found or credentials are incorrect. Please sign up."
+  - ✅ Same message for invalid vs missing user (prevent enumeration)
+- [x] Apply to both `/login` and `/admin/login`
+  - ✅ Consistent error messaging via AuthForm
+  - ✅ Same UX patterns
+- [x] Test thoroughly
+  - ✅ Admin can log in without redirect loop
+  - ✅ Non-admin blocked from admin pages
+  - ✅ Friendly error messages work
+  - ✅ No user enumeration vulnerability
 
 #### Success Criteria
 - ✅ `/admin/login` loads without infinite redirects
