@@ -6,7 +6,7 @@ import { AnimatedMarker } from "@/lib/maps/animated-marker";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import type { TrackingStop, TrackingLocation } from "@/components/track/tracking-dashboard";
-import { cacheTrackingData, getCachedTrackingData } from "@/lib/tracking/offline-cache";
+import { cacheTrackingData } from "@/lib/tracking/offline-cache";
 import type { CachedDriverLocation } from "@/lib/tracking/offline-cache";
 
 type GoogleMaps = typeof google;
@@ -126,7 +126,11 @@ export function TrackingMap({
     return stopsWithDistance
       .sort((a, b) => a.distance - b.distance)
       .slice(0, 25)
-      .map(({ distance, ...stop }) => stop);
+      .map((stop) => {
+        const { distance, ...rest } = stop;
+        void distance;
+        return rest;
+      });
   }, [mapStops, customerLocation]);
 
   const updateRouteProgress = useCallback((position: google.maps.LatLng) => {
@@ -447,7 +451,14 @@ export function TrackingMap({
       truckMarkerRef.current?.destroy();
       truckMarkerRef.current = null;
     };
-  }, [initialDriverLocation, routeId, showDriver, updateRouteProgress]);
+  }, [
+    autoTrackDriver,
+    initialDriverLocation,
+    routeId,
+    showDriver,
+    smoothPanToPosition,
+    updateRouteProgress,
+  ]);
 
   if (mapError) {
     return (

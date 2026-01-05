@@ -149,11 +149,14 @@ export function PhotoUpload({
         )}
       />
       {previewUrl ? (
-        <img
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element -- preview URL can be a blob URL. */}
+          <img
           src={previewUrl}
           alt="Uploaded delivery proof"
           className="max-h-36 w-full rounded-md border border-slate-200 object-cover dark:border-slate-800"
-        />
+          />
+        </>
       ) : null}
       {statusMessage ? (
         <p className="text-xs text-slate-500 dark:text-slate-400">{statusMessage}</p>

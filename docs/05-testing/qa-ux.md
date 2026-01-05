@@ -40,6 +40,7 @@ It is designed to be used:
 - [ ] Pull-to-refresh works on tracking dashboard
 - [ ] Swipe down closes appointment modal on mobile
 - [ ] PWA install prompt appears after eligible session delay
+- [ ] Haptic feedback respects reduced-motion preference and does not fire when disabled
 
 ### Network conditions (minimum)
 - Fast (Wi-Fi)

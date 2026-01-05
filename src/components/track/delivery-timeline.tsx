@@ -64,6 +64,7 @@ const TimelineItem = memo(
           </p>
           {stop.isCustomerStop && stop.photoUrl && isCompleted ? (
             <div className="mt-2 space-y-2">
+              {/* eslint-disable-next-line @next/next/no-img-element -- remote storage URL not optimized. */}
               <img
                 src={stop.photoUrl}
                 alt="Delivery proof"

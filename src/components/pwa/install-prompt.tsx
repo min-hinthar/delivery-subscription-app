@@ -11,6 +11,26 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
+const INSTALL_PROMPT_DELAY_MS = 30_000;
+const DISMISSAL_DAYS = 7;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+const getDismissedAt = () => {
+  try {
+    return localStorage.getItem("pwa-install-dismissed");
+  } catch {
+    return null;
+  }
+};
+
+const setDismissedAt = (value: string) => {
+  try {
+    localStorage.setItem("pwa-install-dismissed", value);
+  } catch {
+    // Ignore storage errors (private browsing mode).
+  }
+};
+
 export function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
     null,
@@ -24,13 +44,12 @@ export function InstallPrompt() {
       return;
     }
 
-    const dismissed = localStorage.getItem("pwa-install-dismissed");
+    const dismissed = getDismissedAt();
     if (dismissed) {
       const dismissedDate = new Date(dismissed);
-      const daysSince =
-        (Date.now() - dismissedDate.getTime()) / (1000 * 60 * 60 * 24);
+      const daysSince = (Date.now() - dismissedDate.getTime()) / MS_PER_DAY;
 
-      if (daysSince < 7) return;
+      if (daysSince < DISMISSAL_DAYS) return;
     }
 
     const handler = (event: Event) => {
@@ -39,7 +58,7 @@ export function InstallPrompt() {
 
       timeoutId = window.setTimeout(() => {
         setShowPrompt(true);
-      }, 30000);
+      }, INSTALL_PROMPT_DELAY_MS);
     };
 
     window.addEventListener("beforeinstallprompt", handler);
@@ -66,7 +85,7 @@ export function InstallPrompt() {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem("pwa-install-dismissed", new Date().toISOString());
+    setDismissedAt(new Date().toISOString());
     setShowPrompt(false);
   };
 
