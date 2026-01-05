@@ -44,6 +44,7 @@ All documentation is organized in [`docs/`](docs/):
 | **🏗️ Architecture** | [docs/03-architecture/](docs/03-architecture/) |
 | **🔒 Security** | [docs/04-security/](docs/04-security/) |
 | **🧪 Testing** | [docs/05-testing/](docs/05-testing/) |
+| **📈 Monitoring & Operations** | [docs/06-operations/MONITORING_GUIDE.md](docs/06-operations/MONITORING_GUIDE.md) |
 
 ---
 
