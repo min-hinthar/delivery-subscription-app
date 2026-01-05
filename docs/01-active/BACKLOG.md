@@ -85,7 +85,7 @@
 ## Workstream: UI / UX
 
 ### P0 — Mobile UX Enhancement
-**Problem:** Mobile experience needs bottom navigation, touch-friendly tap targets, and PWA support.  
+**Problem:** Mobile experience needs bottom navigation, touch-friendly tap targets, and PWA support.
 **Acceptance:**
 - Bottom navigation available on mobile
 - Tap targets ≥44px
@@ -93,8 +93,10 @@
 - PWA manifest + install prompt enabled
 - Safe area support for notched devices
 
-**Planned PR:** `codex/mobile-ux-optimization`  
-**Status:** 🟡 In progress
+**Planned PR:** `codex/mobile-ux-optimization`
+**Status:** ✅ Done (PR #80 merged)
+**Review:** See `docs/08-archive/completed-prs/PR-80-mobile-ux-optimization-review.md`
+**Rating:** 8.5/10 - Production-ready with minor test coverage improvements recommended
 
 ### P1 — Mobile nav overlay background/z-index issues
 **Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  
