@@ -70,7 +70,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let locale = "en";
-  let messages = (await import("../messages/en.json")).default;
+  let messages = (await import("../../messages/en.json")).default;
 
   try {
     locale = await getLocale();
