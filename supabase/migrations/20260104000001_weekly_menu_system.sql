@@ -24,6 +24,9 @@ create index if not exists idx_menu_templates_active
 
 alter table public.menu_templates enable row level security;
 
+drop policy if exists "menu_templates_public_select_active" on public.menu_templates;
+drop policy if exists "menu_templates_admin_access" on public.menu_templates;
+
 create policy "menu_templates_public_select_active"
   on public.menu_templates for select
   using (is_active = true);
@@ -56,6 +59,9 @@ create index if not exists idx_template_dishes_day
   on public.template_dishes(template_id, day_of_week);
 
 alter table public.template_dishes enable row level security;
+
+drop policy if exists "template_dishes_public_select_active" on public.template_dishes;
+drop policy if exists "template_dishes_admin_access" on public.template_dishes;
 
 create policy "template_dishes_public_select_active"
   on public.template_dishes for select
@@ -104,6 +110,7 @@ create index if not exists idx_weekly_menus_delivery
 alter table public.weekly_menus enable row level security;
 
 drop policy if exists "weekly_menus_public_select_published" on public.weekly_menus;
+drop policy if exists "weekly_menus_admin_access" on public.weekly_menus;
 
 create policy "weekly_menus_public_select_published"
   on public.weekly_menus for select
@@ -148,6 +155,7 @@ create index if not exists idx_weekly_menu_items_dish
 alter table public.weekly_menu_items enable row level security;
 
 drop policy if exists "weekly_menu_items_public_select_published" on public.weekly_menu_items;
+drop policy if exists "weekly_menu_items_admin_access" on public.weekly_menu_items;
 
 create policy "weekly_menu_items_public_select_published"
   on public.weekly_menu_items for select
@@ -195,6 +203,9 @@ values
 on conflict do nothing;
 
 alter table public.meal_packages enable row level security;
+
+drop policy if exists "meal_packages_public_select_active" on public.meal_packages;
+drop policy if exists "meal_packages_admin_access" on public.meal_packages;
 
 create policy "meal_packages_public_select_active"
   on public.meal_packages for select
@@ -245,6 +256,13 @@ create index if not exists idx_weekly_orders_delivery
 
 alter table public.weekly_orders enable row level security;
 
+drop policy if exists "weekly_orders_customer_select" on public.weekly_orders;
+drop policy if exists "weekly_orders_customer_insert" on public.weekly_orders;
+drop policy if exists "weekly_orders_customer_update_pending" on public.weekly_orders;
+drop policy if exists "weekly_orders_driver_select" on public.weekly_orders;
+drop policy if exists "weekly_orders_driver_update" on public.weekly_orders;
+drop policy if exists "weekly_orders_admin_access" on public.weekly_orders;
+
 create policy "weekly_orders_customer_select"
   on public.weekly_orders for select
   using (customer_id = auth.uid());
@@ -285,6 +303,8 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists trigger_auto_close_menu on public.weekly_menus;
+
 create trigger trigger_auto_close_menu
   before update on public.weekly_menus
   for each row
@@ -308,6 +328,11 @@ begin
   return NEW;
 end;
 $$ language plpgsql;
+
+drop trigger if exists trigger_increment_orders on public.weekly_orders;
+drop trigger if exists menu_templates_set_updated_at on public.menu_templates;
+drop trigger if exists meal_packages_set_updated_at on public.meal_packages;
+drop trigger if exists weekly_orders_set_updated_at on public.weekly_orders;
 
 create trigger trigger_increment_orders
   after insert or update on public.weekly_orders
