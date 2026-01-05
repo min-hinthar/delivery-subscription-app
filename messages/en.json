@@ -1,0 +1,199 @@
+{
+  "branding": {
+    "appName": "Morning Star Delivery"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "viewAll": "View All",
+    "navigation": "Menu"
+  },
+  "nav": {
+    "menu": "Menu",
+    "schedule": "Schedule",
+    "track": "Track",
+    "account": "Account",
+    "admin": "Admin",
+    "driver": "Driver Dashboard",
+    "howItWorks": "How it Works",
+    "pricing": "Pricing",
+    "login": "Login",
+    "billing": "Billing",
+    "dashboard": "Dashboard",
+    "deliveries": "Deliveries",
+    "routes": "Routes",
+    "menus": "Menus",
+    "meals": "Meals",
+    "subscriptions": "Subscriptions"
+  },
+  "support": {
+    "needHelp": "Need help? Email support@morningstardelivery.com"
+  },
+  "days": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday"
+  },
+  "weeklyMenu": {
+    "title": "This Week's Menu",
+    "noMenuAvailable": "No menu available",
+    "noMenuDescription": "This week's menu hasn't been published yet. Check back soon!",
+    "orderBy": "Order by Wednesday 11:59 PM",
+    "hoursRemaining": "{hours} hours remaining",
+    "ordersClosed": "Orders closed",
+    "deliveryDate": "Delivery: {date}",
+    "dishNumber": "Dish {number}",
+    "soldOut": "Sold Out",
+    "portionsRemaining": "{count} portions remaining"
+  },
+  "packages": {
+    "choosePackage": "Choose Your Package",
+    "chooseDescription": "Select how many dishes you'd like each day",
+    "packageA": "Package A",
+    "packageB": "Package B",
+    "packageC": "Package C",
+    "dishesPerDay": "{count, plural, one {# dish per day} other {# dishes per day}}",
+    "totalDishes": "{count} total dishes",
+    "perWeek": "/week",
+    "saturdayDelivery": "Saturday delivery",
+    "freshAuthentic": "Fresh & authentic",
+    "mostPopular": "Most Popular",
+    "bestValue": "Best Value",
+    "selected": "Selected",
+    "selectPackage": "Select Package",
+    "continueToCheckout": "Continue to Checkout"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "orderSummary": "Order Summary",
+    "package": "Package",
+    "weekOf": "Week of {date}",
+    "deliveryAddress": "Delivery Address",
+    "selectAddress": "Select address",
+    "addNewAddress": "Add new address",
+    "deliveryWindow": "Delivery Window",
+    "selectWindow": "Select preferred time",
+    "morning": "8 AM - 12 PM",
+    "afternoon": "12 PM - 4 PM",
+    "evening": "4 PM - 8 PM",
+    "deliveryInstructions": "Delivery Instructions",
+    "instructionsPlaceholder": "Gate code, parking info, etc.",
+    "paymentMethod": "Payment Method",
+    "total": "Total",
+    "placeOrder": "Place Order",
+    "processing": "Processing..."
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "emailPlaceholder": "you@example.com",
+    "passwordPlaceholder": "Enter your password",
+    "signInWithEmail": "Sign in with email",
+    "signUpWithEmail": "Sign up with email"
+  },
+  "account": {
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "settings": "Settings",
+    "orderHistory": "Order History",
+    "noOrders": "No orders yet",
+    "noOrdersDescription": "When you place an order, it will appear here",
+    "viewOrder": "View Order",
+    "orderStatus": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "preparing": "Preparing",
+      "outForDelivery": "Out for Delivery",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
+    }
+  },
+  "tracking": {
+    "title": "Track Your Delivery",
+    "eta": "Estimated Arrival",
+    "driverName": "Driver",
+    "driverPhone": "Contact Driver",
+    "orderNumber": "Order #{number}",
+    "noActiveDelivery": "No active delivery",
+    "noActiveDescription": "You don't have any deliveries in progress right now"
+  },
+  "admin": {
+    "dashboard": "Admin Dashboard",
+    "menus": "Menus",
+    "templates": "Menu Templates",
+    "createTemplate": "Create Template",
+    "generateMenu": "Generate Weekly Menu",
+    "orders": "Orders",
+    "customers": "Customers",
+    "drivers": "Drivers",
+    "dishes": "Dishes",
+    "analytics": "Analytics",
+    "settings": "Settings"
+  },
+  "driver": {
+    "dashboard": "Driver Dashboard",
+    "myDeliveries": "My Deliveries",
+    "upcomingDeliveries": "Upcoming Deliveries",
+    "completedDeliveries": "Completed Deliveries",
+    "startRoute": "Start Route",
+    "markDelivered": "Mark as Delivered",
+    "contactCustomer": "Contact Customer",
+    "deliveryAddress": "Delivery Address",
+    "deliveryInstructions": "Delivery Instructions",
+    "noDeliveries": "No deliveries assigned",
+    "noDeliveriesDescription": "Check back later for delivery assignments"
+  },
+  "email": {
+    "orderConfirmation": {
+      "subject": "Order Confirmed - Week of {date}",
+      "greeting": "Hi {name},",
+      "confirmMessage": "Your order has been confirmed!",
+      "packageSelected": "Package Selected",
+      "deliveryDate": "Delivery Date",
+      "deliveryWindow": "Delivery Window",
+      "total": "Total Paid",
+      "viewOrder": "View Order Details",
+      "questions": "Questions? Contact us at support@mandalaymorningstar.com"
+    },
+    "deliveryReminder": {
+      "subject": "Delivery Tomorrow - {package}",
+      "greeting": "Hi {name},",
+      "reminderMessage": "Your delicious Burmese food will be delivered tomorrow!",
+      "prepareFor": "Please prepare for delivery",
+      "trackDelivery": "Track Your Delivery"
+    }
+  },
+  "errors": {
+    "unauthorized": "You must be signed in to access this page",
+    "forbidden": "You don't have permission to access this page",
+    "notFound": "Page not found",
+    "serverError": "Something went wrong. Please try again later.",
+    "networkError": "Network error. Please check your connection.",
+    "validationError": "Please check your input and try again",
+    "orderDeadlinePassed": "Sorry, the order deadline has passed",
+    "alreadyOrdered": "You already have an order for this week",
+    "soldOut": "This dish is sold out"
+  }
+}

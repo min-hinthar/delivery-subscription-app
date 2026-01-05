@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const isProduction = process.env.NODE_ENV === "production";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -58,6 +59,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  experimental: {
+    turbopackUseSystemTlsCerts: true,
+  },
   async headers() {
     return [
       {
@@ -76,4 +80,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withNextIntl = createNextIntlPlugin("./src/i18n.ts");
+
+export default withNextIntl(nextConfig);

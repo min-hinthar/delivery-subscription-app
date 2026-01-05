@@ -10,14 +10,16 @@ import {
   User,
   type LucideIcon,
 } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
+import { type Locale } from "@/i18n";
+import { stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   icon: LucideIcon;
-  label: string;
-  labelMy?: string;
+  translationKey: string;
   matchPaths?: string[];
 };
 
@@ -25,35 +27,34 @@ const NAV_ITEMS: NavItem[] = [
   {
     href: "/menu",
     icon: UtensilsCrossed,
-    label: "Menu",
-    labelMy: "မီနူး",
+    translationKey: "nav.menu",
     matchPaths: ["/menu/weekly", "/menu/dish"],
   },
   {
     href: "/schedule",
     icon: Calendar,
-    label: "Schedule",
-    labelMy: "အချိန်",
+    translationKey: "nav.schedule",
     matchPaths: ["/schedule/new"],
   },
   {
     href: "/track",
     icon: MapPin,
-    label: "Track",
-    labelMy: "ခြေရာ",
+    translationKey: "nav.track",
     matchPaths: ["/track/active"],
   },
   {
     href: "/account",
     icon: User,
-    label: "Account",
-    labelMy: "အကောင့်",
+    translationKey: "nav.account",
     matchPaths: ["/account/orders", "/account/settings", "/account/profile"],
   },
 ];
 
 export function MobileBottomNav() {
+  const t = useTranslations();
+  const locale = useLocale() as Locale;
   const pathname = usePathname();
+  const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -85,11 +86,11 @@ export function MobileBottomNav() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/driver")) {
+  if (normalizedPathname.startsWith("/admin") || normalizedPathname.startsWith("/driver")) {
     return null;
   }
 
-  if (pathname?.startsWith("/login") || pathname?.startsWith("/signup")) {
+  if (normalizedPathname.startsWith("/login") || normalizedPathname.startsWith("/signup")) {
     return null;
   }
 
@@ -118,8 +119,8 @@ export function MobileBottomNav() {
             const Icon = item.icon;
 
             const isActive =
-              pathname === item.href ||
-              item.matchPaths?.some((path) => pathname?.startsWith(path)) ||
+              normalizedPathname === item.href ||
+              item.matchPaths?.some((path) => normalizedPathname.startsWith(path)) ||
               false;
 
             return (
@@ -138,7 +139,7 @@ export function MobileBottomNav() {
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                 }}
-                aria-label={item.label}
+                aria-label={t(item.translationKey)}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
@@ -146,7 +147,7 @@ export function MobileBottomNav() {
                   aria-hidden="true"
                 />
                 <span className={cn("text-xs font-medium", isActive && "font-semibold")}>
-                  {item.label}
+                  {t(item.translationKey)}
                 </span>
                 {isActive && (
                   <div

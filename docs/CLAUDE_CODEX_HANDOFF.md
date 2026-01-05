@@ -111,3 +111,31 @@
 - [x] Build + verify completed
 - [ ] Tests fully green (browser-notifications.test.ts failure pre-existing)
 - [ ] Claude review pending
+
+## Codex Session - Burmese language support
+**Date:** 2026-01-05
+**Branch:** codex/burmese-language-support
+
+### Implemented
+- Added next-intl configuration, locale-aware routing under `/[locale]`, and middleware-driven locale detection.
+- Added Burmese/English message catalogs, font setup (Noto Sans + Myanmar), and language switcher UI.
+- Localized weekly menu + package selector with locale-aware dish/package fields and fallback handling.
+- Added Burmese columns migration for dishes/categories and localization helpers + tests.
+- Added bilingual order confirmation email template + sending helper.
+
+### Tests
+- `pnpm test`
+- `pnpm build`
+- `bash scripts/codex/verify.sh`
+
+### For Claude to Review
+- Validate locale UX around redirects and nav behavior across auth/admin/driver routes.
+- Confirm Burmese translation tone + terminology for community alignment.
+
+### Notes / Blockers
+- `bash scripts/codex/verify.sh` reported existing ESLint warnings (pre-existing unused vars + img lint).
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
