@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react';
 import { PageHeader } from '@/components/layout/page-header';
 import { OrderHistoryList } from '@/components/orders/order-history-list';
+import type { Order } from '@/components/orders/order-history-list';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Select, SelectOption } from '@/components/ui/select';
+import { Select } from '@/components/ui/select';
 import { toast } from '@/components/ui/use-toast';
 
 type OrderType = 'all' | 'package' | 'a_la_carte';
 type OrderStatus = 'all' | 'pending' | 'confirmed' | 'delivered' | 'cancelled';
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);

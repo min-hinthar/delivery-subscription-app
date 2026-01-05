@@ -13,7 +13,6 @@ export default function AlaCartePage() {
   const [items, setItems] = useState<AlaCarteItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   useEffect(() => {
     fetchItems();
@@ -143,7 +142,6 @@ export default function AlaCartePage() {
               onUpdateQuantity={handleUpdateQuantity}
               onRemoveItem={handleRemoveItem}
               onCheckout={handleCheckout}
-              isCheckingOut={isCheckingOut}
             />
           </div>
         </div>

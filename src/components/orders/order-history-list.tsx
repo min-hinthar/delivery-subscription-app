@@ -8,9 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatPrice, formatDate } from '@/lib/utils/format';
 
-type OrderStatus = 'pending' | 'confirmed' | 'in_progress' | 'delivered' | 'cancelled';
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'in_progress'
+  | 'delivered'
+  | 'cancelled';
 
-type OrderItem = {
+export type OrderItem = {
   id: string;
   quantity: number;
   unit_price_cents: number;
@@ -22,7 +27,7 @@ type OrderItem = {
   };
 };
 
-type Order = {
+export type Order = {
   id: string;
   week_of: string;
   order_type: 'package' | 'a_la_carte';

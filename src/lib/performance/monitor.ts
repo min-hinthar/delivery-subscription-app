@@ -12,6 +12,12 @@ export type PerformanceMetric = {
 
 export type MetricCallback = (metric: PerformanceMetric) => void;
 
+type WebVitalsMetric = {
+  value: number;
+  delta: number;
+  id: string;
+};
+
 // Core Web Vitals thresholds
 const CWV_THRESHOLDS = {
   FCP: { good: 1800, poor: 3000 },
@@ -39,7 +45,7 @@ function getRating(
 export function reportWebVitals(onPerfEntry?: MetricCallback) {
   if (onPerfEntry && typeof window !== 'undefined') {
     import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
-      onCLS((metric: any) => {
+      onCLS((metric: WebVitalsMetric) => {
         onPerfEntry({
           name: 'CLS',
           value: metric.value,
@@ -48,7 +54,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onFCP((metric: any) => {
+      onFCP((metric: WebVitalsMetric) => {
         onPerfEntry({
           name: 'FCP',
           value: metric.value,
@@ -57,7 +63,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onLCP((metric: any) => {
+      onLCP((metric: WebVitalsMetric) => {
         onPerfEntry({
           name: 'LCP',
           value: metric.value,
@@ -66,7 +72,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onTTFB((metric: any) => {
+      onTTFB((metric: WebVitalsMetric) => {
         onPerfEntry({
           name: 'TTFB',
           value: metric.value,
@@ -75,7 +81,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onINP((metric: any) => {
+      onINP((metric: WebVitalsMetric) => {
         onPerfEntry({
           name: 'INP',
           value: metric.value,
@@ -121,8 +127,8 @@ export class PerformanceMonitor {
       performance.mark(`${markName}-end`);
       try {
         performance.measure(markName, `${markName}-start`, `${markName}-end`);
-      } catch (e) {
-        // Silently ignore if marks don't exist
+      } catch (error) {
+        console.warn('Performance marks unavailable for measurement', error);
       }
 
       this.marks.delete(markName);
@@ -185,8 +191,8 @@ export function observeLongTasks(callback: (entries: PerformanceEntry[]) => void
       });
       observer.observe({ entryTypes: ['longtask'] });
       return () => observer.disconnect();
-    } catch (e) {
-      console.warn('Long task observation not supported');
+    } catch (error) {
+      console.warn('Long task observation not supported', error);
     }
   }
   return () => {};
@@ -203,8 +209,8 @@ export function observeLayoutShifts(callback: (entries: PerformanceEntry[]) => v
       });
       observer.observe({ entryTypes: ['layout-shift'] });
       return () => observer.disconnect();
-    } catch (e) {
-      console.warn('Layout shift observation not supported');
+    } catch (error) {
+      console.warn('Layout shift observation not supported', error);
     }
   }
   return () => {};

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Package, MapPin, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatDate } from '@/lib/utils/format';
 
 type DashboardStats = {
   todayDeliveries: number;
@@ -70,7 +69,7 @@ export function DriverDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Deliveries</CardTitle>
+            <CardTitle className="text-sm font-medium">Today&apos;s Deliveries</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -111,7 +110,7 @@ export function DriverDashboard() {
       {/* Route Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>Today's Route</CardTitle>
+          <CardTitle>Today&apos;s Route</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-8">

@@ -8,7 +8,7 @@ const SendNotificationSchema = z.object({
   type: z.string(),
   title: z.string(),
   message: z.string(),
-  data: z.record(z.any()).optional(),
+  data: z.record(z.unknown()).optional(),
   delivery_method: z.enum(['email', 'push', 'sms']).optional(),
 });
 
@@ -86,10 +86,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
+type NotificationPreferences = {
+  email_enabled: boolean | null;
+  push_enabled: boolean | null;
+  sms_enabled: boolean | null;
+  order_updates: boolean | null;
+  delivery_reminders: boolean | null;
+  promotional: boolean | null;
+};
+
+type NotificationDeliveryMethod = 'email' | 'push' | 'sms' | undefined;
+
 function checkNotificationEnabled(
-  preferences: any,
+  preferences: NotificationPreferences,
   type: string,
-  method?: string
+  method?: NotificationDeliveryMethod
 ): boolean {
   // Check if the delivery method is enabled
   if (method === 'email' && !preferences.email_enabled) return false;
