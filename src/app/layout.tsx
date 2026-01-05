@@ -1,11 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 
 import "./globals.css";
 
-import { PageTransition } from "@/components/page-transition";
-import { SiteHeader } from "@/components/navigation/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -64,17 +61,17 @@ export const viewport: Viewport = {
   ],
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   let locale = "en";
-  let messages = (await import("../../messages/en.json")).default;
 
   try {
     locale = await getLocale();
-    messages = await getMessages();
   } catch {
     locale = "en";
   }
@@ -91,19 +88,10 @@ export default async function RootLayout({
           locale === "my" ? "font-myanmar" : "font-sans"
         }`}
       >
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>
-            <div className="flex min-h-screen flex-col">
-              <SiteHeader />
-              <main className="flex-1 px-4 py-10 sm:px-6">
-                <div className="mx-auto w-full max-w-6xl">
-                  <PageTransition>{children}</PageTransition>
-                </div>
-              </main>
-            </div>
-            <Toaster />
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

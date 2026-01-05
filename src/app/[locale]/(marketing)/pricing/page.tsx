@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   CalendarCheck,
   Clock,
@@ -10,38 +9,10 @@ import {
   Truck,
 } from "lucide-react";
 
-import { BillingActionButton } from "@/components/billing/billing-action-button";
+import { PricingCta } from "@/components/marketing/pricing-cta";
 import { Card } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button-v2";
-import { cn } from "@/lib/utils";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
 export default async function PricingPage() {
-  const hasSupabaseConfig =
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-    Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-
-  const supabase = hasSupabaseConfig ? await createSupabaseServerClient() : null;
-  const {
-    data: { user },
-  } = supabase ? await supabase.auth.getUser() : { data: { user: null } };
-
-  const { data: subscriptionRows } = user
-    ? await supabase!
-        .from("subscriptions")
-        .select("status")
-        .eq("user_id", user.id)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-    : { data: [] };
-
-  const subscriptionStatus = subscriptionRows?.[0]?.status ?? null;
-  const hasActiveSubscription = subscriptionStatus
-    ? ACTIVE_SUBSCRIPTION_STATUSES.has(subscriptionStatus)
-    : false;
-
   const planHighlights = [
     {
       icon: CalendarCheck,
@@ -145,59 +116,7 @@ export default async function PricingPage() {
               </li>
             </ul>
             <div className="flex flex-col gap-3">
-              {user ? (
-                hasActiveSubscription ? (
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <BillingActionButton
-                      endpoint="/api/subscriptions/portal"
-                      label={
-                        <span className="inline-flex items-center gap-2">
-                          <CreditCard className="h-4 w-4" aria-hidden="true" />
-                          Manage billing
-                        </span>
-                      }
-                      loadingLabel="Opening portal…"
-                    />
-                    <Link
-                      href="/schedule"
-                      className={cn(
-                        buttonVariants({
-                          variant: "outline",
-                          className: "border-slate-200 bg-white text-slate-900",
-                        }),
-                      )}
-                    >
-                      <CalendarCheck className="h-4 w-4" aria-hidden="true" />
-                      Schedule delivery
-                    </Link>
-                  </div>
-                ) : (
-                  <BillingActionButton
-                    endpoint="/api/subscriptions/checkout"
-                    label={
-                      <span className="inline-flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" aria-hidden="true" />
-                        Subscribe
-                      </span>
-                    }
-                    loadingLabel="Redirecting to Stripe…"
-                    className="w-full sm:w-auto"
-                  />
-                )
-              ) : (
-                <Link
-                  href="/login"
-                  className={cn(
-                    buttonVariants({
-                      variant: "secondary",
-                      className: "bg-slate-900 text-white hover:bg-slate-800",
-                    }),
-                  )}
-                >
-                  <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                  Sign in to subscribe
-                </Link>
-              )}
+              <PricingCta />
               <p className="text-xs text-slate-500">
                 Need help? Email support@morningstardelivery.com.
               </p>
