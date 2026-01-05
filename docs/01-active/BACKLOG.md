@@ -137,8 +137,14 @@
 - Customers can select Package A/B/C and place a weekly order before the deadline.
 - Order deadline enforcement (Wednesday 11:59 PM) prevents late orders.
 
-**Planned PR:** `codex/weekly-menu-system`  
-**Status:** 🟡 In progress
+**Planned PR:** `codex/weekly-menu-system`
+**Status:** ✅ Done (PR #85, Rating: 7.5/10)
+**Review:** See `docs/08-archive/completed-prs/PR-85-weekly-menu-system-review.md`
+**Follow-ups Required:**
+- Email notifications for order confirmation and delivery reminders
+- Admin UI for weekly order management and driver assignment
+- Test coverage improvements (E2E tests for order flow)
+- Order reconciliation job for Stripe payment mismatches
 
 ---
 
