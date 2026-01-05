@@ -38,7 +38,7 @@ function getTimeZoneOffsetMinutes(date: Date, timeZone: string) {
   return sign * (hours * 60 + minutes);
 }
 
-function toUtcFromTimeZone(parts: DateParts, timeZone: string) {
+export function toUtcFromTimeZone(parts: DateParts, timeZone: string) {
   const hour = parts.hour ?? 0;
   const minute = parts.minute ?? 0;
   const utcGuess = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, hour, minute));

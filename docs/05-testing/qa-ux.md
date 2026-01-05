@@ -142,6 +142,13 @@ This is the “golden flow” that must work smoothly on mobile and desktop.
     - CTA to view full menu/pricing and start subscription
     - empty state message when menu not published
 
+1b) Tap “View Full Menu” → `/menu/weekly`
+- Expected:
+  - weekly menu loads with 7-day tabs
+  - order deadline banner visible
+  - package selection cards highlight on tap
+  - checkout CTA routes to weekly checkout
+
 2) Tap “View Plans” → `/pricing`
 - Expected:
   - plan card with bullets and price
