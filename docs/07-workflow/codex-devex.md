@@ -8,6 +8,12 @@ Strictness:
 - In real environments (Vercel), `CODEX_VERIFY` is not set, so missing env vars still throw.
 - During verify, stubs allow build to complete. Any runtime call that truly requires real env will still fail if exercised (expected).
 
+## Font optimization in restricted environments
+
+Some sandbox or CI environments block Google Fonts downloads, which can cause `pnpm build` to fail.
+Set `SKIP_FONT_OPTIMIZATION=1` to bypass `next/font/google` downloads and fall back to system fonts.
+This is intended for build verification only; production should keep font optimization enabled.
+
 ## Migration validation
 
 `scripts/codex/verify.sh` also runs `scripts/codex/verify-migrations.sh` to validate SQL migrations.

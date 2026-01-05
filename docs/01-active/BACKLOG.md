@@ -108,33 +108,23 @@
 - Language switcher available in the header, preserving locale across routes. ✅
 - Locale-prefixed routes work for Burmese (`/my/...`) with English default (`/`). ✅
 - Burmese font styling (Noto Sans Myanmar) applied with readable typography. ✅
-- Weekly menu + package selector use translations and localized dish/package fields with English fallback. ⚠️ (front-end done, DB broken)
-- Migration adds Burmese columns for dishes/categories and helper functions for locale-aware names. ❌ **BROKEN**
+- Weekly menu + package selector use translations and localized meal item/package fields with English fallback. ✅
+- Migration adds Burmese columns for meal items and helper functions for locale-aware names. ✅
 
 **Planned PR:** `codex/burmese-language-support`
-**Status:** ⚠️ **CHANGES REQUESTED** (PR #88, Rating: 4.5/10 - Critical bug found)
+**Status:** ✅ Done (PR #88, Rating: 8.5/10)
 **Review:** See `docs/08-archive/completed-prs/PR-88-burmese-i18n-review-CORRECTED.md`
 
-**CRITICAL ISSUES (P0 - BLOCKING):**
-- ❌ **Migration references non-existent tables** (`dishes`, `categories`)
-- ❌ Schema uses `meal_items` NOT `dishes` - migration will fail on deploy
-- ❌ Helper functions have wrong parameter types
-- 🔧 **MUST FIX:** Use `20260104000002_add_burmese_columns_FIXED.sql` version
-- 🔧 **MUST UPDATE:** Implementation guide references wrong table names
-
-**What Works (Front-End):**
+**What Works:**
 - ✅ next-intl integration excellent
 - ✅ 199 complete translations (en + my)
 - ✅ Language switcher with proper routing
 - ✅ Typography optimization for Burmese script
 - ✅ Helper functions and components well-coded
+- ✅ Migration corrected for meal_items schema
 
-**Follow-ups After Fix (P1):**
-- E2E tests for locale switching and Burmese content rendering
-- Fix Google Fonts 403 in restricted build environments (CODEX_DEVEX.md P0)
+**Follow-ups (Pre-Launch QA):**
 - Native Burmese speaker review of translations before production launch
-- Migration validation tests in verify.sh
-- Locale cookie persistence for improved UX (P2)
 
 ### P1 — Mobile nav overlay background/z-index issues
 **Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  

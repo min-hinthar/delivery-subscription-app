@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans, Noto_Sans_Myanmar } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 
@@ -10,16 +9,27 @@ import { SiteHeader } from "@/components/navigation/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
-const notoSans = Noto_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
+const shouldSkipFontOptimization = process.env.SKIP_FONT_OPTIMIZATION === "1";
 
-const notoSansMyanmar = Noto_Sans_Myanmar({
-  subsets: ["myanmar"],
-  variable: "--font-myanmar",
-  weight: ["400", "500", "600", "700"],
-});
+async function getFontVariables() {
+  if (shouldSkipFontOptimization) {
+    return "";
+  }
+
+  const { Noto_Sans, Noto_Sans_Myanmar } = await import("next/font/google");
+  const notoSans = Noto_Sans({
+    subsets: ["latin"],
+    variable: "--font-sans",
+  });
+
+  const notoSansMyanmar = Noto_Sans_Myanmar({
+    subsets: ["myanmar"],
+    variable: "--font-myanmar",
+    weight: ["400", "500", "600", "700"],
+  });
+
+  return `${notoSans.variable} ${notoSansMyanmar.variable}`;
+}
 
 export const metadata: Metadata = {
   title: "Morning Star Weekly Delivery",
@@ -61,11 +71,12 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const fontVariables = await getFontVariables();
 
   return (
     <html
       lang={locale}
-      className={`${notoSans.variable} ${notoSansMyanmar.variable}`}
+      className={fontVariables || "font-sans"}
       suppressHydrationWarning
     >
       <body

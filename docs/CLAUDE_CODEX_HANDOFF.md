@@ -24,6 +24,26 @@
 - [x] Tests executed
 - [ ] Claude review pending
 
+## Codex Session - PR #88 follow-up fixes
+**Date:** 2026-01-06
+**Branch:** work
+
+### Implemented
+- Replaced Burmese migration with meal_items-based columns and helper functions.
+- Added locale persistence, E2E locale coverage, and QA/devex documentation updates.
+- Added SKIP_FONT_OPTIMIZATION fallback to avoid Google Fonts download failures.
+- Updated types to use MealItem naming aligned with schema.
+
+### Tests
+- `bash scripts/codex/verify.sh` (failed: missing next-intl/@react-email/resend deps in environment)
+
+### Notes / Blockers
+- Typecheck fails in Codex environment due to missing dependencies (see verify output).
+
+### Status
+- [x] Fixes implemented
+- [ ] Tests fully green (dependency gaps in sandbox)
+
 ## Codex Session - Supabase migration hotfix
 **Date:** 2026-01-06
 **Branch:** hotfix/supabase-resource-exhaustion-and-017-migration

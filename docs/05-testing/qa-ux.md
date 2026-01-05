@@ -84,6 +84,13 @@ It is designed to be used:
 - [ ] Motion never blocks interaction (no forced waits)
 - [ ] Animation durations are short and consistent (e.g., 150–250ms)
 
+### Localization QA
+- [ ] Language switcher is visible in the header on marketing and app routes
+- [ ] Locale persists across navigation and refresh (cookie or locale-prefixed routes)
+- [ ] Burmese typography remains legible (line-height, font size, spacing)
+- [ ] English fallback appears when Burmese translations are missing
+- [ ] Burmese translations reviewed by a native speaker before launch
+
 ---
 
 ## 4) Security QA (Customer Flow)

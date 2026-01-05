@@ -12,7 +12,7 @@ export type WeeklyOrderStatus =
 
 export type DeliveryWindow = "8 AM - 12 PM" | "12 PM - 4 PM" | "4 PM - 8 PM";
 
-export interface Dish {
+export interface MealItem {
   id: string;
   name: string;
   name_my?: string | null;
@@ -43,7 +43,7 @@ export interface TemplateDish {
   day_of_week: number;
   meal_position: number;
   created_at: string;
-  dish?: Dish | null;
+  dish?: MealItem | null;
 }
 
 export interface WeeklyMenu {
@@ -71,7 +71,7 @@ export interface WeeklyMenuItem {
   max_portions?: number | null;
   current_orders: number;
   created_at: string;
-  dish?: Dish | null;
+  dish?: MealItem | null;
 }
 
 export interface MealPackage {
@@ -140,7 +140,7 @@ export interface DayMenu {
   dayOfWeek: number;
   dayName: string;
   date: string;
-  dishes: (WeeklyMenuItem & { dish: Dish })[];
+  dishes: (WeeklyMenuItem & { dish: MealItem })[];
 }
 
 export interface WeeklyOrderSummary {
