@@ -43,7 +43,17 @@ function getTimeZoneOffset(date: Date, timeZone: string) {
 }
 
 function zonedTimeToUtc(parts: DateParts, timeZone: string) {
-  const utcDate = new Date(
+  // We want to convert a local time in the given timezone to UTC
+  // Use a simple approach: create a date that we know the offset for, then apply it
+
+  // Create a date in the middle of the target day (noon) to get a stable offset
+  const referenceDate = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, 12, 0, 0));
+
+  // Get the timezone offset for this date
+  const offset = getTimeZoneOffset(referenceDate, timeZone);
+
+  // Create the UTC date by treating the parts as local time and subtracting the offset
+  const localAsUtc = new Date(
     Date.UTC(
       parts.year,
       parts.month - 1,
@@ -54,8 +64,10 @@ function zonedTimeToUtc(parts: DateParts, timeZone: string) {
       parts.millisecond,
     ),
   );
-  const offset = getTimeZoneOffset(utcDate, timeZone);
-  return new Date(utcDate.getTime() - offset);
+
+  // The offset tells us how many milliseconds to add to UTC to get local time
+  // So to convert from local to UTC, we subtract the offset
+  return new Date(localAsUtc.getTime() - offset);
 }
 
 function addDays(dateString: string, days: number) {

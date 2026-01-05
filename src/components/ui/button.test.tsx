@@ -37,7 +37,8 @@ describe('Button', () => {
     it('renders with burmese variant', () => {
       render(<Button variant="burmese">Burmese</Button>)
       const button = screen.getByRole('button')
-      expect(button).toHaveClass('bg-[#D4A574]')
+      expect(button).toHaveClass('bg-gradient-to-r')
+      expect(button).toHaveClass('from-primary')
     })
 
     it('applies custom className', () => {
