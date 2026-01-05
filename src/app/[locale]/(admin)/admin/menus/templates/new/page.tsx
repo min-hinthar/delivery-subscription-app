@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { DishSelector } from "@/components/admin/dish-selector";
@@ -31,11 +31,67 @@ export default function NewMenuTemplatePage() {
   const [theme, setTheme] = useState<MenuTheme>("traditional");
   const [selectedDishes, setSelectedDishes] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const draftKey = "weekly-menu-template-draft-v1";
 
   const missingSlots = useMemo(() => {
     const totalSlots = DAYS.length * 3;
     return totalSlots - Object.keys(selectedDishes).length;
   }, [selectedDishes]);
+
+  useEffect(() => {
+    const draft = localStorage.getItem(draftKey);
+    if (!draft) return;
+
+    try {
+      const parsed = JSON.parse(draft) as {
+        name: string;
+        nameMy: string;
+        description: string;
+        theme: MenuTheme;
+        selectedDishes: Record<string, string>;
+      };
+      setName(parsed.name ?? "");
+      setNameMy(parsed.nameMy ?? "");
+      setDescription(parsed.description ?? "");
+      setTheme(parsed.theme ?? "traditional");
+      setSelectedDishes(parsed.selectedDishes ?? {});
+      toast({
+        title: "Draft restored",
+        description: "We restored your last template draft.",
+      });
+    } catch {
+      localStorage.removeItem(draftKey);
+    }
+  }, [draftKey, toast]);
+
+  useEffect(() => {
+    const hasContent =
+      Boolean(name.trim()) ||
+      Boolean(nameMy.trim()) ||
+      Boolean(description.trim()) ||
+      Object.keys(selectedDishes).length > 0;
+
+    const saveDraft = () => {
+      if (!hasContent) {
+        localStorage.removeItem(draftKey);
+        return;
+      }
+
+      localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          name,
+          nameMy,
+          description,
+          theme,
+          selectedDishes,
+        }),
+      );
+    };
+
+    const handle = window.setTimeout(saveDraft, 400);
+    return () => window.clearTimeout(handle);
+  }, [name, nameMy, description, theme, selectedDishes, draftKey]);
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -58,7 +114,7 @@ export default function NewMenuTemplatePage() {
 
     setSaving(true);
     try {
-      const templateResponse = await fetch("/api/admin/menu-templates", {
+      const templateResponse = await fetch("/api/admin/menu-templates/with-dishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -66,6 +122,14 @@ export default function NewMenuTemplatePage() {
           name_my: nameMy || null,
           description: description || null,
           theme,
+          dishes: Object.entries(selectedDishes).map(([key, dishId]) => {
+            const [dayOfWeek, mealPosition] = key.split("-").map(Number);
+            return {
+              dish_id: dishId,
+              day_of_week: dayOfWeek,
+              meal_position: mealPosition,
+            };
+          }),
         }),
       });
 
@@ -75,32 +139,11 @@ export default function NewMenuTemplatePage() {
         throw new Error(templatePayload.error?.message ?? "Failed to create template.");
       }
 
-      const templateId = templatePayload.data.template.id as string;
-      const templateDishes = Object.entries(selectedDishes).map(([key, dishId]) => {
-        const [dayOfWeek, mealPosition] = key.split("-").map(Number);
-        return {
-          template_id: templateId,
-          dish_id: dishId,
-          day_of_week: dayOfWeek,
-          meal_position: mealPosition,
-        };
-      });
-
-      const dishesResponse = await fetch("/api/admin/template-dishes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dishes: templateDishes }),
-      });
-
-      if (!dishesResponse.ok) {
-        const dishesPayload = await dishesResponse.json();
-        throw new Error(dishesPayload.error?.message ?? "Failed to save dishes.");
-      }
-
       toast({
         title: "Template created",
         description: "Your menu template is ready to generate weekly menus.",
       });
+      localStorage.removeItem(draftKey);
       router.push("/admin/menus/templates");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to create template.";
@@ -198,7 +241,22 @@ export default function NewMenuTemplatePage() {
         </Card>
 
         <div className="flex justify-end gap-4">
-          <Button variant="secondary" onClick={() => router.back()} disabled={saving}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const hasChanges =
+                Boolean(name.trim()) ||
+                Boolean(nameMy.trim()) ||
+                Boolean(description.trim()) ||
+                Object.keys(selectedDishes).length > 0;
+
+              if (!hasChanges || window.confirm("Discard this template draft?")) {
+                localStorage.removeItem(draftKey);
+                router.back();
+              }
+            }}
+            disabled={saving}
+          >
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={saving}>

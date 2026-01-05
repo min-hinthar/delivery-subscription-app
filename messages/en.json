@@ -5,6 +5,7 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
+    "retry": "Try again",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -52,6 +53,8 @@
     "title": "This Week's Menu",
     "noMenuAvailable": "No menu available",
     "noMenuDescription": "This week's menu hasn't been published yet. Check back soon!",
+    "errorTitle": "Unable to load weekly menu",
+    "errorMessage": "We couldn't load the weekly menu right now. Please try again.",
     "orderBy": "Order by Wednesday 11:59 PM",
     "hoursRemaining": "{hours} hours remaining",
     "ordersClosed": "Orders closed",

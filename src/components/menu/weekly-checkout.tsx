@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
@@ -37,6 +39,7 @@ export function WeeklyCheckout({
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [orderCreated, setOrderCreated] = useState(false);
 
   const addressOptions = addresses.map((address) => ({
     value: address.id,
@@ -52,6 +55,7 @@ export function WeeklyCheckout({
 
     setSubmitting(true);
     setMessage(null);
+    setOrderCreated(false);
 
     try {
       const response = await fetch("/api/orders/weekly", {
@@ -76,6 +80,7 @@ export function WeeklyCheckout({
       setMessage(
         "Order created! We’ll confirm payment shortly and send you a receipt when it clears.",
       );
+      setOrderCreated(true);
     } catch {
       setMessage("Unable to place order. Please try again.");
     } finally {
@@ -159,7 +164,15 @@ export function WeeklyCheckout({
 
       {message && (
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
-          {message}
+          <p>{message}</p>
+          {orderCreated ? (
+            <Link
+              href="/orders/weekly"
+              className="mt-2 inline-flex text-sm font-medium text-[#D4A574]"
+            >
+              View weekly orders
+            </Link>
+          ) : null}
         </div>
       )}
 

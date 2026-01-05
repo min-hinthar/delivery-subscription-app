@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -89,6 +90,11 @@ export function WeeklyMenuList({ menus }: WeeklyMenuListProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">{menu.status ?? "draft"}</Badge>
+                  <Link href={`/admin/menus/${menu.id}/orders`}>
+                    <Button size="sm" variant="ghost">
+                      View orders
+                    </Button>
+                  </Link>
                   <Button
                     size="sm"
                     variant={isPublished ? "secondary" : "default"}

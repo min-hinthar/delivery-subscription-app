@@ -1,11 +1,22 @@
 import { bad, ok } from "@/lib/api/response";
+import { SimpleCache } from "@/lib/cache/simple-cache";
 import { groupMenuItemsByDay } from "@/lib/menu/weekly";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { WeeklyMenuItem } from "@/types";
 
-const publicHeaders = { "Cache-Control": "no-store" };
+const publicHeaders = {
+  "Cache-Control": "public, max-age=300, s-maxage=300, stale-while-revalidate=60",
+};
+const menuCache = new SimpleCache<{
+  menu: Record<string, unknown>;
+}>(5 * 60 * 1000);
 
 export async function GET() {
+  const cached = menuCache.get("weekly-menu-current");
+  if (cached) {
+    return ok(cached, { headers: publicHeaders });
+  }
+
   const supabase = await createSupabaseServerClient();
 
   const { data, error } = await supabase
@@ -63,13 +74,14 @@ export async function GET() {
   const weekStartDate = data.week_start_date ?? "";
   const dayMenus = weekStartDate ? groupMenuItemsByDay(items, weekStartDate) : [];
 
-  return ok(
-    {
-      menu: {
-        ...data,
-        day_menus: dayMenus,
-      },
+  const response = {
+    menu: {
+      ...data,
+      day_menus: dayMenus,
     },
-    { headers: publicHeaders },
-  );
+  };
+
+  menuCache.set("weekly-menu-current", response);
+
+  return ok(response, { headers: publicHeaders });
 }

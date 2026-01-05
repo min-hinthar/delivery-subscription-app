@@ -1,53 +1,41 @@
-import {
-  Body,
-  Container,
-  Head,
-  Heading,
-  Html,
-  Preview,
-  Text,
-} from "@react-email/components";
+import { Body, Container, Head, Heading, Html, Preview, Text } from "@react-email/components";
 
-type OrderConfirmationEmailProps = {
+type DeliveryReminderEmailProps = {
   locale: "en" | "my";
   customerName: string;
   packageName: string;
   deliveryDate: string;
   deliveryWindow?: string | null;
-  totalAmount: string;
 };
 
 const translations = {
   en: {
-    subject: "Order Confirmed",
+    subject: "Delivery Reminder",
     greeting: (name: string) => `Hi ${name},`,
-    confirmMessage: "Your order has been confirmed!",
+    reminderMessage: "Your delivery arrives tomorrow!",
     packageSelected: "Package Selected",
     deliveryDate: "Delivery Date",
     deliveryWindow: "Delivery Window",
-    total: "Total Paid",
-    thanks: "Thank you for your order!",
+    thanks: "We can’t wait for you to enjoy it.",
   },
   my: {
-    subject: "အော်ဒါအတည်ပြုပြီး",
+    subject: "ပို့ဆောင်မှု သတိပေးချက်",
     greeting: (name: string) => `မင်္ဂလာပါ ${name}`,
-    confirmMessage: "သင့်အော်ဒါကို အတည်ပြုပြီးပါပြီ!",
+    reminderMessage: "မနက်ဖြန် ပို့ဆောင်မည် ဖြစ်ပါသည်။",
     packageSelected: "ရွေးချယ်ထားသော အစီအစဉ်",
     deliveryDate: "ပို့ဆောင်မည့်နေ့",
     deliveryWindow: "ပို့ဆောင်မည့်အချိန်",
-    total: "စုစုပေါင်း ပေးချေပြီး",
-    thanks: "သင့်အော်ဒါအတွက် ကျေးဇူးတင်ပါသည်!",
+    thanks: "သင်တင်စားသုံးရန် မျှော်လင့်နေပါသည်။",
   },
 };
 
-export default function OrderConfirmationEmail({
+export default function DeliveryReminderEmail({
   locale = "en",
   customerName,
   packageName,
   deliveryDate,
   deliveryWindow,
-  totalAmount,
-}: OrderConfirmationEmailProps) {
+}: DeliveryReminderEmailProps) {
   const t = translations[locale];
 
   return (
@@ -56,7 +44,7 @@ export default function OrderConfirmationEmail({
       <Preview>{t.subject}</Preview>
       <Body style={{ fontFamily: locale === "my" ? "Noto Sans Myanmar" : "system-ui" }}>
         <Container>
-          <Heading>{t.confirmMessage}</Heading>
+          <Heading>{t.reminderMessage}</Heading>
           <Text>{t.greeting(customerName)}</Text>
 
           <Text>
@@ -70,9 +58,6 @@ export default function OrderConfirmationEmail({
               <strong>{t.deliveryWindow}:</strong> {deliveryWindow}
             </Text>
           ) : null}
-          <Text>
-            <strong>{t.total}:</strong> {totalAmount}
-          </Text>
 
           <Text>{t.thanks}</Text>
         </Container>

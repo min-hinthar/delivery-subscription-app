@@ -31,9 +31,19 @@ If you cannot access admin pages:
 
 Once published:
 - The public homepage should show “This week’s menu”.
+- Subscribers receive a “weekly menu published” email (if Resend is configured).
 
 ### 4) Unpublish (if needed)
 Set the weekly menu status back to `draft` to hide it publicly.
+
+### 5) Manage weekly orders
+1) Go to `/admin/menus`
+2) Select **View orders** for the weekly menu
+3) Assign a driver and update status (confirmed → preparing → out for delivery → delivered)
+
+Notes:
+- Pending orders can still be cancelled by customers until a driver is assigned.
+- Delivery reminder emails send 24 hours before delivery (cron).
 
 ## Meal Catalog (meal_items)
 Meal catalog items power:

@@ -24,6 +24,26 @@
 - [x] Tests executed
 - [ ] Claude review pending
 
+## Codex Session - Weekly menu feedback follow-up
+**Date:** 2026-01-06
+**Branch:** codex/weekly-menu-feedback-followup
+
+### Implemented
+- Added admin weekly orders dashboard with assignment + status updates.
+- Added customer weekly order history with reorder + cancel pending flow.
+- Implemented transactional safety for menu generation/template creation and stricter weekly order policies.
+- Added Stripe reconciliation + cleanup + delivery reminder cron routes.
+- Added menu published + order confirmation + reminder email notifications.
+- Added caching, loading skeletons, error states, and timezone-correct deadline calculation.
+- Added API docs and QA checklist updates for weekly menu/order operations.
+
+### Tests
+- `pnpm test`
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- Ensure CRON_SECRET and RESEND_API_KEY are configured in production.
+
 ## Codex Session - PR #88 follow-up fixes
 **Date:** 2026-01-06
 **Branch:** work
