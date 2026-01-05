@@ -35,10 +35,12 @@
   - ⚠️ Note: Follow-up needed for email notifications and admin order management
 
 ### Week 2: Community Features (P0)
-- [x] **PR #26 (PR #88):** Burmese Language Support — ✅ Complete (Rating: 8.0/10)
-  - next-intl integration, 199 translations, locale routing, bilingual UI, database localization
-  - 📖 Review: `docs/08-archive/completed-prs/PR-88-burmese-i18n-review.md`
-  - ⚠️ Note: Follow-up needed for E2E tests, build env fix, native speaker review
+- [ ] **PR #26 (PR #88):** Burmese Language Support — ⚠️ CHANGES REQUESTED (Rating: 4.5/10)
+  - Front-end excellent (next-intl, 199 translations, locale routing, bilingual UI)
+  - ❌ **CRITICAL BUG: Migration references non-existent tables (`dishes`, `categories`)**
+  - 📖 Review: `docs/08-archive/completed-prs/PR-88-burmese-i18n-review-CORRECTED.md`
+  - 🔧 **BLOCKING:** Must fix migration before merge (use `*_FIXED.sql` version)
+  - Schema uses `meal_items` NOT `dishes` - migration will fail on deploy
 
 ### Week 3: Testing & QA (P1)
 - [ ] **PR #27:** E2E Test Suite Expansion
@@ -89,10 +91,11 @@
 ### Phase 6: Business Model Features (Completed)
 - ✅ **PR #85:** Weekly Menu System (templates, packages, ordering, payment)
 
-### Phase 7: Localization & Community (Completed)
-- ✅ **PR #88:** Burmese Language Support (next-intl, 199 translations, locale routing, bilingual emails)
+### Phase 7: Localization & Community (In Progress)
+- ⚠️ **PR #88:** Burmese Language Support (front-end done, migration broken - needs rework)
 
-**Total Completed:** 16 major PRs, 23,800+ lines of production code
+**Total Completed:** 15 major PRs, 22,000+ lines of production code
+**In Review:** 1 PR (awaiting fixes)
 
 ---
 
@@ -104,10 +107,13 @@ See detailed workstreams and acceptance criteria in:
 ### P0 (Critical)
 - None blocking! 🎉
 
+### P0 (Critical - BLOCKING)
+- ⚠️ **Fix PR #88 migration** - Database migration broken (references non-existent tables)
+
 ### P1 (High Value)
 - ✅ Mobile UX (conversion, retention) — Complete (PR #80, 8.5/10)
 - ✅ Weekly Menu System (core business model) — Complete (PR #85, 7.5/10)
-- ✅ Burmese i18n (community requirement) — Complete (PR #88, 8.0/10)
+- ⚠️ Burmese i18n (community requirement) — Front-end done, DB migration needs fix (PR #88, 4.5/10)
 - Admin Dashboard Polish (operational efficiency)
 - Email notifications for weekly orders (follow-up from PR #85)
 - Admin weekly order management UI (follow-up from PR #85)
