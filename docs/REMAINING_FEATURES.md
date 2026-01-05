@@ -144,13 +144,22 @@
 
 ---
 
+### ⭐ PR #17: Driver Authentication & Management (P0) **← NEXT! 🔥**
+
+**Status:** 🟢 READY FOR IMPLEMENTATION - All docs prepared!
+**Priority:** P0 (Critical - Blocks production deployment)
+**Estimated Effort:** 3-4 hours
+**Complexity:** Medium-High
 ### ✅ PR #17: Driver Authentication & Management (P0)
 
 **Status:** ✅ COMPLETED
 **Priority:** P0 (Critical - Completes driver workflow)
 **Completed:** 2026-01-04
 **Prerequisites:** PR #16 (Driver App) ✅ COMPLETED
+**Branch:** `codex/driver-authentication`
 
+**🚨 WHY THIS IS CRITICAL:**
+Currently drivers can use `/driver/route/[id]` but there's **NO authentication, NO onboarding, and NO admin management**. This PR completes the full driver workflow loop:
 **Outcome:** Driver workflow is now end-to-end:
 
 ```
@@ -158,6 +167,27 @@ Admin invites driver → Driver confirms email → Driver onboards →
 Admin assigns route → Driver accesses route → Customer tracks delivery
 ```
 
+**📦 EVERYTHING IS PREPARED FOR YOU:**
+1. ✅ **Migration file:** `supabase/migrations/017_driver_authentication.sql` (created)
+2. ✅ **Implementation guide:** `CODEX_PR17_IMPLEMENTATION.md` (step-by-step with code samples)
+3. ✅ **Full specification:** `docs/DRIVER_AUTH_SPEC.md` (complete with mockups)
+4. ✅ **API code samples:** All 5 endpoints documented with copy-paste code
+5. ✅ **Updated docs:** `docs/PR_PROMPTS_NEXT_SESSIONS.md` has detailed prompt
+
+**⚡ Quick Start:**
+```bash
+# Read the implementation guide first!
+cat CODEX_PR17_IMPLEMENTATION.md
+
+# Then follow phases 1-5 in order
+# Phase 1: Database (migration already done!)
+# Phase 2: API Endpoints (60 min, code provided)
+# Phase 3: Admin UI (45 min)
+# Phase 4: Driver UI (45 min)
+# Phase 5: Auth & Routing (30 min)
+```
+
+**What to Implement:**
 **Implemented:**
 
 #### 1. Database Schema
