@@ -69,8 +69,15 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  let locale = "en";
+  let messages = (await import("../messages/en.json")).default;
+
+  try {
+    locale = await getLocale();
+    messages = await getMessages();
+  } catch {
+    locale = "en";
+  }
   const fontVariables = await getFontVariables();
 
   return (
