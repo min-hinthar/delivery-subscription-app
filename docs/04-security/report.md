@@ -144,6 +144,15 @@
 
 ---
 
+## Remediation Status (hotfix-2026-01-06)
+- ✅ RLS policies updated to wrap `auth.*()` calls with `(select auth.*())` for plan stability.
+- ✅ Functions flagged by Supabase linter now set `search_path = public`.
+- ✅ FK indexes added for `delivery_appointments.delivery_window_id`, `delivery_routes.driver_id`, `meal_plan_template_items.meal_item_id`, `order_items.meal_item_id`, and `orders.appointment_id`.
+
+---
+
 ## Notes / Open Questions
 - Rate limiting and CSP policies should be implemented pragmatically to avoid breaking Stripe Checkout or Maps integrations.
 - Cron secret is accepted via header or query param; consider restricting to headers only in a future hardening pass.
+- Supabase Auth leaked password protection is disabled; enable in Supabase Auth settings when possible.
+- Several tables report multiple permissive policies; consolidate where safe to reduce policy sprawl.
