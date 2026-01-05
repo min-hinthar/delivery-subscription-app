@@ -81,13 +81,13 @@ security definer
 set search_path = public
 as $$
   select
-    schemaname || '.' || tablename as table_name,
+    schemaname || '.' || relname as table_name,
     n_live_tup as row_count,
-    round((pg_total_relation_size(schemaname || '.' || tablename) / 1024.0 / 1024.0)::numeric, 2) as total_size_mb,
-    round((pg_indexes_size(schemaname || '.' || tablename) / 1024.0 / 1024.0)::numeric, 2) as index_size_mb
+    round((pg_total_relation_size(quote_ident(schemaname) || '.' || quote_ident(relname)) / 1024.0 / 1024.0)::numeric, 2) as total_size_mb,
+    round((pg_indexes_size(quote_ident(schemaname) || '.' || quote_ident(relname)) / 1024.0 / 1024.0)::numeric, 2) as index_size_mb
   from pg_stat_user_tables
   where schemaname = 'public'
-  order by pg_total_relation_size(schemaname || '.' || tablename) desc;
+  order by pg_total_relation_size(quote_ident(schemaname) || '.' || quote_ident(relname)) desc;
 $$;
 
 -- Grant execute to authenticated users with admin role
@@ -112,13 +112,13 @@ security definer
 set search_path = public
 as $$
   select
-    schemaname || '.' || tablename as table_name,
-    indexname as index_name,
+    schemaname || '.' || relname as table_name,
+    indexrelname as index_name,
     idx_scan as index_scans,
-    round((pg_relation_size(schemaname || '.' || indexname) / 1024.0 / 1024.0)::numeric, 2) as index_size_mb
+    round((pg_relation_size(quote_ident(schemaname) || '.' || quote_ident(indexrelname)) / 1024.0 / 1024.0)::numeric, 2) as index_size_mb
   from pg_stat_user_indexes
   where schemaname = 'public'
-  order by idx_scan asc, pg_relation_size(schemaname || '.' || indexname) desc;
+  order by idx_scan asc, pg_relation_size(quote_ident(schemaname) || '.' || quote_ident(indexrelname)) desc;
 $$;
 
 -- Grant execute to authenticated users
