@@ -103,7 +103,7 @@
 ## Workstream: Community / Localization
 
 ### P0 — Burmese language support (next-intl)
-**Problem:** Burmese-speaking customers need a fully localized UI with proper font support.  
+**Problem:** Burmese-speaking customers need a fully localized UI with proper font support.
 **Acceptance:**
 - Language switcher available in the header, preserving locale across routes.
 - Locale-prefixed routes work for Burmese (`/my/...`) with English default (`/`).
@@ -111,8 +111,14 @@
 - Weekly menu + package selector use translations and localized dish/package fields with English fallback.
 - Migration adds Burmese columns for dishes/categories and helper functions for locale-aware names.
 
-**Planned PR:** `codex/burmese-language-support`  
-**Status:** 🟡 In progress
+**Planned PR:** `codex/burmese-language-support`
+**Status:** ✅ Done (PR #88 merged, Rating: 8.0/10)
+**Review:** See `docs/08-archive/completed-prs/PR-88-burmese-i18n-review.md`
+**Follow-ups Required:**
+- E2E tests for locale switching and Burmese content rendering
+- Fix Google Fonts 403 in restricted build environments (addresses CODEX_DEVEX.md P0 requirement)
+- Native Burmese speaker review of translations before production launch
+- Locale cookie persistence for improved UX (optional enhancement)
 
 ### P1 — Mobile nav overlay background/z-index issues
 **Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  
