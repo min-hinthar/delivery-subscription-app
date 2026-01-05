@@ -150,11 +150,17 @@
 **Priority:** P0 (Critical - Blocks production deployment)
 **Estimated Effort:** 3-4 hours
 **Complexity:** Medium-High
+### ✅ PR #17: Driver Authentication & Management (P0)
+
+**Status:** ✅ COMPLETED
+**Priority:** P0 (Critical - Completes driver workflow)
+**Completed:** 2026-01-04
 **Prerequisites:** PR #16 (Driver App) ✅ COMPLETED
 **Branch:** `codex/driver-authentication`
 
 **🚨 WHY THIS IS CRITICAL:**
 Currently drivers can use `/driver/route/[id]` but there's **NO authentication, NO onboarding, and NO admin management**. This PR completes the full driver workflow loop:
+**Outcome:** Driver workflow is now end-to-end:
 
 ```
 Admin invites driver → Driver confirms email → Driver onboards →
@@ -182,8 +188,9 @@ cat CODEX_PR17_IMPLEMENTATION.md
 ```
 
 **What to Implement:**
+**Implemented:**
 
-#### 1. Database Schema (30 min)
+#### 1. Database Schema
 - Create `driver_profiles` table:
   - `id`, `email`, `full_name`, `phone`
   - `vehicle_make`, `vehicle_model`, `vehicle_color`, `license_plate`
@@ -192,7 +199,7 @@ cat CODEX_PR17_IMPLEMENTATION.md
 - Add `is_driver` boolean to `profiles` table
 - RLS policies (drivers see own, admins see all)
 
-#### 2. Admin Driver Management (45 min)
+#### 2. Admin Driver Management
 - `/admin/drivers` page with driver list
 - Invite driver modal (email input)
 - Driver cards with status badges
@@ -200,13 +207,13 @@ cat CODEX_PR17_IMPLEMENTATION.md
 - Search and filter (by status)
 - Resend invite for pending drivers
 
-#### 3. Driver Invite System (30 min)
+#### 3. Driver Invite System
 - `POST /api/admin/drivers/invite` endpoint
 - Supabase magic link email with custom template
 - 24-hour expiry on invite links
 - Rate limiting (10 invites/hour per admin)
 
-#### 4. Driver Onboarding (45 min)
+#### 4. Driver Onboarding
 - `/driver/onboarding` page (after email confirmation)
 - Form fields:
   - Full name (required)
@@ -217,7 +224,7 @@ cat CODEX_PR17_IMPLEMENTATION.md
 - `POST /api/driver/profile` endpoint
 - Redirect to `/driver/dashboard` on completion
 
-#### 5. Driver Authentication (30 min)
+#### 5. Driver Authentication
 - `/driver/login` page with magic link
 - 15-minute expiry on login links
 - Logout functionality

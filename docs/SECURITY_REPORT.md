@@ -1,8 +1,8 @@
 # Security Report — Audit Findings (S0)
 
 **Project:** Morning Star Weekly Delivery App  
-**Date:** 2025-12-30  
-**Audited commit/branch:** `2abfd7de1f0b1ae8d90a4e8dd1b65d74952a1316` / `codex/security-s0`  
+**Date:** 2026-01-04  
+**Audited commit/branch:** `TBD` / `codex/auth-p0-driver-auth`  
 **Auditor:** Codex  
 
 ## Executive Summary
@@ -36,6 +36,13 @@
 - `/admin/meals`
 - `/admin/routes`
 - `/admin/subscriptions`
+- `/admin/drivers`
+
+### Frontend routes (driver)
+- `/driver/login`
+- `/driver/onboarding`
+- `/driver/dashboard`
+- `/driver/route/[id]`
 
 ### API routes (Route Handlers)
 | Route | Purpose | Auth/Admin | Validation | Rate limit |
@@ -55,6 +62,12 @@
 | `src/app/api/admin/routes/summary/route.ts` | Admin route summary | Admin | Query params | No |
 | `src/app/api/admin/routes/stops/route.ts` | Admin stops list | Admin | Query params | No |
 | `src/app/api/admin/manifest.csv/route.ts` | Admin manifest export | Admin | Query params | No |
+| `src/app/api/admin/drivers/invite/route.ts` | Invite a driver | Admin | Zod | Yes (per-admin) |
+| `src/app/api/admin/drivers/[id]/route.ts` | Update driver status | Admin | Zod | No |
+| `src/app/api/admin/drivers/[id]/resend-invite/route.ts` | Resend driver invite | Admin | None | No |
+| `src/app/api/driver/profile/route.ts` | Driver onboarding/profile | Driver | Zod | No |
+| `src/app/api/driver/login/route.ts` | Driver magic link login | Public | Zod | Yes (per-email) |
+| `src/app/api/driver/routes/route.ts` | Driver route list | Driver | Query params | No |
 
 ### External integrations
 - Supabase Auth + Postgres + RLS
@@ -94,6 +107,7 @@
 - [x] Open-redirect prevention implemented (`src/lib/navigation.ts` and return URL normalization in Stripe routes).
 - [x] RLS enabled with ownership/admin policies (`supabase/migrations/002_rls.sql`).
 - [x] Admin gating enforced server-side (`src/components/auth/admin-guard.tsx`, `src/lib/auth/admin.ts`).
+- [x] Driver gating enforced server-side (`src/components/auth/driver-guard.tsx`, `src/lib/auth/driver.ts`).
 - [x] Input validation present on mutating endpoints (zod in API routes).
 - [x] Secrets not committed; `.env.local` not tracked.
 - [x] Private route handlers return `Cache-Control: no-store` (auth/profile/subscription flows, webhook).

@@ -46,30 +46,36 @@ describe("SimpleCache", () => {
   });
 
   describe("TTL and expiration", () => {
-    it("expires entries after TTL", async () => {
+    it("expires entries after TTL", () => {
+      vi.useFakeTimers();
       cache.set("key1", "value1", 100); // 100ms TTL
       expect(cache.get("key1")).toBe("value1");
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      vi.advanceTimersByTime(150);
       expect(cache.get("key1")).toBeNull();
+      vi.useRealTimers();
     });
 
-    it("uses default TTL when not specified", async () => {
+    it("uses default TTL when not specified", () => {
+      vi.useFakeTimers();
       const shortCache = new SimpleCache<string>(100);
       shortCache.set("key1", "value1");
       expect(shortCache.get("key1")).toBe("value1");
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      vi.advanceTimersByTime(150);
       expect(shortCache.get("key1")).toBeNull();
       shortCache.destroy();
+      vi.useRealTimers();
     });
 
-    it("has() returns false for expired entries", async () => {
+    it("has() returns false for expired entries", () => {
+      vi.useFakeTimers();
       cache.set("key1", "value1", 100);
       expect(cache.has("key1")).toBe(true);
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      vi.advanceTimersByTime(150);
       expect(cache.has("key1")).toBe(false);
+      vi.useRealTimers();
     });
   });
 
@@ -81,15 +87,17 @@ describe("SimpleCache", () => {
       expect(stats.size).toBe(2);
     });
 
-    it("reports expired entries", async () => {
+    it("reports expired entries", () => {
+      vi.useFakeTimers();
       cache.set("key1", "value1", 100);
       cache.set("key2", "value2", 10000);
 
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      vi.advanceTimersByTime(150);
 
       const stats = cache.stats();
       expect(stats.size).toBe(2); // Both still in map
       expect(stats.expired).toBe(1); // One expired
+      vi.useRealTimers();
     });
   });
 
@@ -108,19 +116,21 @@ describe("SimpleCache", () => {
   });
 
   describe("cleanup", () => {
-    it("removes expired entries during periodic cleanup", async () => {
+    it("removes expired entries during periodic cleanup", () => {
+      vi.useFakeTimers();
       const cleanupCache = new SimpleCache<string>(100);
       cleanupCache.set("key1", "value1", 100);
       cleanupCache.set("key2", "value2", 10000);
 
       // Wait for expiration + cleanup interval
-      await new Promise((resolve) => setTimeout(resolve, 61000));
+      vi.advanceTimersByTime(61_000);
 
       const stats = cleanupCache.stats();
       // Cleanup should have removed expired entry
       expect(stats.size).toBeLessThan(2);
       cleanupCache.destroy();
-    }, 62000); // Increase test timeout
+      vi.useRealTimers();
+    });
 
     it("stops cleanup on destroy", () => {
       const testCache = new SimpleCache<string>();
