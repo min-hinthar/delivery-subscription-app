@@ -27,6 +27,11 @@
 
 ### ✅ RECENTLY COMPLETED (Week 1-2)
 
+- [x] **Maintenance:** Lint/build cleanup — ✅ Complete
+  - Removed unused imports/state across analytics, orders, and driver dashboards
+  - Replaced `any` usage in API routes with explicit types
+  - **Branch:** codex/platform-p0-lint-build-fixes
+
 - [x] **PR #92:** Mobile UX Feedback Implementation — ✅ Complete
   - Applied all review feedback from PR #80
   - Enhanced accessibility, test coverage, haptic refinements

@@ -1,6 +1,52 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ok, bad } from '@/lib/api/response';
 
+type DeliveryWindow = {
+  day_of_week: string | null;
+  start_time: string | null;
+  end_time: string | null;
+};
+
+type DeliveryAddress = {
+  line1: string | null;
+  city: string | null;
+  state: string | null;
+};
+
+type DeliveryProfile = {
+  full_name: string | null;
+};
+
+type DeliveryAppointment = {
+  profiles?: DeliveryProfile | null;
+  addresses?: DeliveryAddress | null;
+  delivery_windows?: DeliveryWindow | null;
+};
+
+type DeliveryStop = {
+  id: string;
+  status: string;
+  eta: string | null;
+  completed_at: string | null;
+  delivery_appointments?: DeliveryAppointment | null;
+};
+
+type DeliveryRoute = {
+  id: string;
+  distance_meters: number | null;
+  duration_seconds: number | null;
+  delivery_stops?: DeliveryStop[] | null;
+};
+
+type UpcomingDelivery = {
+  id: string;
+  customer_name: string;
+  address: string;
+  window: string;
+  status: string;
+  eta: string | null;
+};
+
 /**
  * GET /api/driver/dashboard
  * Fetch driver dashboard statistics and upcoming deliveries
@@ -83,15 +129,15 @@ export async function GET() {
       onTimeRate: 95, // Placeholder - would calculate from historical data
     };
 
-    const upcomingDeliveries: any[] = [];
+    const upcomingDeliveries: UpcomingDelivery[] = [];
 
     if (routes && routes.length > 0) {
-      routes.forEach((route: any) => {
+      (routes as DeliveryRoute[]).forEach((route) => {
         stats.totalDistance += route.distance_meters || 0;
         stats.estimatedTime += route.duration_seconds || 0;
 
         if (route.delivery_stops) {
-          route.delivery_stops.forEach((stop: any) => {
+          route.delivery_stops.forEach((stop) => {
             stats.todayDeliveries++;
 
             if (stop.status === 'completed') {
@@ -102,15 +148,23 @@ export async function GET() {
               // Add to upcoming deliveries
               const appointment = stop.delivery_appointments;
               if (appointment) {
+                const address = appointment.addresses;
+                const deliveryWindow = appointment.delivery_windows;
+                const addressLabel = address
+                  ? [address.line1, address.city, address.state]
+                      .filter((value): value is string => Boolean(value))
+                      .join(', ')
+                  : '';
+                const windowLabel = deliveryWindow
+                  ? [deliveryWindow.day_of_week, deliveryWindow.start_time, deliveryWindow.end_time]
+                      .filter((value): value is string => Boolean(value))
+                      .join(' ')
+                  : '';
                 upcomingDeliveries.push({
                   id: stop.id,
                   customer_name: appointment.profiles?.full_name || 'Customer',
-                  address: appointment.addresses
-                    ? `${appointment.addresses.line1}, ${appointment.addresses.city}, ${appointment.addresses.state}`
-                    : 'Address not available',
-                  window: appointment.delivery_windows
-                    ? `${appointment.delivery_windows.day_of_week} ${appointment.delivery_windows.start_time}-${appointment.delivery_windows.end_time}`
-                    : 'TBD',
+                  address: addressLabel || 'Address not available',
+                  window: windowLabel || 'TBD',
                   status: stop.status,
                   eta: stop.eta,
                 });

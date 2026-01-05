@@ -9,7 +9,7 @@ export const localeNames: Record<Locale, string> = {
   my: "မြန်မာ",
 };
 
-export default getRequestConfig(async ({ locale }) => {
+export default getRequestConfig(async ({ locale }: { locale?: Locale }) => {
   const resolvedLocale = locale ?? "en";
 
   if (!locales.includes(resolvedLocale as Locale)) {

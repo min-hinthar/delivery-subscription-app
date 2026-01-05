@@ -1,5 +1,43 @@
 # Claude/Codex Handoff Log
 
+## Codex Session - Lint/build cleanup
+**Date:** 2026-01-05
+**Branch:** codex/platform-p0-lint-build-fixes
+
+### Implemented
+- Removed unused imports/state and resolved lint warnings across analytics, orders, and driver pages.
+- Replaced `any` usage with explicit types in driver dashboard and notifications APIs.
+- Hardened performance monitor web-vitals typing and guard logging.
+- Updated bundle analyzer config to use ESM import.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- `bash scripts/codex/verify.sh` fails in typecheck due to missing `next-intl`, `@react-email/components`, `resend`, and `web-vitals` modules in the sandbox.
+
+### Status
+- [x] Lint/build cleanup implemented
+- [x] Tests executed
+
+## Codex Session - A la carte orders migration fix
+**Date:** 2026-01-05
+**Branch:** codex/platform-p0-lint-build-fixes
+
+### Implemented
+- Made the à la carte orders policy creation idempotent using a `DO` block with `pg_policies` checks.
+- Enabled RLS on `public.orders` and aligned policy to use `(SELECT auth.uid())` for stable query plans.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- `bash scripts/codex/verify.sh` fails in typecheck due to missing `next-intl`, `@react-email/components`, `resend`, and `web-vitals` modules in the sandbox.
+
+### Status
+- [x] Migration update implemented
+- [x] Tests executed (typecheck blocked by missing deps)
+
 ## Codex Session - Mobile UX Enhancement
 **Date:** 2026-01-05
 **Branch:** codex/mobile-ux-optimization

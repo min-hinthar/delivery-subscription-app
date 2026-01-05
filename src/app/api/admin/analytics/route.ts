@@ -1,4 +1,3 @@
-import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { requireAdmin } from '@/lib/auth/admin';
 import { ok, bad } from '@/lib/api/response';
 

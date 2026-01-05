@@ -40,13 +40,26 @@ ORDER BY mi.category, mi.name;
 ALTER VIEW a_la_carte_items SET (security_invoker = on);
 
 -- Update RLS policies to include à la carte orders
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
 -- Customers can view their own à la carte orders
-CREATE POLICY IF NOT EXISTS "Users can view own a la carte orders"
-  ON orders FOR SELECT
-  USING (
-    auth.uid() = user_id
-    AND (order_type = 'a_la_carte' OR order_type = 'package')
-  );
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_policies
+    WHERE schemaname = 'public'
+      AND tablename = 'orders'
+      AND policyname = 'Users can view own a la carte orders'
+  ) THEN
+    CREATE POLICY "Users can view own a la carte orders"
+      ON public.orders FOR SELECT
+      USING (
+        (SELECT auth.uid()) = user_id
+        AND (order_type = 'a_la_carte' OR order_type = 'package')
+      );
+  END IF;
+END $$;
 
 -- Comment for documentation
 COMMENT ON COLUMN orders.order_type IS 'Type of order: package (meal plan) or a_la_carte (single dishes)';

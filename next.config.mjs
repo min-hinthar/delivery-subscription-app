@@ -1,4 +1,5 @@
 import createNextIntlPlugin from 'next-intl/plugin';
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
 const withNextIntl = createNextIntlPlugin();
 
@@ -12,7 +13,6 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     // Only analyze in production client builds when ANALYZE is set
     if (!isServer && process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
       config.plugins.push(
         new BundleAnalyzerPlugin({
           analyzerMode: 'static',

@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  TrendingUp,
   Users,
   Package,
   DollarSign,
-  Calendar,
   MapPin,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,11 +42,7 @@ export function AnalyticsDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeRange]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       const response = await fetch(`/api/admin/analytics?range=${timeRange}`);
       const result = await response.json();
@@ -61,7 +55,11 @@ export function AnalyticsDashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeRange]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   if (isLoading) {
     return (
