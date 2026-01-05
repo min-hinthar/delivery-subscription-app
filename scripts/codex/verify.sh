@@ -7,6 +7,12 @@ if [[ -f "scripts/codex/load-env.sh" ]]; then
   source scripts/codex/load-env.sh
 fi
 
+echo "==> Migration lint"
+bash scripts/codex/verify-migrations.sh
+
+echo "==> Supabase stats"
+bash scripts/codex/verify-supabase-stats.sh
+
 echo "==> Lint"
 pnpm lint
 

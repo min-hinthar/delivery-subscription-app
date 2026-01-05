@@ -19,6 +19,8 @@ Use this checklist for PR review and before deployments.
 - [ ] Ownership policies exist for SELECT/INSERT/UPDATE/DELETE as needed
 - [ ] Admin-only tables restricted to admins
 - [ ] Service role usage is server-only
+- [ ] RLS policies wrap `auth.*()` calls with `(select auth.*())` for plan stability
+- [ ] Security helper functions set `search_path` explicitly (no role-mutable defaults)
 
 ## Input Validation
 - [ ] Every mutating API validates input (zod)
