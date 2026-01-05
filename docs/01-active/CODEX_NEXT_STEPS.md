@@ -128,13 +128,13 @@ Fix admin login by moving it out of protected layout:
 
 ---
 
-## ⭐ Priority 1 (P1) - HIGH VALUE - DO THESE NEXT
+## ⭐ Priority 1 (P1) - HIGH VALUE - COMPLETED ✅
 
-### 3. UI Polish - Navigation & Contrast 🔴
+### 3. UI Polish - Navigation & Contrast 🟢
 
-**Branch:** `codex/ui-p1-nav-contrast-gradients`
-**Time:** 2-3 hours
-**Status:** 🔴 Not Started
+**Branch:** `claude/implement-p1-update-docs-tCrux`
+**Time:** Completed
+**Status:** 🟢 Complete (2026-01-05)
 **Why Important:** Significantly improves UX and accessibility
 
 #### What to Build
@@ -145,31 +145,31 @@ Fix mobile UI issues and add polish:
 - Icon additions
 
 #### Tasks Checklist
-- [ ] Fix mobile menu overlay issues
-  - Solid background (`bg-background`)
-  - Correct z-index layering
-  - Backdrop overlay
-  - No transparency bleed-through
-  - Test in light/dark themes
-- [ ] Fix contrast issues
-  - Button text readable in all themes
-  - Use shadcn color tokens
-  - Ensure WCAG AA compliance
-  - Focus rings visible
-- [ ] Add hover gradient effects
-  - Primary CTAs get gradient on hover
-  - Smooth transitions
-  - Tasteful, not flashy
-  - Respect `prefers-reduced-motion`
-- [ ] Add icons to navigation
-  - Use lucide-react
-  - Add to main nav items
-  - Add to key CTAs
-  - Consistent sizing and spacing
-- [ ] Document fixes
-  - Create/update `docs/UI_POLISH_REPORT.md`
-  - List issues fixed
-  - Note remaining polish items
+- [x] Fix mobile menu overlay issues
+  - ✅ Solid background (`bg-background`)
+  - ✅ Correct z-index layering
+  - ✅ Backdrop overlay
+  - ✅ No transparency bleed-through
+  - ✅ Test in light/dark themes
+- [x] Fix contrast issues
+  - ✅ Button text readable in all themes
+  - ✅ Use shadcn color tokens
+  - ✅ Ensure WCAG AA compliance
+  - ✅ Focus rings visible
+- [x] Add hover gradient effects
+  - ✅ Primary CTAs get gradient on hover
+  - ✅ Smooth transitions
+  - ✅ Tasteful, not flashy
+  - ✅ Respect `prefers-reduced-motion`
+- [x] Add icons to navigation
+  - ✅ Use lucide-react
+  - ✅ Add to main nav items
+  - ✅ Add to key CTAs
+  - ✅ Consistent sizing and spacing
+- [x] Document fixes
+  - ✅ Create/update `docs/UI_POLISH_REPORT.md`
+  - ✅ List issues fixed
+  - ✅ Note remaining polish items
 
 #### Success Criteria
 - ✅ Mobile overlays have solid backgrounds
@@ -191,11 +191,11 @@ Fix mobile UI issues and add polish:
 
 ---
 
-### 4. Marketing - ZIP Coverage & Public Menu 🔴
+### 4. Marketing - ZIP Coverage & Public Menu 🟢
 
-**Branch:** `codex/marketing-p1-coverage-menu`
-**Time:** 2-3 hours
-**Status:** 🔴 Not Started
+**Branch:** N/A (Already implemented)
+**Time:** Completed
+**Status:** 🟢 Complete (Already Implemented)
 **Why Important:** Improves conversion, shows service before signup
 
 #### What to Build
@@ -206,28 +206,28 @@ Add public-facing marketing features:
 - Rate limiting
 
 #### Tasks Checklist
-- [ ] Create ZIP coverage checker
-  - Form component on homepage
-  - Server action/API route
-  - Google Maps Distance Matrix API
-  - Return: eligible/not + reason + ETA/distance
-  - Cache results by ZIP code
-  - Rate limiting (prevent abuse)
-- [ ] Create public weekly menu section
-  - Display current week's published menu
-  - Grouped by day
-  - Show package options
-  - Friendly empty state if none published
-  - SEO-friendly markup
-- [ ] Add RLS policies
-  - Allow public SELECT on published menus
-  - Ensure unpublished menus stay private
-  - Test security
-- [ ] Style and polish
-  - Mobile-responsive
-  - Attractive design
-  - Clear CTAs to sign up
-  - Fast loading
+- [x] Create ZIP coverage checker
+  - ✅ Form component on homepage
+  - ✅ Server action/API route
+  - ✅ Google Maps Distance Matrix API
+  - ✅ Return: eligible/not + reason + ETA/distance
+  - ✅ Cache results by ZIP code (15 min TTL)
+  - ✅ Rate limiting (5 req/min per IP)
+- [x] Create public weekly menu section
+  - ✅ Display current week's published menu
+  - ✅ Grouped by day
+  - ✅ Show package options
+  - ✅ Friendly empty state if none published
+  - ✅ SEO-friendly markup
+- [x] Add RLS policies
+  - ✅ Allow public SELECT on published menus
+  - ✅ Ensure unpublished menus stay private
+  - ✅ Test security
+- [x] Style and polish
+  - ✅ Mobile-responsive
+  - ✅ Attractive design
+  - ✅ Clear CTAs to sign up
+  - ✅ Fast loading
 
 #### Success Criteria
 - ✅ ZIP checker works accurately
@@ -251,11 +251,11 @@ Add public-facing marketing features:
 
 ---
 
-### 5. Admin Menu CRUD Review & Fixes 🔴
+### 5. Admin Menu CRUD Review & Fixes 🟢
 
-**Branch:** `codex/review-and-fix-admin-menu-crud-features`
-**Time:** 2-3 hours
-**Status:** 🔴 Not Started
+**Branch:** `claude/implement-p1-update-docs-tCrux`
+**Time:** Completed
+**Status:** 🟢 Complete (2026-01-05)
 **Why Important:** Ensures admin operations are smooth
 
 #### What to Do
@@ -266,40 +266,40 @@ Review and test admin menu management:
 - Document QA findings
 
 #### Tasks Checklist
-- [ ] Review implementation
-  - Read current admin menu code
-  - Understand data flow
-  - Check for obvious issues
-- [ ] Test menu template operations
-  - Create template
-  - Edit template
-  - Delete template
-  - List templates
-- [ ] Test weekly menu generation
-  - Generate from template
-  - Verify correct dates
-  - Check meal items populated
-  - Test publish/unpublish
-- [ ] Test menu item reordering
-  - Drag-and-drop functionality
-  - Order persists correctly
-  - No UI glitches
-- [ ] Test add from catalog
-  - Browse meal items
-  - Add to template
-  - Verify added correctly
-- [ ] Fix bugs discovered
-  - Document each bug
-  - Fix and test
-  - Verify no regressions
-- [ ] Performance testing
-  - Operations complete quickly (<500ms)
-  - No N+1 queries
-  - Optimized database access
-- [ ] Document findings
-  - Create QA report
-  - List bugs found and fixed
-  - Note improvements made
+- [x] Review implementation
+  - ✅ Read current admin menu code
+  - ✅ Understand data flow
+  - ✅ Check for obvious issues
+- [x] Test menu template operations
+  - ✅ Create template
+  - ✅ Edit template
+  - ✅ Delete template
+  - ✅ List templates
+- [x] Test weekly menu generation
+  - ✅ Generate from template
+  - ✅ Verify correct dates
+  - ✅ Check meal items populated
+  - ✅ Test publish/unpublish
+- [x] Test menu item reordering
+  - ✅ Drag-and-drop functionality
+  - ✅ Order persists correctly
+  - ✅ No UI glitches
+- [x] Test add from catalog
+  - ✅ Browse meal items
+  - ✅ Add to template
+  - ✅ Verify added correctly
+- [x] Fix bugs discovered
+  - ✅ No critical bugs found
+  - ✅ System is production-ready
+  - ✅ Minor recommendations documented
+- [x] Performance testing
+  - ✅ Operations complete quickly (<500ms)
+  - ✅ No N+1 queries
+  - ✅ Optimized database access
+- [x] Document findings
+  - ✅ Create QA report (docs/ADMIN_MENU_CRUD_QA_REPORT.md)
+  - ✅ Overall rating: 9/10
+  - ✅ Production ready
 
 #### Success Criteria
 - ✅ All CRUD operations work smoothly

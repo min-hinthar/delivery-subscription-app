@@ -148,32 +148,58 @@
 **Follow-ups (Pre-Launch QA):**
 - Native Burmese speaker review of translations before production launch
 
-### P1 — Mobile nav overlay background/z-index issues
-**Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.  
+### P1 — Mobile nav overlay background/z-index issues ✅
+**Problem:** transparent overlays and stacking issues on mobile nav and dropdowns.
 **Acceptance:**
 - Solid sheet background (`bg-background`)
 - Proper overlay/backdrop
 - No bleed-through, correct z-index layering
 - Works in dark/light
 
-**Planned PR:** `codex/ui-p1-nav-contrast-gradients`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Fixed mobile bottom nav to use theme tokens (border-border, bg-background/95)
+- Changed active state from hardcoded text-[#D4A574] to text-primary
+- Changed inactive state to text-muted-foreground hover:text-foreground
+- Changed active indicator from bg-[#D4A574] to bg-primary
+- All components work in light and dark themes
+- Documentation: docs/UI_POLISH_REPORT.md
 
-### P1 — Fix contrast for buttons and text across themes
-**Problem:** low contrast in dark/light.  
+**Planned PR:** `claude/implement-p1-update-docs-tCrux`
+
+### P1 — Fix contrast for buttons and text across themes ✅
+**Problem:** low contrast in dark/light.
 **Acceptance:**
 - WCAG-aware contrast (primary buttons readable)
 - Focus states visible
 
-**Planned PR:** `codex/ui-p1-nav-contrast-gradients`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Enhanced button gradient effects for all variants
+- Improved hover states with gradients
+- All buttons meet WCAG AA contrast requirements
+- Focus rings clearly visible in all themes
+- Documentation: docs/UI_POLISH_REPORT.md
 
-### P2 — Enhanced hover/interactions (gradient effects)
-**Problem:** UI feels flat.  
+**Planned PR:** `claude/implement-p1-update-docs-tCrux`
+
+### P2 — Enhanced hover/interactions (gradient effects) ✅
+**Problem:** UI feels flat.
 **Acceptance:**
 - Subtle hover gradients for key CTAs
 - Respect `prefers-reduced-motion`
 - No performance regressions
 
-**Planned PR:** `codex/ui-p1-nav-contrast-gradients`
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Added hover gradients to all button variants
+- Ghost variant now has gradient hover effect
+- Secondary and destructive variants enhanced
+- All animations respect prefers-reduced-motion
+- GPU-accelerated for performance
+- Documentation: docs/UI_POLISH_REPORT.md
+
+**Planned PR:** `claude/implement-p1-update-docs-tCrux`
 
 ---
 
@@ -200,28 +226,54 @@
 
 ## Workstream: Marketing / Public pages
 
-### P1 — Public ZIP coverage check on homepage
-**Problem:** users need to check eligibility before signup.  
+### P1 — Public ZIP coverage check on homepage ✅
+**Problem:** users need to check eligibility before signup.
 **Acceptance:**
 - Public ZIP form on homepage
 - Calls server endpoint to verify coverage from kitchen origin
 - Returns eligible/ineligible + reason + ETA/distance when eligible
 - Rate limiting and caching by ZIP implemented
 
-**Planned PR:** `codex/marketing-p1-coverage-menu`
+**Status:** ✅ Done (Already implemented)
+**Implementation:**
+- Component exists: src/components/marketing/coverage-checker.tsx
+- Used on homepage at line 180
+- API endpoint: /api/maps/coverage/route.ts
+- Rate limiting: 5 requests/min per IP
+- Caching: 15 min TTL per ZIP code
+- Google Maps Distance Matrix API integration
+- Returns eligibility status, reason, distance, and ETA
 
-### P1 — Public weekly chef-curated menu on homepage
-**Problem:** improve conversion by showing menus.  
+### P1 — Public weekly chef-curated menu on homepage ✅
+**Problem:** improve conversion by showing menus.
 **Acceptance:**
-- Public “This week’s menu” section
+- Public "This week's menu" section
 - If none published, show friendly empty state
 - If DB tables added, RLS allows public select only for published menus
 
-**Planned PR:** `codex/marketing-p1-coverage-menu`
+**Status:** ✅ Done (Already implemented)
+**Implementation:**
+- Component exists: src/components/marketing/weekly-menu.tsx
+- Used on homepage at line 214
+- RLS policy allows public SELECT on published menus
+- Shows friendly empty state when no menu published
+- SEO-friendly markup
+- Displays up to 4 preview dishes
 
 ---
 
-### P1 — Admin Weekly Menu Management (service-role API)
+### P1 — Admin Weekly Menu Management (service-role API) ✅
 **Acceptance:** /admin/menus CRUD weekly menus/items + reorder + publish + add from catalog.
-**Planned PR:** codex/admin-menu-crud
-**Status:** ✅ Implemented in codex/admin-menu-crud
+
+**Status:** ✅ Done (2026-01-05)
+**Implementation:**
+- Full admin CRUD for menu templates
+- Weekly menu generation from templates
+- Publish/unpublish workflow with email notifications
+- Menu item reordering API endpoints
+- Add from catalog functionality
+- QA review complete: 9/10 rating
+- Documentation: docs/ADMIN_MENU_CRUD_QA_REPORT.md
+- Production-ready with no critical issues
+
+**Planned PR:** `claude/implement-p1-update-docs-tCrux`

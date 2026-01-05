@@ -101,10 +101,9 @@ export function MobileBottomNav() {
       <nav
         className={cn(
           "fixed bottom-0 left-0 right-0 z-50",
-          "border-t border-slate-200 bg-white/95 backdrop-blur-lg",
+          "border-t border-border bg-background/95 backdrop-blur-lg",
           "shadow-[0_-2px_10px_rgba(0,0,0,0.1)]",
           "transition-transform duration-300 ease-in-out",
-          "dark:border-slate-800 dark:bg-slate-950/95",
           "md:hidden",
           isVisible ? "translate-y-0" : "translate-y-full",
         )}
@@ -130,8 +129,8 @@ export function MobileBottomNav() {
                 className={cn(
                   "relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors",
                   isActive
-                    ? "text-[#D4A574]"
-                    : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
                 style={{
                   minHeight: "56px",
@@ -151,7 +150,7 @@ export function MobileBottomNav() {
                 </span>
                 {isActive && (
                   <div
-                    className="absolute bottom-0 h-1 w-12 rounded-t-full bg-[#D4A574]"
+                    className="absolute bottom-0 h-1 w-12 rounded-t-full bg-primary"
                     aria-hidden="true"
                   />
                 )}
