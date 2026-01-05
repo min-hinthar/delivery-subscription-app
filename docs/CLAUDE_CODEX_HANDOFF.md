@@ -85,3 +85,29 @@
 - [x] Remediations added
 - [ ] Tests executed
 - [ ] Claude review pending
+
+## Codex Session - Weekly menu system foundation
+**Date:** 2026-01-05
+**Branch:** codex/weekly-menu-system
+
+### Implemented
+- Added weekly menu system schema/migration with templates, weekly menus/items, packages, and weekly orders.
+- Built customer weekly menu UI, package selector, weekly checkout flow, and supporting API routes.
+- Added admin template creation, weekly menu generation, and status publishing tooling.
+- Updated marketing weekly menu query to new schema and added helper utilities + tests.
+- Updated progress/backlog + admin operations/QA UX docs for the new flow.
+
+### Tests
+- `pnpm test` (failed: existing notification test expects browser permissions)
+- `pnpm build` (passed)
+- `bash scripts/codex/verify.sh` (passed with existing lint warnings)
+
+### For Claude to Review
+- Confirm weekly menu publish workflow + status copy are aligned with product expectations.
+- Validate weekly menu ordering deadlines/timezone assumptions.
+
+### Status
+- [x] Weekly menu system implemented
+- [x] Build + verify completed
+- [ ] Tests fully green (browser-notifications.test.ts failure pre-existing)
+- [ ] Claude review pending

@@ -127,6 +127,21 @@
 
 ---
 
+## Workstream: Customer / Weekly Menu System
+
+### P0 — Weekly menu system (templates + packages + orders)
+**Acceptance:**
+- Admin can create menu templates with 7 days × 3 dishes.
+- Admin can generate weekly menus from templates for a Sunday start date.
+- Customers can view the published weekly menu grouped by day.
+- Customers can select Package A/B/C and place a weekly order before the deadline.
+- Order deadline enforcement (Wednesday 11:59 PM) prevents late orders.
+
+**Planned PR:** `codex/weekly-menu-system`  
+**Status:** 🟡 In progress
+
+---
+
 ## Workstream: Marketing / Public pages
 
 ### P1 — Public ZIP coverage check on homepage

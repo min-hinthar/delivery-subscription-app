@@ -3,7 +3,6 @@ import { ArrowRight, Flame, Leaf, Sparkles } from "lucide-react";
 
 import { ButtonV2 } from "@/components/ui/button-v2";
 import { Card } from "@/components/ui/card";
-import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -13,11 +12,11 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-function formatWeekLabel(weekOf?: string | null) {
-  if (!weekOf) {
+function formatWeekLabel(weekStartDate?: string | null) {
+  if (!weekStartDate) {
     return "Upcoming week";
   }
-  const date = new Date(`${weekOf}T00:00:00Z`);
+  const date = new Date(`${weekStartDate}T00:00:00Z`);
   return new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
@@ -31,24 +30,42 @@ export async function WeeklyMenu() {
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
   const supabase = hasSupabaseConfig ? await createSupabaseServerClient() : null;
-  const [weekStart] = getUpcomingWeekStarts(1);
-  const weekOf = weekStart ? formatDateYYYYMMDD(weekStart) : null;
+  const weekStartDate = null;
 
   const { data, error } =
-    supabase && weekOf
+    supabase && weekStartDate
       ? await supabase
         .from("weekly_menus")
         .select(
-          "id, title, week_of, weekly_menu_items ( id, name, description, price_cents, sort_order )",
+          "id, week_start_date, template:menu_templates(name), weekly_menu_items(id, day_of_week, meal_position, dish:meal_items(id, name, description, price_cents))",
         )
-        .eq("is_published", true)
-        .eq("week_of", weekOf)
-        .order("sort_order", { foreignTable: "weekly_menu_items", ascending: true })
+        .eq("status", "published")
+        .gte("order_deadline", new Date().toISOString())
+        .order("week_start_date", { ascending: true })
         .maybeSingle()
       : { data: null, error: null };
 
-  const items = error ? [] : (data?.weekly_menu_items ?? []);
-  const title = data?.title ?? `Chef-curated menu • Week of ${formatWeekLabel(weekOf)}`;
+  const items =
+    error || !data
+      ? []
+      : [...(data.weekly_menu_items ?? [])]
+        .map((item) => ({
+          ...item,
+          dish: Array.isArray(item.dish) ? item.dish[0] : item.dish,
+        }))
+        .sort((a, b) => {
+          const dayDiff = (a.day_of_week ?? 0) - (b.day_of_week ?? 0);
+          if (dayDiff !== 0) return dayDiff;
+          return (a.meal_position ?? 0) - (b.meal_position ?? 0);
+        });
+  const template = data?.template
+    ? Array.isArray(data.template)
+      ? data.template[0]
+      : data.template
+    : null;
+  const title =
+    template?.name ??
+    `Chef-curated menu • Week of ${formatWeekLabel(data?.week_start_date ?? weekStartDate)}`;
   const previewItems = items.slice(0, 4);
   const hasPublishedMenu = items.length > 0;
   const totalItems = items.length;
@@ -116,15 +133,20 @@ export async function WeeklyMenu() {
                       <Sparkles className="h-6 w-6" aria-hidden="true" />
                     </div>
                   </div>
-                  <div className="absolute right-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8B4513] shadow-sm">
-                    {priceFormatter.format((item.price_cents ?? 0) / 100)}
-                  </div>
+                  {item.dish?.price_cents !== null && item.dish?.price_cents !== undefined && (
+                    <div className="absolute right-4 top-4 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-[#8B4513] shadow-sm">
+                      {priceFormatter.format((item.dish.price_cents ?? 0) / 100)}
+                    </div>
+                  )}
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <div className="space-y-1">
-                    <p className="text-base font-semibold text-foreground">{item.name}</p>
+                    <p className="text-base font-semibold text-foreground">
+                      {item.dish?.name ?? "Chef's special"}
+                    </p>
                     <p className="text-sm text-muted-foreground line-clamp-2">
-                      {item.description || "Chef-crafted Burmese favorite with seasonal sides."}
+                      {item.dish?.description ||
+                        "Chef-crafted Burmese favorite with seasonal sides."}
                     </p>
                   </div>
                   <div className="mt-auto flex items-center justify-between text-xs font-medium text-muted-foreground">

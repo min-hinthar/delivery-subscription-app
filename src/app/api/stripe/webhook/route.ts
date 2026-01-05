@@ -253,6 +253,25 @@ export async function POST(request: Request) {
     }
   }
 
+  if (event.type === "payment_intent.succeeded") {
+    const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+    const { error } = await admin
+      .from("weekly_orders")
+      .update({
+        status: "confirmed",
+        paid_at: new Date().toISOString(),
+      })
+      .eq("stripe_payment_intent_id", paymentIntent.id);
+
+    if (error) {
+      return bad("Failed to confirm weekly order payment.", {
+        status: 500,
+        headers: privateHeaders,
+      });
+    }
+  }
+
   console.info("stripe_webhook_processed", {
     eventId: event.id,
     eventType: event.type,

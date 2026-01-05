@@ -15,6 +15,7 @@ import {
   Menu,
   Route,
   Sparkles,
+  UtensilsCrossed,
   Truck,
   User,
   X,
@@ -40,6 +41,7 @@ const PUBLIC_LINKS: NavLink[] = [
 
 const AUTH_LINKS: NavLink[] = [
   { label: "Account", href: "/account", icon: User },
+  { label: "Menu", href: "/menu/weekly", icon: UtensilsCrossed },
   { label: "Schedule", href: "/schedule", icon: CalendarCheck },
   { label: "Track", href: "/track", icon: MapPinned },
   { label: "Billing", href: "/billing", icon: CreditCard },
@@ -54,7 +56,14 @@ const ADMIN_LINKS: NavLink[] = [
   { label: "Subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
 ];
 
-const APP_ROUTES = new Set(["/account", "/schedule", "/track", "/billing", "/onboarding"]);
+const APP_ROUTES = new Set([
+  "/account",
+  "/menu",
+  "/schedule",
+  "/track",
+  "/billing",
+  "/onboarding",
+]);
 
 function isActiveRoute(pathname: string, href: string) {
   if (href.startsWith("/#")) {

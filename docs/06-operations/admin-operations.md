@@ -13,31 +13,27 @@ If you cannot access admin pages:
 - Confirm your profile has `is_admin = true` in `public.profiles`.
 
 ## Weekly Menu Workflow (recommended weekly cadence)
-### 1) Create or load the weekly menu
-1) Go to `/admin/menus`
-2) Set **Week of (Saturday)** to the delivery weekend you want (YYYY-MM-DD)
-3) Click **Load**
-4) If no menu exists, click **Create Menu**
-5) Update the menu title (saves on blur)
+### 1) Build templates
+1) Go to `/admin/menus/templates`
+2) Click **New template**
+3) Name the template + select 21 dishes (7 days × 3 dishes)
+4) Save to reuse weekly
 
-### 2) Add items
-You can add items two ways:
-- **Add from Catalog**: picks from `meal_items` (recommended)
-- **Add Custom Item**: for one-off specials
+### 2) Generate the weekly menu
+1) Go to `/admin/menus/generate`
+2) Pick a template + week start date (Sunday)
+3) Click **Generate weekly menu**
 
-### 3) Reorder items
-Use **Up/Down** buttons to reorder items. The UI persists the order to `sort_order`.
-
-### 4) Publish
-Toggle **Published** ON:
-- Sets `weekly_menus.is_published = true`
-- Sets `weekly_menus.published_at` if this is the first publish
+### 3) Publish and monitor
+1) Verify the menu items populated correctly
+2) Publish once ready (status = `published`)
+3) Orders close Wednesday 11:59 PM
 
 Once published:
 - The public homepage should show “This week’s menu”.
 
-### 5) Unpublish (if needed)
-Toggle **Published** OFF to hide the menu publicly.
+### 4) Unpublish (if needed)
+Set the weekly menu status back to `draft` to hide it publicly.
 
 ## Meal Catalog (meal_items)
 Meal catalog items power:

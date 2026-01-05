@@ -29,7 +29,7 @@
   - Bottom navigation, touch optimization, PWA, haptics, swipeable modals
   - 📖 Review: `docs/08-archive/completed-prs/PR-80-mobile-ux-optimization-review.md`
 
-- [ ] **PR #25:** Weekly Menu System (3-4 hours)
+- [ ] **PR #25:** Weekly Menu System (3-4 hours) — 🟡 In progress
   - Menu templates, package ordering, email notifications
   - 📖 Guide: `docs/01-active/implementation-guides/weekly-menu.md`
 
