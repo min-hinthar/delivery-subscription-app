@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     template_id: template.id,
   }));
 
-  const { details: { error: dishesError  }} = await supabase.from("template_dishes").insert(dishPayload);
+  const { error: dishesError } = await supabase.from("template_dishes").insert(dishPayload);
 
   if (dishesError) {
     await supabase.from("menu_templates").delete().eq("id", template.id);

@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     return bad(message, { status: 422, headers: privateHeaders });
   }
 
-  const { details: { error: authUpdateError  }} = await supabase.auth.updateUser({
+  const { error: authUpdateError } = await supabase.auth.updateUser({
     data: {
       full_name,
       phone,
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     return bad("Failed to sync user metadata.", { status: 500, headers: privateHeaders });
   }
 
-  const { details: { error: profileError  }} = await supabase.from("profiles").upsert({
+  const { error: profileError } = await supabase.from("profiles").upsert({
     id: auth.user.id,
     email: auth.user.email,
     full_name,
@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     return bad("Failed to update profile.", { status: 500, headers: privateHeaders });
   }
 
-  const { details: { error: addressError  }} = await supabase
+  const { error: addressError } = await supabase
     .from("addresses")
     .upsert(
       {

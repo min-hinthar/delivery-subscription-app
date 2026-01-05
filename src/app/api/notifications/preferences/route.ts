@@ -76,7 +76,7 @@ export async function PUT(request: NextRequest) {
 
     if (!validationResult.success) {
       return bad('Invalid request data', {
-        errors: validationResult.error.flatten().fieldErrors,
+        details: { errors: validationResult.error.flatten().fieldErrors },
       });
     }
 

@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return bad('Invalid request data', {
-        errors: validationResult.error.flatten().fieldErrors,
+        details: { errors: validationResult.error.flatten().fieldErrors },
       });
     }
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     if (unavailableItems.length > 0) {
       return bad('Some items are not available for à la carte ordering', {
-        unavailable: unavailableItems.map(item => item.name),
+        details: { unavailable: unavailableItems.map(item => item.name) },
       });
     }
 
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     for (const orderItem of orderItems) {
       const menuItem = itemsMap.get(orderItem.item_id);
       if (!menuItem) {
-        return bad('Invalid item in order', { item_id: orderItem.item_id });
+        return bad('Invalid item in order', { details: { item_id: orderItem.item_id } });
       }
       totalCents += menuItem.price_cents * orderItem.quantity;
     }
@@ -104,18 +104,18 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    const { details: { error: itemsInsertError  }} = await supabase
+    const { error: itemsInsertError } = await supabase
       .from('order_items')
       .insert(orderItemsData);
 
     if (itemsInsertError) {
       // Rollback order creation
       await supabase.from('orders').delete().eq('id', order.id);
-      return bad('Failed to create order items', { details: { error: itemsInsertError.message  }});
+      return bad('Failed to create order items', { details: { error: itemsInsertError.message } });
     }
 
     // Create delivery appointment
-    const { details: { error: appointmentError  }} = await supabase
+    const { error: appointmentError } = await supabase
       .from('delivery_appointments')
       .insert({
         user_id: user.id,

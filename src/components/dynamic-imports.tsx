@@ -22,13 +22,15 @@ export const DynamicRouteBuilder = dynamic(
   }
 );
 
-export const DynamicRouteMap = dynamic(
-  () => import('@/components/admin/route-builder-map').then((mod) => ({ default: mod.RouteMap })),
-  {
-    loading: LoadingSpinner,
-    ssr: false, // Maps require browser APIs
-  }
-);
+// Note: RouteBuilderMap is not exported as default from route-builder-map
+// For now, commenting out this import until the component export is fixed
+// export const DynamicRouteBuilderMap = dynamic(
+//   () => import('@/components/admin/route-builder-map'),
+//   {
+//     loading: LoadingSpinner,
+//     ssr: false, // Maps require browser APIs
+//   }
+// );
 
 export const DynamicDeliveryList = dynamic(
   () => import('@/components/admin/delivery-list').then((mod) => ({ default: mod.DeliveryList })),

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return bad('Invalid request data', {
-        errors: validationResult.error.flatten().fieldErrors,
+        details: { errors: validationResult.error.flatten().fieldErrors },
       });
     }
 

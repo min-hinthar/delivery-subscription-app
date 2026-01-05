@@ -35,7 +35,8 @@ test.describe('Admin Route Builder', () => {
 
       // Should have multiple week options
       const options = page.locator('option, [role="option"]');
-      await expect(options).toHaveCount({ min: 1 }, { timeout: 5000 });
+      const count = await options.count();
+      expect(count).toBeGreaterThanOrEqual(1);
     }
   });
 

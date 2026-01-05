@@ -38,8 +38,8 @@ function getRating(
  */
 export function reportWebVitals(onPerfEntry?: MetricCallback) {
   if (onPerfEntry && typeof window !== 'undefined') {
-    import('web-vitals').then(({ onCLS, onFCP, onFID, onLCP, onTTFB, onINP }) => {
-      onCLS((metric) => {
+    import('web-vitals').then(({ onCLS, onFCP, onLCP, onTTFB, onINP }) => {
+      onCLS((metric: any) => {
         onPerfEntry({
           name: 'CLS',
           value: metric.value,
@@ -48,7 +48,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onFCP((metric) => {
+      onFCP((metric: any) => {
         onPerfEntry({
           name: 'FCP',
           value: metric.value,
@@ -57,16 +57,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onFID((metric) => {
-        onPerfEntry({
-          name: 'FID',
-          value: metric.value,
-          rating: getRating('FID', metric.value),
-          delta: metric.delta,
-          id: metric.id,
-        });
-      });
-      onLCP((metric) => {
+      onLCP((metric: any) => {
         onPerfEntry({
           name: 'LCP',
           value: metric.value,
@@ -75,7 +66,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onTTFB((metric) => {
+      onTTFB((metric: any) => {
         onPerfEntry({
           name: 'TTFB',
           value: metric.value,
@@ -84,7 +75,7 @@ export function reportWebVitals(onPerfEntry?: MetricCallback) {
           id: metric.id,
         });
       });
-      onINP((metric) => {
+      onINP((metric: any) => {
         onPerfEntry({
           name: 'INP',
           value: metric.value,
