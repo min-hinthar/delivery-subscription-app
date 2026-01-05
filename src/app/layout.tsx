@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 import "./globals.css";
 
@@ -10,6 +10,34 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: "Morning Star Weekly Delivery",
   description: "Weekly delivery subscription app for Mandalay Morning Star.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Mandalay Star",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [{ url: "/icons/app-icon.svg", type: "image/svg+xml" }],
+    apple: [{ url: "/icons/apple-touch-icon.svg", type: "image/svg+xml" }],
+    shortcut: [{ url: "/icons/app-icon.svg", type: "image/svg+xml" }],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#D4A574" },
+    { media: "(prefers-color-scheme: dark)", color: "#8B4513" },
+  ],
 };
 
 export default function RootLayout({

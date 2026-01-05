@@ -35,6 +35,12 @@ It is designed to be used:
 - Keyboard: full navigation without mouse
 - Screen readers: basic flows readable and operable
 
+### Mobile UX checks
+- [ ] Bottom nav appears on mobile-only routes and respects safe-area insets
+- [ ] Pull-to-refresh works on tracking dashboard
+- [ ] Swipe down closes appointment modal on mobile
+- [ ] PWA install prompt appears after eligible session delay
+
 ### Network conditions (minimum)
 - Fast (Wi-Fi)
 - Slow (Regular 3G simulation)

@@ -3,6 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 
+import { SwipeableModal } from "@/components/ui/swipeable-modal";
+
 type AppointmentModalProps = {
   children: (props: {
     onClose: () => void;
@@ -38,21 +40,13 @@ export function AppointmentModal({ children }: AppointmentModalProps) {
   }, [handleClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-      <button
-        type="button"
-        className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity motion-reduce:transition-none"
-        aria-label="Close appointment details"
-        onClick={handleClose}
-      />
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="Appointment details"
-        className="relative z-10 w-full max-w-2xl rounded-2xl bg-white shadow-xl transition-transform motion-reduce:transition-none dark:bg-slate-950"
-      >
-        {children({ onClose: handleClose, closeButtonRef })}
-      </div>
-    </div>
+    <SwipeableModal
+      isOpen
+      onClose={handleClose}
+      title="Appointment details"
+      showCloseButton={false}
+    >
+      {children({ onClose: handleClose, closeButtonRef })}
+    </SwipeableModal>
   );
 }

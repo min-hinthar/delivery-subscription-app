@@ -63,6 +63,109 @@ body {
   font-family: var(--font-body);
 }
 
+/* ============================================
+   MOBILE TOUCH OPTIMIZATIONS
+   ============================================ */
+
+@media (max-width: 768px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  button,
+  a[role="button"],
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 12px 16px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    min-height: 48px;
+    font-size: 16px;
+    padding: 12px 16px;
+  }
+
+  input[type="checkbox"],
+  input[type="radio"] {
+    width: 24px;
+    height: 24px;
+    margin: 8px;
+  }
+
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
+  .card[role="button"],
+  .card.clickable {
+    min-height: 56px;
+    cursor: pointer;
+  }
+
+  .icon-button {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* ============================================
+   PULL-TO-REFRESH PREVENTION (for custom impl)
+   ============================================ */
+
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* ============================================
+   SAFE AREA SUPPORT (iPhone notch)
+   ============================================ */
+
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-right: env(safe-area-inset-right);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+  --safe-area-inset-left: env(safe-area-inset-left);
+}
+
+/* ============================================
+   BURMESE FONT OPTIMIZATIONS
+   ============================================ */
+
+[lang="my"] {
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+}
+
+[lang="my"] button,
+[lang="my"] input,
+[lang="my"] select {
+  font-size: 17px;
+}
+
 .font-display {
   font-family: var(--font-display);
 }

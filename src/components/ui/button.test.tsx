@@ -34,6 +34,12 @@ describe('Button', () => {
       expect(button).toHaveClass('bg-destructive')
     })
 
+    it('renders with burmese variant', () => {
+      render(<Button variant="burmese">Burmese</Button>)
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('bg-[#D4A574]')
+    })
+
     it('applies custom className', () => {
       render(<Button className="custom-class">Custom</Button>)
       const button = screen.getByRole('button')
@@ -44,6 +50,12 @@ describe('Button', () => {
       render(<Button size="sm">Small</Button>)
       const button = screen.getByRole('button')
       expect(button).toHaveClass('h-9')
+    })
+
+    it('supports mobile size', () => {
+      render(<Button size="mobile">Mobile</Button>)
+      const button = screen.getByRole('button')
+      expect(button).toHaveClass('h-12')
     })
 
     it('supports icon size', () => {

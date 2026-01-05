@@ -9,6 +9,12 @@ import { TimeSlotSelector } from "@/components/schedule/time-slot-selector";
 import { Card } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { parseApiResponse } from "@/lib/api/client";
+import {
+  hapticError,
+  hapticMedium,
+  hapticSelection,
+  hapticSuccess,
+} from "@/lib/haptics";
 import { isAfterCutoff } from "@/lib/scheduling";
 
 type WeekOption = {
@@ -112,6 +118,7 @@ export function SchedulePlanner({
   function handleWeekChange(value: string) {
     setError(null);
     setStatus(null);
+    hapticSelection();
     const params = new URLSearchParams();
     params.set("week_of", value);
     startTransition(() => {
@@ -126,12 +133,14 @@ export function SchedulePlanner({
 
     if (!selectedWindow) {
       setError("Select a delivery window to continue.");
+      hapticError();
       return;
     }
 
     setStatus(null);
     setError(null);
     setIsSaving(true);
+    hapticMedium();
 
     try {
       const response = await fetch("/api/delivery/appointment", {
@@ -148,6 +157,7 @@ export function SchedulePlanner({
       if (!result.ok) {
         setError(result.message);
         setStatus(null);
+        hapticError();
         toast({
           title: "Unable to save appointment",
           description: result.message,
@@ -157,6 +167,7 @@ export function SchedulePlanner({
       }
 
       setStatus("Appointment saved!");
+      hapticSuccess();
       toast({
         title: "Appointment saved",
         description: "Your delivery window is confirmed.",
@@ -165,6 +176,7 @@ export function SchedulePlanner({
       const message =
         caught instanceof Error ? caught.message : "Unable to save appointment.";
       setError(message);
+      hapticError();
       toast({
         title: "Unable to save appointment",
         description: message,
@@ -202,6 +214,7 @@ export function SchedulePlanner({
           windows={windows}
           selectedWindow={selectedWindow}
           onSelect={(value) => {
+            hapticSelection();
             setSelectedWindow(value);
             setError(null);
           }}
