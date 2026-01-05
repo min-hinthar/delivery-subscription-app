@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { Globe } from "lucide-react";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
@@ -12,6 +13,10 @@ export function LanguageSwitcher() {
   const locale = useLocale() as Locale;
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
+  }, [locale]);
 
   const switchLocale = (newLocale: Locale) => {
     const pathnameWithoutLocale = stripLocaleFromPathname(pathname, locale);

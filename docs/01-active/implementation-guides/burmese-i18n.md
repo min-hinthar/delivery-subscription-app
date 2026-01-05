@@ -882,13 +882,8 @@ export default {
 **Create:** `supabase/migrations/20260104000002_add_burmese_columns.sql`
 
 ```sql
--- Add Burmese columns to dishes table
-alter table dishes
-  add column if not exists name_my text,
-  add column if not exists description_my text;
-
--- Add Burmese columns to categories table (if exists)
-alter table categories
+-- Add Burmese columns to meal_items table (schema uses meal_items)
+alter table public.meal_items
   add column if not exists name_my text,
   add column if not exists description_my text;
 
@@ -898,42 +893,48 @@ alter table categories
 -- Add Burmese columns to meal_packages (already have from PR #25)
 -- (no changes needed)
 
--- Create helper function to get dish name by locale
-create or replace function get_dish_name(dish_record dishes, preferred_locale text)
+-- Create helper function to get meal item name by locale
+create or replace function public.get_meal_item_name(
+  item_record public.meal_items,
+  preferred_locale text
+)
 returns text as $$
 begin
-  if preferred_locale = 'my' and dish_record.name_my is not null then
-    return dish_record.name_my;
+  if preferred_locale = 'my' and item_record.name_my is not null and item_record.name_my != '' then
+    return item_record.name_my;
   else
-    return dish_record.name;
+    return item_record.name;
   end if;
 end;
 $$ language plpgsql immutable;
 
 -- Create helper function to get description by locale
-create or replace function get_dish_description(dish_record dishes, preferred_locale text)
+create or replace function public.get_meal_item_description(
+  item_record public.meal_items,
+  preferred_locale text
+)
 returns text as $$
 begin
-  if preferred_locale = 'my' and dish_record.description_my is not null then
-    return dish_record.description_my;
+  if preferred_locale = 'my' and item_record.description_my is not null and item_record.description_my != '' then
+    return item_record.description_my;
   else
-    return dish_record.description;
+    return item_record.description;
   end if;
 end;
 $$ language plpgsql immutable;
 ```
 
-#### 6.2 Update Dish Type
+#### 6.2 Update Meal Item Type
 
-**Edit:** `src/types/index.ts`
+**Edit:** `src/types/weekly-menu.ts`
 
 ```typescript
-export interface Dish {
+export interface MealItem {
   id: string;
   name: string;
-  name_my?: string; // Burmese name
-  description?: string;
-  description_my?: string; // Burmese description
+  name_my?: string | null; // Burmese name
+  description?: string | null;
+  description_my?: string | null; // Burmese description
   // ... other fields
 }
 ```
