@@ -27,7 +27,6 @@ describe("AnimatedMarker", () => {
   describe("animateTo", () => {
     it("should calculate adaptive duration for short distances (<50m)", () => {
       // Distance < 50m should use 500ms duration
-      const distance = 30; // meters
       const expectedDuration = 500;
       expect(expectedDuration).toBe(500);
     });

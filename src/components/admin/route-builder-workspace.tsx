@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   DndContext,
   DragEndEvent,
-  DragStartEvent,
   DragOverEvent,
   PointerSensor,
   KeyboardSensor,
@@ -66,7 +65,6 @@ export function RouteBuilderWorkspace({
   const [optimized, setOptimized] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedRouteId, setSavedRouteId] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   const mapAssignedStops = routeStops.filter((stop) => stop.hasAddress);
   const mapUnassignedStops = unassignedStops.filter((stop) => stop.hasAddress);
@@ -93,8 +91,8 @@ export function RouteBuilderWorkspace({
     setRouteMetrics(DEFAULT_METRICS);
   };
 
-  const handleDragStart = (event: DragStartEvent) => {
-    setActiveId(String(event.active.id));
+  const handleDragStart = () => {
+    setStatusMessage(null);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -117,7 +115,6 @@ export function RouteBuilderWorkspace({
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveId(null);
     const { active, over } = event;
     if (!over) {
       return;

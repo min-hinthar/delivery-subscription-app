@@ -28,7 +28,7 @@ export function PullToRefresh({
   const [canPull, setCanPull] = useState(false);
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (window.scrollY === 0) {
+    if (window.scrollY <= 1) {
       setStartY(e.touches[0].clientY);
       setCanPull(true);
     }

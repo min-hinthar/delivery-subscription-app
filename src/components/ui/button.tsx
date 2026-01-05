@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { hapticLight } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 export type ButtonVariant = "default" | "ghost" | "secondary" | "destructive" | "burmese";
@@ -9,6 +10,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
   size?: ButtonSize;
   loading?: boolean;
+  haptic?: boolean;
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -40,7 +42,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size = "default",
       loading,
       disabled,
+      haptic = true,
       children,
+      onClick,
       ...props
     },
     ref,
@@ -58,6 +62,12 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         disabled={isDisabled}
         aria-busy={loading || undefined}
+        onClick={(event) => {
+          if (!isDisabled && haptic) {
+            hapticLight();
+          }
+          onClick?.(event);
+        }}
         {...props}
       >
         {loading ? (

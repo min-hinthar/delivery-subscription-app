@@ -56,7 +56,7 @@ export async function GET(request: Request) {
     const supabase = createSupabaseAdminClient();
 
     // Test basic connectivity with a simple query
-    const { data: pingData, error: pingError } = await supabase
+    const { error: pingError } = await supabase
       .from("profiles")
       .select("id")
       .limit(1)

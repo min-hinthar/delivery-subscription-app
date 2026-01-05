@@ -179,3 +179,25 @@
 - [x] Feature implemented
 - [x] Tests executed
 - [ ] Claude review pending
+
+## Codex Session - PR #80 feedback follow-up
+**Date:** 2026-01-05
+**Branch:** codex/ui-p1-mobile-ux-feedback
+
+### Implemented
+- Added missing tests for SwipeableModal, MobileBottomNav, and InstallPrompt.
+- Hardened install prompt storage handling, extracted timing constants, and tweaked pull-to-refresh scroll threshold.
+- Updated haptics to respect reduced-motion and added default button haptic feedback.
+- Cleaned up lint warnings across admin route builder, tracking map, and map tests.
+- Documented new mobile QA check for reduced-motion haptics.
+
+### Tests
+- `bash scripts/codex/verify.sh` (lint passed; typecheck failed: missing next-intl/react-email/resend deps in this environment).
+
+### Notes / Blockers
+- `tsc --noEmit` fails locally due to missing `next-intl`, `@react-email/components`, and `resend` packages/types in this environment.
+
+### Status
+- [x] Feedback items implemented
+- [x] Tests executed (lint)
+- [ ] Typecheck clean (blocked by missing deps)

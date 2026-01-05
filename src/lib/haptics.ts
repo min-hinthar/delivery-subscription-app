@@ -7,11 +7,23 @@ function canVibrate(): boolean {
   return typeof navigator !== "undefined" && typeof navigator.vibrate === "function";
 }
 
+function prefersReducedMotion(): boolean {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function shouldUseHaptics(): boolean {
+  return canVibrate() && !prefersReducedMotion();
+}
+
 /**
  * Check if haptic feedback is supported
  */
 export function isHapticSupported(): boolean {
-  return canVibrate();
+  return shouldUseHaptics();
 }
 
 /**
@@ -19,7 +31,7 @@ export function isHapticSupported(): boolean {
  * Use for: Button taps, checkbox toggles, small interactions
  */
 export function hapticLight() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate(10);
   }
 }
@@ -29,7 +41,7 @@ export function hapticLight() {
  * Use for: Adding items to cart, form submissions, confirmations
  */
 export function hapticMedium() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate(20);
   }
 }
@@ -39,7 +51,7 @@ export function hapticMedium() {
  * Use for: Errors, warnings, important actions
  */
 export function hapticHeavy() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate(30);
   }
 }
@@ -49,7 +61,7 @@ export function hapticHeavy() {
  * Use for: Successful order, payment confirmation, completion
  */
 export function hapticSuccess() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate([10, 50, 10]);
   }
 }
@@ -59,7 +71,7 @@ export function hapticSuccess() {
  * Use for: Form errors, payment failures, unavailable items
  */
 export function hapticError() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate([50, 100, 50, 100, 50]);
   }
 }
@@ -69,7 +81,7 @@ export function hapticError() {
  * Use for: Order deadline warnings, delivery delays
  */
 export function hapticWarning() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate([30, 100, 30]);
   }
 }
@@ -79,7 +91,7 @@ export function hapticWarning() {
  * Use for: Package selection, menu item selection
  */
 export function hapticSelection() {
-  if (canVibrate()) {
+  if (shouldUseHaptics()) {
     navigator.vibrate(5);
   }
 }

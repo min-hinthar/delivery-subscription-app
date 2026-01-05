@@ -260,7 +260,7 @@ export async function POST(request: Request) {
 
     // Render each stop with professional formatting
     doc.setFont("helvetica", "normal");
-    formattedStops.forEach((stop, index) => {
+    formattedStops.forEach((stop) => {
       const stopHeight = 75; // Estimated height for each stop block
 
       if (cursorY > pageHeight - 150) {

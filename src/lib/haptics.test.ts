@@ -12,14 +12,37 @@ import {
 
 describe("haptics", () => {
   const originalVibrate = navigator.vibrate;
+  const originalMatchMedia = window.matchMedia;
+
+  const setMatchMedia = (matches: boolean) => {
+    Object.defineProperty(window, "matchMedia", {
+      value: vi.fn().mockImplementation(() => ({
+        matches,
+        media: "(prefers-reduced-motion: reduce)",
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+  };
 
   beforeEach(() => {
     vi.restoreAllMocks();
+    setMatchMedia(false);
   });
 
   afterEach(() => {
     Object.defineProperty(navigator, "vibrate", {
       value: originalVibrate,
+      configurable: true,
+      writable: true,
+    });
+    Object.defineProperty(window, "matchMedia", {
+      value: originalMatchMedia,
       configurable: true,
       writable: true,
     });
@@ -66,5 +89,21 @@ describe("haptics", () => {
     expect(vibrate).toHaveBeenCalledWith(10);
     expect(vibrate).toHaveBeenCalledWith(20);
     expect(vibrate).toHaveBeenCalledWith([10, 50, 10]);
+  });
+
+  it("skips haptics when prefers-reduced-motion is enabled", () => {
+    const vibrate = vi.fn();
+    Object.defineProperty(navigator, "vibrate", {
+      value: vibrate,
+      configurable: true,
+      writable: true,
+    });
+    setMatchMedia(true);
+
+    hapticLight();
+    hapticMedium();
+
+    expect(isHapticSupported()).toBe(false);
+    expect(vibrate).not.toHaveBeenCalled();
   });
 });

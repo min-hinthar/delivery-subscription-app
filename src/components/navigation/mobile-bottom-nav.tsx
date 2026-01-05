@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -56,7 +56,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
   const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
   const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
 
   useEffect(() => {
     let ticking = false;
@@ -68,13 +68,13 @@ export function MobileBottomNav() {
 
           if (currentScrollY < 10) {
             setIsVisible(true);
-          } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          } else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
             setIsVisible(false);
-          } else if (currentScrollY < lastScrollY) {
+          } else if (currentScrollY < lastScrollY.current) {
             setIsVisible(true);
           }
 
-          setLastScrollY(currentScrollY);
+          lastScrollY.current = currentScrollY;
           ticking = false;
         });
 
@@ -84,7 +84,7 @@ export function MobileBottomNav() {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   if (normalizedPathname.startsWith("/admin") || normalizedPathname.startsWith("/driver")) {
     return null;
