@@ -90,10 +90,54 @@
   - 📖 Spec: `.github/codex/prompts/review-and-fix-admin-menu-crud-features.md`
 
 #### Priority 2 (P2) - Nice-to-Have
-- [ ] **Error Boundaries** - Route-level error recovery
-- [ ] **Performance Optimization** - Code splitting, bundle analysis
-- [ ] **E2E Test Expansion** - Driver auth, admin operations
-- [ ] **Security Hardening** - CSP headers, additional validation
+- [x] **Error Boundaries** - ✅ Complete
+  - Route-level error recovery for scheduling and route builder
+  - Components: `SchedulingErrorBoundary`, `RouteBuilderErrorBoundary`
+  - **Completed:** 2026-01-05
+
+- [x] **Performance Optimization** - ✅ Complete
+  - Code splitting with dynamic imports
+  - Bundle analyzer integration (`pnpm analyze`)
+  - Web Vitals monitoring utilities
+  - **Completed:** 2026-01-05
+
+- [x] **E2E Test Expansion** - ✅ Complete
+  - New test suites: scheduling, admin routes, order history, reviews
+  - Total: 8 E2E test files covering all major flows
+  - **Completed:** 2026-01-05
+
+- [x] **À La Carte Orders** - ✅ Complete
+  - Single-dish ordering without meal plan
+  - Shopping cart, checkout flow, order management
+  - Database migration and API endpoints
+  - **Completed:** 2026-01-05
+
+- [x] **Order History Page** - ✅ Complete
+  - Customer order history with filtering and pagination
+  - Expandable order details, reorder functionality
+  - **Completed:** 2026-01-05
+
+- [x] **Driver Dashboard** - ✅ Complete
+  - Statistics: deliveries, completion rate, on-time performance
+  - Upcoming deliveries with customer info and ETAs
+  - **Completed:** 2026-01-05
+
+- [x] **Admin Analytics Dashboard** - ✅ Complete
+  - Revenue metrics, customer analytics, order statistics
+  - Delivery performance tracking with time range selector
+  - **Completed:** 2026-01-05
+
+- [x] **Notifications System** - ✅ Complete
+  - Push, email, and SMS notification infrastructure
+  - User preferences management with granular controls
+  - Database schema and API endpoints
+  - **Completed:** 2026-01-05
+
+- [x] **Reviews & Ratings** - ✅ Complete
+  - 5-star rating system with comments
+  - Review submission and display
+  - Aggregated ratings for menu items
+  - **Completed:** 2026-01-05
 
 ---
 

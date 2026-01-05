@@ -1,6 +1,7 @@
 import { RouteBuilder } from "@/components/admin/route-builder";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
+import { RouteBuilderErrorBoundary } from "@/components/error-boundary";
 import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { withTimeout } from "@/lib/utils/async";
@@ -173,13 +174,15 @@ export default async function AdminRoutesPage({
           <LogoutButton />
         </div>
       </Card>
-      <RouteBuilder
-        key={selectedWeek}
-        weekOptions={weekOptions}
-        selectedWeek={selectedWeek}
-        appointments={formattedAppointments}
-        initialRoutes={availableRoutes}
-      />
+      <RouteBuilderErrorBoundary>
+        <RouteBuilder
+          key={selectedWeek}
+          weekOptions={weekOptions}
+          selectedWeek={selectedWeek}
+          appointments={formattedAppointments}
+          initialRoutes={availableRoutes}
+        />
+      </RouteBuilderErrorBoundary>
     </div>
   );
 }

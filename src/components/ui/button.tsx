@@ -3,7 +3,7 @@ import * as React from "react";
 import { hapticLight } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
-export type ButtonVariant = "default" | "ghost" | "secondary" | "destructive" | "burmese";
+export type ButtonVariant = "default" | "ghost" | "secondary" | "destructive" | "burmese" | "outline";
 export type ButtonSize = "sm" | "default" | "lg" | "icon" | "mobile";
 
 export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -11,6 +11,7 @@ export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: ButtonSize;
   loading?: boolean;
   haptic?: boolean;
+  asChild?: boolean;
 };
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -23,6 +24,8 @@ const variantClasses: Record<ButtonVariant, string> = {
   destructive:
     "bg-destructive text-destructive-foreground shadow-sm hover:bg-gradient-to-r hover:from-destructive/95 hover:to-destructive/85",
   burmese: "bg-gradient-to-r from-primary via-primary to-primary/95 text-primary-foreground hover:from-primary hover:via-primary/95 hover:to-primary/90 shadow-md",
+  outline:
+    "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

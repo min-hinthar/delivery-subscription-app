@@ -31,7 +31,7 @@ export async function GET(request: Request) {
   // Optional: Protect health endpoint with secret
   if (process.env.HEALTH_CHECK_SECRET && secret !== process.env.HEALTH_CHECK_SECRET) {
     return NextResponse.json(
-      { error: "Unauthorized" },
+      { details: { error: "Unauthorized"  }},
       {
         status: 401,
         headers: {
