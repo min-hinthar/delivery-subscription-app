@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { SchedulingErrorBoundary } from "@/components/error-boundary";
 import { PageHeader } from "@/components/layout/page-header";
 import { SchedulePlanner } from "@/components/schedule/schedule-planner";
 import { Card } from "@/components/ui/card";
@@ -169,21 +170,23 @@ export default async function SchedulePage({
           </Link>
         </Card>
       ) : null}
-      <SchedulePlanner
-        weekOptions={weekOptions}
-        selectedWeek={selectedWeek}
-        windows={
-          windows?.map((window) => ({
-            ...window,
-            available: Math.max(window.capacity - (counts.get(window.id) ?? 0), 0),
-          })) ?? []
-        }
-        appointment={existingAppointment}
-        cutoffAt={formatCutoff(cutoffDate)}
-        isCutoffPassed={isAfterCutoff(new Date(`${selectedWeek}T00:00:00Z`))}
-        nextEligibleWeekLabel={weekOptions[0]?.label}
-        isSchedulingDisabled={!hasActiveSubscription}
-      />
+      <SchedulingErrorBoundary>
+        <SchedulePlanner
+          weekOptions={weekOptions}
+          selectedWeek={selectedWeek}
+          windows={
+            windows?.map((window) => ({
+              ...window,
+              available: Math.max(window.capacity - (counts.get(window.id) ?? 0), 0),
+            })) ?? []
+          }
+          appointment={existingAppointment}
+          cutoffAt={formatCutoff(cutoffDate)}
+          isCutoffPassed={isAfterCutoff(new Date(`${selectedWeek}T00:00:00Z`))}
+          nextEligibleWeekLabel={weekOptions[0]?.label}
+          isSchedulingDisabled={!hasActiveSubscription}
+        />
+      </SchedulingErrorBoundary>
     </div>
   );
 }

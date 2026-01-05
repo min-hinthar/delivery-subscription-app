@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     return bad("Unable to send invite email.", { status: 500, headers: privateHeaders });
   }
 
-  const { error: insertError } = await supabase.from("driver_profiles").insert({
+  const { details: { error: insertError  }} = await supabase.from("driver_profiles").insert({
     id: inviteData.user.id,
     email: payload.email,
     status: "pending",

@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     stripeCustomerId = customer.id;
 
-    const { error: insertError } = await admin.from("stripe_customers").insert({
+    const { details: { error: insertError  }} = await admin.from("stripe_customers").insert({
       user_id: user.id,
       stripe_customer_id: stripeCustomerId,
     });

@@ -116,7 +116,7 @@ export async function POST(request: Request) {
   }
 
   const admin = createSupabaseAdminClient();
-  const { error: eventInsertError } = await admin.from("stripe_events").insert({
+  const { details: { error: eventInsertError  }} = await admin.from("stripe_events").insert({
     event_id: event.id,
     event_type: event.type,
   });

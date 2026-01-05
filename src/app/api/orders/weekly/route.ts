@@ -187,7 +187,7 @@ export async function POST(request: Request) {
     return bad(message, { status: 500, headers: privateHeaders });
   }
 
-  const { error: paymentUpdateError } = await supabase
+  const { details: { error: paymentUpdateError  }} = await supabase
     .from("weekly_orders")
     .update({ stripe_payment_intent_id: paymentIntentId })
     .eq("id", order.id);

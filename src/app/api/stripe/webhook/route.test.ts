@@ -44,11 +44,11 @@ describe("POST /api/stripe/webhook", () => {
     mockStripeClient.webhooks.constructEvent.mockReturnValue(event);
 
     const stripeEventsQuery = {
-      insert: vi.fn().mockResolvedValue({ error: null }),
+      insert: vi.fn().mockResolvedValue({ details: { error: null  }}),
     };
     const weeklyOrdersUpdateQuery = {
       update: vi.fn().mockReturnValue({
-        eq: vi.fn().mockResolvedValue({ error: null }),
+        eq: vi.fn().mockResolvedValue({ details: { error: null  }}),
       }),
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({

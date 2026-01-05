@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     })),
   );
 
-  const { error: itemsError } = await admin.from("order_items").insert(itemsPayload);
+  const { details: { error: itemsError  }} = await admin.from("order_items").insert(itemsPayload);
 
   if (itemsError) {
     return bad("Failed to create order items.", { status: 500 });

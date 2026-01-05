@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       is_available: true,
     }));
 
-    const { error: itemsError } = await supabase.from("weekly_menu_items").insert(weeklyItems);
+    const { details: { error: itemsError  }} = await supabase.from("weekly_menu_items").insert(weeklyItems);
 
     if (itemsError) {
       await supabase.from("weekly_menus").delete().eq("id", menu.id);

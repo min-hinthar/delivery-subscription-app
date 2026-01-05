@@ -181,7 +181,7 @@ export async function POST(request: Request) {
         status: "pending",
       }));
 
-      const { error: stopsError } = await supabase.from("delivery_stops").insert(stopRows);
+      const { details: { error: stopsError  }} = await supabase.from("delivery_stops").insert(stopRows);
 
       if (stopsError) {
         return bad("Failed to create route stops.", { status: 500 });
@@ -234,7 +234,7 @@ export async function POST(request: Request) {
       status: "pending",
     }));
 
-    const { error: stopsError } = await supabase.from("delivery_stops").insert(stopRows);
+    const { details: { error: stopsError  }} = await supabase.from("delivery_stops").insert(stopRows);
 
     if (stopsError) {
       return bad("Failed to create route stops.", { status: 500 });

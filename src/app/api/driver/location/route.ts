@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Upsert driver location
-    const { error: upsertError } = await supabase.from("driver_locations").upsert(
+    const { details: { error: upsertError  }} = await supabase.from("driver_locations").upsert(
       {
         driver_id: user.id,
         route_id: location.route_id,
