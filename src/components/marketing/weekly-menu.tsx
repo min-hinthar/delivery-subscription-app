@@ -29,12 +29,22 @@ export async function WeeklyMenu() {
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
 
-  const supabase = hasSupabaseConfig ? await createSupabaseServerClient() : null;
+  let supabase = null;
+  let data = null;
+  let error = null;
+
+  try {
+    supabase = hasSupabaseConfig ? await createSupabaseServerClient() : null;
+  } catch (e) {
+    console.error("Failed to create Supabase client:", e);
+    supabase = null;
+  }
+
   const weekStartDate = null;
 
-  const { data, error } =
-    supabase && weekStartDate
-      ? await supabase
+  if (supabase && weekStartDate) {
+    try {
+      const result = await supabase
         .from("weekly_menus")
         .select(
           "id, week_start_date, template:menu_templates(name), weekly_menu_items(id, day_of_week, meal_position, dish:meal_items(id, name, description, price_cents))",
@@ -42,8 +52,15 @@ export async function WeeklyMenu() {
         .eq("status", "published")
         .gte("order_deadline", new Date().toISOString())
         .order("week_start_date", { ascending: true })
-        .maybeSingle()
-      : { data: null, error: null };
+        .maybeSingle();
+
+      data = result.data;
+      error = result.error;
+    } catch (e) {
+      console.error("Failed to fetch weekly menu:", e);
+      error = e instanceof Error ? e : new Error("Unknown error");
+    }
+  }
 
   const items =
     error || !data
