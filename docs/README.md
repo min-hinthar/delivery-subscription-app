@@ -10,6 +10,9 @@ This README serves as your navigation center for all project documentation.
 
 | For... | Go To... |
 |--------|----------|
+| **📊 Latest Status (Jan 5)** | [EXECUTIVE_SUMMARY.md](./EXECUTIVE_SUMMARY.md) ⭐ NEW! |
+| **🎯 Codex Next Steps** | [01-active/CODEX_NEXT_STEPS.md](./01-active/CODEX_NEXT_STEPS.md) ⭐ NEW! |
+| **📈 Detailed Status** | [CODEX_STATUS_2026-01-05.md](./CODEX_STATUS_2026-01-05.md) ⭐ NEW! |
 | **What to work on next** | [PROGRESS.md](./PROGRESS.md) |
 | **How to run Codex/Claude** | [WORKFLOW.md](./WORKFLOW.md) |
 | **Current sprint tasks** | [01-active/BACKLOG.md](./01-active/BACKLOG.md) |
