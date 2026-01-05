@@ -1,8 +1,9 @@
 # 📊 Project Progress Tracker
 
-**Last Updated:** 2026-01-06
+**Last Updated:** 2026-01-05 (Codex Status Update)
 **App Completion:** ~98% ✅ PRODUCTION-READY!
 **Phase:** Polish & Testing (Core Features Complete)
+**Latest Status Report:** `docs/CODEX_STATUS_2026-01-05.md`
 
 ---
 
@@ -24,39 +25,73 @@
 
 ## 🚀 What's Next (Priority Order)
 
-### Week 1: Production Essentials (P0)
-- [x] **PR #24 (PR #80):** Mobile UX Enhancement — ✅ Complete (Rating: 8.5/10)
-  - Bottom navigation, touch optimization, PWA, haptics, swipeable modals
-  - 📖 Review: `docs/08-archive/completed-prs/PR-80-mobile-ux-optimization-review.md`
+### ✅ RECENTLY COMPLETED (Week 1-2)
 
-- [x] **PR #25 (PR #85):** Weekly Menu System — ✅ Complete (Rating: 7.5/10)
-  - Menu templates, package ordering, Stripe integration, admin tools
-  - 📖 Review: `docs/08-archive/completed-prs/PR-85-weekly-menu-system-review.md`
-  - ⚠️ Note: Follow-up needed for email notifications and admin order management
+- [x] **PR #92:** Mobile UX Feedback Implementation — ✅ Complete
+  - Applied all review feedback from PR #80
+  - Enhanced accessibility, test coverage, haptic refinements
+  - **Merged:** 2026-01-05
 
-### Week 2: Community Features (P0)
-- [x] **PR #26 (PR #88):** Burmese Language Support — ✅ Complete (Rating: 8.5/10)
-  - Migration corrected for `meal_items`, helper functions renamed, and docs updated
-  - Added locale persistence, E2E coverage, and build-friendly font fallback
-  - 📖 Review: `docs/08-archive/completed-prs/PR-88-burmese-i18n-review-CORRECTED.md`
+- [x] **PR #91:** Weekly Menu Feedback Implementation — ✅ Complete
+  - Applied all review feedback from PR #85
+  - Admin order management, email notifications, cron jobs
+  - **Merged:** 2026-01-05
 
-### Week 3: Testing & QA (P1)
-- [ ] **PR #27:** E2E Test Suite Expansion
-  - Driver auth, admin operations, full user journey
-  - 📖 Guide: `docs/05-testing/comprehensive-guide.md`
+- [x] **PR #90:** Burmese i18n Feedback Implementation — ✅ Complete
+  - Fixed migration bugs, added E2E tests, locale persistence
+  - **Merged:** 2026-01-05
 
-- [ ] **PR #28:** RLS Policy Audit
-  - Test all security boundaries
-  - 📖 Guide: `docs/04-security/rls-audit.md`
+- [x] **PR #88:** Burmese Language Support — ✅ Complete (Rating: 8.5/10)
+  - Full i18n with next-intl, 199 translations, font optimization
+  - **Merged:** 2026-01-05
 
-### Week 4: Polish & Launch (P2)
-- [ ] **PR #29:** Performance Optimization
-  - Code splitting, bundle analysis, caching
-  - 📖 Spec: `docs/02-planning/feature-specs/`
+- [x] **PR #85:** Weekly Menu System — ✅ Complete (Rating: 7.5/10)
+  - Menu templates, package ordering, Stripe integration
+  - **Merged:** 2026-01-05
 
-- [ ] **PR #30:** Admin Dashboard Polish
-  - Enhanced metrics, route status, alerts
-  - 📖 Backlog: `docs/01-active/BACKLOG.md`
+- [x] **PR #80:** Mobile UX Enhancement — ✅ Complete (Rating: 8.5/10)
+  - Bottom navigation, PWA, haptics, swipeable modals
+  - **Merged:** 2026-01-05
+
+### 🎯 NEXT UP (Week 3-4)
+
+#### Priority 0 (P0) - Critical
+- [ ] **Platform/DevEx Improvements**
+  - Make verify/build work in ephemeral environments
+  - Branch: `codex/platform-p0-devex`
+  - ⏱️ Estimated: 1-2 hours
+  - 📖 Spec: `.github/codex/prompts/platform-p0-devex.md`
+
+- [ ] **Admin Login Redirect Loop Fix**
+  - Fix infinite redirect on /admin/login
+  - Branch: `codex/auth-p0-admin-login-fix`
+  - ⏱️ Estimated: 1-2 hours
+  - 📖 Spec: `.github/codex/prompts/auth-p0-admin-login-fix.md`
+
+#### Priority 1 (P1) - High Value
+- [ ] **UI Polish - Navigation & Contrast**
+  - Fix mobile overlays, contrast, hover effects
+  - Branch: `codex/ui-p1-nav-contrast-gradients`
+  - ⏱️ Estimated: 2-3 hours
+  - 📖 Spec: `.github/codex/prompts/ui-p1-nav-contrast-gradients.md`
+
+- [ ] **Marketing - ZIP Coverage & Public Menu**
+  - Public ZIP check, weekly menu on homepage
+  - Branch: `codex/marketing-p1-coverage-menu`
+  - ⏱️ Estimated: 2-3 hours
+  - 📖 Spec: `.github/codex/prompts/marketing-p1-coverage-menu.md`
+
+- [ ] **Admin Menu CRUD Review**
+  - Review and fix any admin menu issues
+  - Branch: `codex/review-and-fix-admin-menu-crud-features`
+  - ⏱️ Estimated: 2-3 hours
+  - 📖 Spec: `.github/codex/prompts/review-and-fix-admin-menu-crud-features.md`
+
+#### Priority 2 (P2) - Nice-to-Have
+- [ ] **Error Boundaries** - Route-level error recovery
+- [ ] **Performance Optimization** - Code splitting, bundle analysis
+- [ ] **E2E Test Expansion** - Driver auth, admin operations
+- [ ] **Security Hardening** - CSP headers, additional validation
 
 ---
 
