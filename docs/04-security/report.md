@@ -151,6 +151,11 @@
 
 ---
 
+## Remediation Status (weekly-menu-followup-2026-01-06)
+- ✅ Tightened `weekly_orders` customer update policy to block edits after driver assignment.
+
+---
+
 ## Notes / Open Questions
 - Rate limiting and CSP policies should be implemented pragmatically to avoid breaking Stripe Checkout or Maps integrations.
 - Cron secret is accepted via header or query param; consider restricting to headers only in a future hardening pass.

@@ -13,6 +13,7 @@ Use this checklist for PR review and before deployments.
 - [ ] Server-side checks exist for any cross-tenant access
 - [ ] Driver pages and APIs require active driver profiles
 - [ ] Driver routes are scoped to `delivery_routes.driver_id = auth.uid()` via RLS
+- [ ] Weekly orders cannot be modified by customers after a driver is assigned
 
 ## Supabase RLS
 - [ ] RLS enabled on all user-owned tables

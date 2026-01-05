@@ -6,9 +6,12 @@ import { ChefHat, Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { WeeklyMenuSkeleton } from "@/components/menu/weekly-menu-skeleton";
 import { type Locale } from "@/i18n";
 import { getLocalizedField } from "@/lib/i18n-helpers";
+import { reportError } from "@/lib/monitoring/report-error";
 import type { DayMenu, WeeklyMenu } from "@/types";
 import { PackageSelector } from "./package-selector";
 
@@ -20,30 +23,60 @@ export function WeeklyMenuView() {
   const [menu, setMenu] = useState<WeeklyMenu | null>(null);
   const [dayMenus, setDayMenus] = useState<DayMenu[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const dayKeys = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const cacheKey = "weekly-menu-cache-v1";
+  const cacheTtlMs = 5 * 60 * 1000;
 
   useEffect(() => {
     const fetchWeeklyMenu = async () => {
+      setLoading(true);
+      setError(null);
       try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) {
+          const parsed = JSON.parse(cached) as {
+            data: (WeeklyMenu & { day_menus?: DayMenu[] }) | null;
+            timestamp: number;
+          };
+          if (Date.now() - parsed.timestamp < cacheTtlMs) {
+            setMenu(parsed.data);
+            const menuDays = parsed.data?.day_menus ?? [];
+            setDayMenus(menuDays as DayMenu[]);
+            setSelectedDay(menuDays[0]?.dayOfWeek ?? null);
+            setLoading(false);
+            return;
+          }
+        }
+
         const response = await fetch("/api/menu/weekly/current");
         const payload = await response.json();
 
         if (response.ok) {
-          setMenu(payload.data.menu);
-          const menuDays = payload.data.menu.day_menus as DayMenu[];
+          const menuPayload = payload.data.menu as WeeklyMenu & { day_menus?: DayMenu[] };
+          setMenu(menuPayload);
+          const menuDays = (menuPayload.day_menus ?? []) as DayMenu[];
           setDayMenus(menuDays);
           setSelectedDay(menuDays[0]?.dayOfWeek ?? null);
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({ data: menuPayload, timestamp: Date.now() }),
+          );
+        } else {
+          setError(payload.error?.message ?? t("errorMessage"));
         }
       } catch (error) {
-        console.error("Error fetching menu:", error);
+        reportError(error, { scope: "weekly-menu-view" });
+        setError(t("errorMessage"));
       } finally {
         setLoading(false);
       }
     };
 
     void fetchWeeklyMenu();
-  }, []);
+  }, [t, cacheKey, cacheTtlMs, reloadToken]);
 
   const activeDay = useMemo(
     () => dayMenus.find((day) => day.dayOfWeek === selectedDay),
@@ -51,7 +84,28 @@ export function WeeklyMenuView() {
   );
 
   if (loading) {
-    return <div className="text-center text-sm text-slate-500">{tCommon("loading")}</div>;
+    return <WeeklyMenuSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6 text-center">
+        <h2 className="text-lg font-semibold">{t("errorTitle")}</h2>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{error}</p>
+        <Button
+          className="mt-4"
+          variant="secondary"
+          onClick={() => {
+            setError(null);
+            setLoading(true);
+            sessionStorage.removeItem(cacheKey);
+            setReloadToken((prev) => prev + 1);
+          }}
+        >
+          {tCommon("retry")}
+        </Button>
+      </Card>
+    );
   }
 
   if (!menu) {

@@ -36,6 +36,16 @@ export const templateDishesSchema = z.object({
     .min(1),
 });
 
+const templateDishInputSchema = z.object({
+  dish_id: z.string().uuid(),
+  day_of_week: z.number().int().min(0).max(6),
+  meal_position: z.number().int().min(1).max(3),
+});
+
+export const createMenuTemplateWithDishesSchema = createMenuTemplateSchema.extend({
+  dishes: z.array(templateDishInputSchema).min(1),
+});
+
 export const generateWeeklyMenuSchema = z.object({
   template_id: z.string().uuid(),
   week_start_date: weekStartSchema,

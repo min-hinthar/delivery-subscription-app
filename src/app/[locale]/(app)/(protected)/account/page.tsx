@@ -115,6 +115,30 @@ export default async function AccountPage() {
     .order("week_of", { ascending: true })
     .limit(3);
 
+  const { data: weeklyOrders } = await supabase
+    .from("weekly_orders")
+    .select(
+      `
+      id,
+      status,
+      created_at,
+      weekly_menu:weekly_menus(week_start_date, delivery_date),
+      package:meal_packages(name)
+    `,
+    )
+    .eq("customer_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  const normalizedWeeklyOrders =
+    weeklyOrders?.map((order) => ({
+      ...order,
+      package: Array.isArray(order.package) ? order.package[0] ?? null : order.package ?? null,
+      weekly_menu: Array.isArray(order.weekly_menu)
+        ? order.weekly_menu[0] ?? null
+        : order.weekly_menu ?? null,
+    })) ?? [];
+
   const { data: recentRoute } = await supabase
     .from("delivery_routes")
     .select("polyline, distance_meters, duration_seconds")
@@ -293,6 +317,46 @@ export default async function AccountPage() {
         appointments={(appointments ?? []) as unknown as ScheduledAppointment[]}
         route={recentRoute}
       />
+      <Card className="space-y-4 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              Weekly orders
+            </p>
+            <p className="text-lg font-semibold text-foreground">Recent weekly orders</p>
+          </div>
+          <Link
+            href="/orders/weekly"
+            className="text-sm font-medium text-[#D4A574] hover:underline"
+          >
+            View all
+          </Link>
+        </div>
+        {normalizedWeeklyOrders.length === 0 ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            No weekly orders yet.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {normalizedWeeklyOrders.map((order) => (
+              <div key={order.id} className="flex flex-wrap items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                    {order.package?.name ?? "Weekly package"}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Week of {formatDate(order.weekly_menu?.week_start_date ?? null)} • Delivery{" "}
+                    {formatDate(order.weekly_menu?.delivery_date ?? null)}
+                  </p>
+                </div>
+                <span className="rounded-full border px-3 py-1 text-xs font-semibold text-slate-600 dark:text-slate-200">
+                  {order.status ?? "pending"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="space-y-3 bg-gradient-to-br from-white via-slate-50 to-emerald-50/60 dark:from-slate-950 dark:via-slate-900/70 dark:to-emerald-950/30">
           <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">

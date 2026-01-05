@@ -454,6 +454,25 @@ Edge cases:
 - Non-admin blocked from admin routes
 - Missing menu shows clear empty state
 
+## Admin — Weekly Orders
+Happy path:
+- Admin opens `/admin/menus` → **View orders**
+- Orders list shows customer, package, delivery window, and status
+- Assign driver and update status with Save changes
+
+Edge cases:
+- Orders page loads with empty state when no orders exist
+- Status changes persist after refresh
+
+## Customer — Weekly Order History
+Happy path:
+- Customer opens `/orders/weekly` from account
+- Recent orders show status, delivery date, and reorder CTA
+- Pending orders can be cancelled before driver assignment
+
+Edge cases:
+- No orders shows empty state with link to weekly menu
+
 ---
 
 ## 6) Driver Flow QA (Operational)

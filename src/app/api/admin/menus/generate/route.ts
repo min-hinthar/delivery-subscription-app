@@ -86,6 +86,7 @@ export async function POST(request: Request) {
     const { error: itemsError } = await supabase.from("weekly_menu_items").insert(weeklyItems);
 
     if (itemsError) {
+      await supabase.from("weekly_menus").delete().eq("id", menu.id);
       return bad("Failed to copy template dishes.", {
         status: 500,
         headers: noStoreHeaders,

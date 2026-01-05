@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { type Locale } from "@/i18n";
 import { hapticMedium, hapticSelection } from "@/lib/haptics";
 import { getLocalizedField } from "@/lib/i18n-helpers";
+import { reportError } from "@/lib/monitoring/report-error";
 import { cn } from "@/lib/utils";
 import type { MealPackage } from "@/types";
 
@@ -20,27 +21,37 @@ type PackageSelectorProps = {
 
 export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
   const t = useTranslations("packages");
+  const tCommon = useTranslations("common");
   const locale = useLocale() as Locale;
   const router = useRouter();
   const [packages, setPackages] = useState<MealPackage[]>([]);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [reloadToken, setReloadToken] = useState(0);
 
   useEffect(() => {
     const fetchPackages = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const response = await fetch("/api/menu/packages");
         const payload = await response.json();
-        setPackages(payload.data?.packages ?? []);
+        if (response.ok) {
+          setPackages(payload.data?.packages ?? []);
+        } else {
+          setError(payload.error?.message ?? tCommon("error"));
+        }
       } catch (error) {
-        console.error("Error fetching packages:", error);
+        reportError(error, { scope: "package-selector" });
+        setError(tCommon("error"));
       } finally {
         setLoading(false);
       }
     };
 
     void fetchPackages();
-  }, []);
+  }, [reloadToken, tCommon]);
 
   const handleSelectPackage = (packageId: string) => {
     hapticSelection();
@@ -55,6 +66,25 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
   };
 
   if (loading) return null;
+
+  if (error) {
+    return (
+      <Card className="mt-12 border border-dashed border-slate-200 p-6 text-center dark:border-slate-800">
+        <p className="text-sm text-slate-600 dark:text-slate-300">{error}</p>
+        <Button
+          className="mt-4"
+          variant="secondary"
+          onClick={() => {
+            setError(null);
+            setLoading(true);
+            setReloadToken((prev) => prev + 1);
+          }}
+        >
+          {tCommon("retry")}
+        </Button>
+      </Card>
+    );
+  }
 
   return (
     <div className="mt-12 border-t border-slate-200 pt-12 dark:border-slate-800">

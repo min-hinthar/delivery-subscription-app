@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 
 import { bad, ok } from "@/lib/api/response";
+import { sendOrderConfirmation } from "@/lib/email";
 import { getStripeClient, getStripeWebhookSecret } from "@/lib/stripe";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
@@ -269,6 +270,61 @@ export async function POST(request: Request) {
         status: 500,
         headers: privateHeaders,
       });
+    }
+
+    const { data: order } = await admin
+      .from("weekly_orders")
+      .select(
+        `
+        id,
+        confirmation_sent_at,
+        delivery_window,
+        total_amount_cents,
+        customer:profiles(full_name, email),
+        package:meal_packages(name),
+        weekly_menu:weekly_menus(delivery_date)
+      `,
+      )
+      .eq("stripe_payment_intent_id", paymentIntent.id)
+      .maybeSingle();
+
+    const normalizedOrder = order
+      ? {
+          ...order,
+          customer: Array.isArray(order.customer) ? order.customer[0] ?? null : order.customer,
+          package: Array.isArray(order.package) ? order.package[0] ?? null : order.package,
+          weekly_menu: Array.isArray(order.weekly_menu)
+            ? order.weekly_menu[0] ?? null
+            : order.weekly_menu,
+        }
+      : null;
+
+    if (normalizedOrder?.customer?.email && !normalizedOrder.confirmation_sent_at) {
+      try {
+        await sendOrderConfirmation(
+          normalizedOrder.customer.email,
+          normalizedOrder.customer.full_name ?? "there",
+          "en",
+          {
+            packageName: normalizedOrder.package?.name ?? "Weekly package",
+            deliveryDate: normalizedOrder.weekly_menu?.delivery_date ?? "Upcoming delivery",
+            deliveryWindow: normalizedOrder.delivery_window,
+            totalAmount: normalizedOrder.total_amount_cents
+              ? `$${(normalizedOrder.total_amount_cents / 100).toFixed(0)}`
+              : "$0",
+          },
+        );
+
+        await admin
+          .from("weekly_orders")
+          .update({ confirmation_sent_at: new Date().toISOString() })
+          .eq("id", normalizedOrder.id);
+      } catch (emailError) {
+        console.warn("weekly_order_confirmation_email_failed", {
+          orderId: normalizedOrder.id,
+          error: emailError instanceof Error ? emailError.message : "unknown",
+        });
+      }
     }
   }
 
