@@ -17,27 +17,26 @@ export function LanguageSwitcher() {
   useEffect(() => {
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
 
-    // Update body font class for Burmese language
-    const body = document.body;
-    if (locale === "my") {
-      body.classList.remove("font-sans");
-      body.classList.add("font-myanmar");
-    } else {
-      body.classList.remove("font-myanmar");
-      body.classList.add("font-sans");
-    }
-
     // Update html lang attribute
     const html = document.documentElement;
     html.setAttribute("lang", locale);
   }, [locale]);
 
-  const switchLocale = (newLocale: Locale) => {
+  const switchLocale = async (newLocale: Locale) => {
+    try {
+      await fetch("/api/locale", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ locale: newLocale }),
+      });
+    } catch {
+      // Ignore cookie write failures and proceed with navigation.
+    }
+
     const pathnameWithoutLocale = stripLocaleFromPathname(pathname, locale);
-    const nextPath =
-      newLocale === "en"
-        ? pathnameWithoutLocale || "/"
-        : `/${newLocale}${pathnameWithoutLocale || "/"}`;
+    const nextPath = pathnameWithoutLocale || "/";
 
     router.push(nextPath);
     router.refresh();
