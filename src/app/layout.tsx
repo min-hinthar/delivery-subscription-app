@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { getLocale } from "next-intl/server";
-import { Noto_Sans, Noto_Sans_Myanmar } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -11,21 +10,22 @@ import { Toaster } from "@/components/ui/toaster";
 
 const shouldSkipFontOptimization = process.env.SKIP_FONT_OPTIMIZATION === "1";
 
-const notoSans = Noto_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-});
-
-const notoSansMyanmar = Noto_Sans_Myanmar({
-  subsets: ["myanmar"],
-  variable: "--font-myanmar",
-  weight: ["400", "500", "600", "700"],
-});
-
-function getFontVariables() {
+async function getFontVariables() {
   if (shouldSkipFontOptimization) {
     return "";
   }
+
+  const { Noto_Sans, Noto_Sans_Myanmar } = await import("next/font/google");
+  const notoSans = Noto_Sans({
+    subsets: ["latin"],
+    variable: "--font-sans",
+  });
+
+  const notoSansMyanmar = Noto_Sans_Myanmar({
+    subsets: ["myanmar"],
+    variable: "--font-myanmar",
+    weight: ["400", "500", "600", "700"],
+  });
 
   return `${notoSans.variable} ${notoSansMyanmar.variable}`;
 }
@@ -77,7 +77,7 @@ export default async function RootLayout({
   } catch {
     locale = "en";
   }
-  const fontVariables = getFontVariables();
+  const fontVariables = await getFontVariables();
 
   return (
     <html

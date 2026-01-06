@@ -1,5 +1,24 @@
 # Claude/Codex Handoff Log
 
+## Codex Session - Verify.sh stabilization
+**Date:** 2026-01-07
+**Branch:** work
+
+### Implemented
+- Added verify-only font optimization skip to avoid Google Fonts download failures.
+- Cleaned lint warnings in tests and adjusted route handler typings for Next.js 16 params.
+- Deferred Google font loading when `SKIP_FONT_OPTIMIZATION=1` to keep builds green in sandboxed environments.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- None.
+
+### Status
+- [x] Fixes implemented
+- [x] Tests executed
+
 ## Codex Session - Lint/build cleanup
 **Date:** 2026-01-05
 **Branch:** codex/platform-p0-lint-build-fixes

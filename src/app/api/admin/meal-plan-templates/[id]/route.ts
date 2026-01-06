@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NextRequest } from "next/server";
 
 import { bad, ok } from "@/lib/api/response";
 import { requireAdmin } from "@/lib/auth/requireAdmin";
@@ -11,9 +12,10 @@ const updateTemplateSchema = z.object({
 });
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const { isAdmin } = await requireAdmin();
 
   if (!isAdmin) {
@@ -35,7 +37,7 @@ export async function PATCH(
   const { data, error } = await supabase
     .from("meal_plan_templates")
     .update({ is_active: parsed.data.is_active })
-    .eq("id", params.id)
+    .eq("id", id)
     .select("id, name, is_active")
     .maybeSingle();
 

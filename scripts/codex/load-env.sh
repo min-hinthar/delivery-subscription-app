@@ -10,6 +10,7 @@ export STRIPE_SECRET_KEY="${STRIPE_SECRET_KEY:-sk_test_stub}"
 export STRIPE_WEBHOOK_SECRET="${STRIPE_WEBHOOK_SECRET:-whsec_stub}"
 export GOOGLE_MAPS_API_KEY="${GOOGLE_MAPS_API_KEY:-gmaps_stub}"
 export CRON_SECRET="${CRON_SECRET:-stub_cron_secret}"
+export SKIP_FONT_OPTIMIZATION="${SKIP_FONT_OPTIMIZATION:-1}"
 
 # Let code relax env checks ONLY for verify/build in ephemeral environments.
 export CODEX_VERIFY="${CODEX_VERIFY:-1}"
