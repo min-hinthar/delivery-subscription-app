@@ -1,9 +1,9 @@
 # 📊 Project Progress Tracker
 
-**Last Updated:** 2026-01-05 (Codex Status Update)
+**Last Updated:** 2026-01-06 (i18n Removal Complete)
 **App Completion:** ~98% ✅ PRODUCTION-READY!
 **Phase:** Polish & Testing (Core Features Complete)
-**Latest Status Report:** `docs/CODEX_STATUS_2026-01-05.md`
+**Latest Status Report:** `docs/01-active/I18N_REMOVAL_COMPLETE.md`
 
 ---
 
@@ -27,6 +27,16 @@
 
 ### ✅ RECENTLY COMPLETED (Week 1-2)
 
+- [x] **Critical Fix:** i18n/Locale Removal — ✅ Complete (2026-01-06)
+  - **Issue:** Dynamic server error with Route /[locale] using cookies()
+  - **Solution:** Removed entire i18n infrastructure, English-only mode
+  - Deleted [locale] routing, middleware, next-intl dependency
+  - Migrated all 69 route files from /[locale]/* to root
+  - Myanmar language support on hold indefinitely
+  - **Result:** TypeScript compiles with 0 errors, simplified architecture
+  - **Branch:** claude/fix-locale-dynamic-server-7BsHk
+  - **Docs:** `docs/01-active/I18N_REMOVAL_COMPLETE.md`
+
 - [x] **Maintenance:** Lint/build cleanup — ✅ Complete
   - Removed unused imports/state across analytics, orders, and driver dashboards
   - Replaced `any` usage in API routes with explicit types
@@ -46,9 +56,11 @@
   - Fixed migration bugs, added E2E tests, locale persistence
   - **Merged:** 2026-01-05
 
-- [x] **PR #88:** Burmese Language Support — ✅ Complete (Rating: 8.5/10)
+- [x] **PR #88:** Burmese Language Support — ⚠️ REVERTED (2026-01-06)
   - Full i18n with next-intl, 199 translations, font optimization
   - **Merged:** 2026-01-05
+  - **Reverted:** 2026-01-06 (conflicted with Next.js 16 static rendering)
+  - Myanmar language support now ON HOLD
 
 - [x] **PR #85:** Weekly Menu System — ✅ Complete (Rating: 7.5/10)
   - Menu templates, package ordering, Stripe integration

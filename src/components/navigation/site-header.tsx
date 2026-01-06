@@ -127,10 +127,11 @@ export function SiteHeader() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
           href="/"
-          className="group flex items-center gap-2 text-lg font-bold tracking-tight transition-all hover:scale-105"
+          className="group flex items-center gap-2 text-base sm:text-lg font-bold tracking-tight transition-all hover:scale-105"
         >
           <span className="bg-gradient-to-r from-primary via-brand-primary to-brand-secondary bg-clip-text text-transparent">
-            Morning Star Weekly Delivery
+            <span className="hidden sm:inline">Morning Star Weekly Delivery</span>
+            <span className="sm:hidden">Morning Star</span>
           </span>
         </Link>
         <nav className="hidden items-center gap-4 text-sm md:flex">
