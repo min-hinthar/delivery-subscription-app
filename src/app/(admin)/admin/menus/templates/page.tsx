@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 function formatDate(value?: string | null) {
   if (!value) {
     return "—";

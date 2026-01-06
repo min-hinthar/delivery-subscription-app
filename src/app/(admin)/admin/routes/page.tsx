@@ -6,6 +6,9 @@ import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { withTimeout } from "@/lib/utils/async";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type DeliveryWindow = {
   day_of_week: string | null;
   start_time: string | null;

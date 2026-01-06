@@ -5,6 +5,9 @@ import { DriverLoginForm } from "@/components/driver/driver-login-form";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 export default async function DriverLoginPage() {
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&

@@ -7,6 +7,9 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
+// Force dynamic rendering globally - many pages need cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 const shouldSkipFontOptimization = process.env.SKIP_FONT_OPTIMIZATION === "1";
 
 async function getFontVariables() {

@@ -6,6 +6,9 @@ import { CoverageChecker } from "@/components/marketing/coverage-checker";
 import { WeeklyMenu } from "@/components/marketing/weekly-menu";
 import { Card } from "@/components/ui/card";
 
+// Force dynamic rendering - WeeklyMenu component needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <div className="space-y-24">

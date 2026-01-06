@@ -4,6 +4,9 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type SubscriptionRow = {
   id: string;
   status: string;

@@ -7,6 +7,9 @@ import { formatDateYYYYMMDD, getUpcomingWeekStarts } from "@/lib/scheduling";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 const ACTIVE_SUBSCRIPTION_STATUSES = new Set(["active", "trialing"]);
 
 type RouteStopRow = {

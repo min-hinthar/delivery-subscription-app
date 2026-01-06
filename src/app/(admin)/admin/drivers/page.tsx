@@ -2,6 +2,9 @@ import { DriverList } from "@/components/admin/driver-list";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type DriverRow = {
   id: string;
   email: string;

@@ -9,6 +9,9 @@ export const metadata = {
   description: "Confirm your weekly menu package and delivery details.",
 };
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type WeeklyCheckoutPageProps = {
   searchParams: { menu?: string; package?: string };
 };

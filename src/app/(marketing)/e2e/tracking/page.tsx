@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/layout/page-header";
 import { TrackingE2EHarness } from "@/components/track/tracking-e2e-harness";
 
+// Force dynamic rendering - E2E testing page
+export const dynamic = "force-dynamic";
+
 export default function TrackingE2EPage() {
   const isE2EEnabled =
     process.env.PLAYWRIGHT_E2E === "1" ||

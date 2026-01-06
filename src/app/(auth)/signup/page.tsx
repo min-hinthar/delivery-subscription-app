@@ -7,6 +7,9 @@ import { Card } from "@/components/ui/card";
 import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 export default async function SignupPage({
   searchParams,
 }: {

@@ -4,6 +4,9 @@ import { WeeklyOrderHistory, type WeeklyOrderHistoryItem } from "@/components/ac
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 export default async function WeeklyOrdersPage() {
   const supabase = await createSupabaseServerClient();
   const {

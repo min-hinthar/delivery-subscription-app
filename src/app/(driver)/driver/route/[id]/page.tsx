@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import { RouteView, type DriverStop } from "@/components/driver/route-view";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type AddressRow = {
   line1: string | null;
   line2: string | null;

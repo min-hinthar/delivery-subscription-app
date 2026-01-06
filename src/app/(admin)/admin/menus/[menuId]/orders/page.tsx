@@ -5,6 +5,9 @@ import { WeeklyOrdersTable, type WeeklyOrderRow } from "@/components/admin/weekl
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 type WeeklyOrdersPageProps = {
   params: Promise<{ menuId: string }>;
 };

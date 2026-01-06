@@ -6,6 +6,9 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+// Force dynamic rendering - this page needs cookies() for Supabase auth
+export const dynamic = "force-dynamic";
+
 const STATUS_LABELS: Record<string, string> = {
   active: "Active",
   trialing: "Trialing",
