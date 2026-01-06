@@ -68,7 +68,12 @@ export function InviteDriverModal({ open, onClose, onInvited }: InviteDriverModa
       const payload = await response.json();
 
       if (!response.ok || !payload.ok) {
-        throw new Error(payload.error?.message ?? "Unable to invite driver.");
+        // Extract more detailed error information
+        const errorMessage = payload.error?.details?.message
+          || payload.error?.message
+          || "Unable to invite driver. Please try again.";
+
+        throw new Error(errorMessage);
       }
 
       onInvited({
@@ -79,17 +84,20 @@ export function InviteDriverModal({ open, onClose, onInvited }: InviteDriverModa
       });
 
       toast({
-        title: "Invite sent",
-        description: `A driver invite was sent to ${email}.`,
+        title: "Driver invite sent successfully",
+        description: `An invitation email has been sent to ${email}. The driver will receive a magic link to complete their onboarding.`,
       });
 
       resetForm();
       onClose();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unable to invite driver.";
+      const message = error instanceof Error
+        ? error.message
+        : "Unable to invite driver. Please check your connection and try again.";
+
       setError(message);
       toast({
-        title: "Invite failed",
+        title: "Failed to send driver invite",
         description: message,
         variant: "destructive",
       });
