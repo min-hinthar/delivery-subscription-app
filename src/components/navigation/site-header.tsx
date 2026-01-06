@@ -21,43 +21,39 @@ import {
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 
 import { LogoutButton } from "@/components/auth/logout-button";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { type Locale } from "@/i18n";
-import { getLocalizedPathname, stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { getMotionTransition, getSlideMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type NavLink = {
-  labelKey: string;
+  label: string;
   href: string;
   icon: LucideIcon;
 };
 
 const PUBLIC_LINKS: NavLink[] = [
-  { labelKey: "nav.howItWorks", href: "/#how-it-works", icon: Sparkles },
-  { labelKey: "nav.pricing", href: "/pricing", icon: BadgeDollarSign },
-  { labelKey: "nav.login", href: "/login", icon: LogIn },
+  { label: "How It Works", href: "/#how-it-works", icon: Sparkles },
+  { label: "Pricing", href: "/pricing", icon: BadgeDollarSign },
+  { label: "Login", href: "/login", icon: LogIn },
 ];
 
 const AUTH_LINKS: NavLink[] = [
-  { labelKey: "nav.account", href: "/account", icon: User },
-  { labelKey: "nav.menu", href: "/menu/weekly", icon: UtensilsCrossed },
-  { labelKey: "nav.schedule", href: "/schedule", icon: CalendarCheck },
-  { labelKey: "nav.track", href: "/track", icon: MapPinned },
-  { labelKey: "nav.billing", href: "/billing", icon: CreditCard },
+  { label: "Account", href: "/account", icon: User },
+  { label: "Menu", href: "/menu/weekly", icon: UtensilsCrossed },
+  { label: "Schedule", href: "/schedule", icon: CalendarCheck },
+  { label: "Track", href: "/track", icon: MapPinned },
+  { label: "Billing", href: "/billing", icon: CreditCard },
 ];
 
 const ADMIN_LINKS: NavLink[] = [
-  { labelKey: "nav.dashboard", href: "/admin", icon: LayoutDashboard },
-  { labelKey: "nav.deliveries", href: "/admin/deliveries", icon: Truck },
-  { labelKey: "nav.routes", href: "/admin/routes", icon: Route },
-  { labelKey: "nav.menus", href: "/admin/menus", icon: ChefHat },
-  { labelKey: "nav.meals", href: "/admin/meals", icon: ChefHat },
-  { labelKey: "nav.subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
+  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Deliveries", href: "/admin/deliveries", icon: Truck },
+  { label: "Routes", href: "/admin/routes", icon: Route },
+  { label: "Menus", href: "/admin/menus", icon: ChefHat },
+  { label: "Meals", href: "/admin/meals", icon: ChefHat },
+  { label: "Subscriptions", href: "/admin/subscriptions", icon: BadgeDollarSign },
 ];
 
 const APP_ROUTES = new Set([
@@ -82,10 +78,8 @@ function isActiveRoute(pathname: string, href: string) {
 }
 
 export function SiteHeader() {
-  const t = useTranslations();
-  const locale = useLocale() as Locale;
   const pathname = usePathname();
-  const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
+  const normalizedPathname = pathname ?? "/";
   const [openPathname, setOpenPathname] = useState<string | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const isOpen = openPathname === pathname;
@@ -127,17 +121,16 @@ export function SiteHeader() {
 
   const navLinks = isAdminRoute ? ADMIN_LINKS : isAppRoute ? AUTH_LINKS : PUBLIC_LINKS;
   const showLogout = isAdminRoute || isAppRoute;
-  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-gradient-to-r from-background/98 via-background/95 to-background/98 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
-          href={localizedLink("/")}
+          href="/"
           className="group flex items-center gap-2 text-lg font-bold tracking-tight transition-all hover:scale-105"
         >
           <span className="bg-gradient-to-r from-primary via-brand-primary to-brand-secondary bg-clip-text text-transparent">
-            {t("branding.appName")}
+            Morning Star Weekly Delivery
           </span>
         </Link>
         <nav className="hidden items-center gap-4 text-sm md:flex">
@@ -146,7 +139,7 @@ export function SiteHeader() {
             return (
               <Link
                 key={link.href}
-                href={localizedLink(link.href)}
+                href={link.href}
                 className={cn(
                   "group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none",
                   isActiveRoute(normalizedPathname, link.href)
@@ -155,12 +148,11 @@ export function SiteHeader() {
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
-                {t(link.labelKey)}
+                {link.label}
               </Link>
             );
           })}
           {showLogout ? <LogoutButton /> : null}
-          <LanguageSwitcher />
           <ThemeToggle />
         </nav>
         <button
@@ -192,7 +184,7 @@ export function SiteHeader() {
             >
               <div className="flex items-center justify-between">
                 <p className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-sm font-bold text-transparent">
-                  {t("common.navigation")}
+                  Navigation
                 </p>
                 <button
                   onClick={() => setOpenPathname(null)}
@@ -209,7 +201,7 @@ export function SiteHeader() {
                   return (
                     <Link
                       key={link.href}
-                      href={localizedLink(link.href)}
+                      href={link.href}
                       onClick={() => setOpenPathname(null)}
                       className={cn(
                         "group relative flex h-11 items-center gap-3 overflow-hidden rounded-lg px-4 text-sm font-medium transition-all hover:pl-5 motion-reduce:transition-none",
@@ -219,18 +211,17 @@ export function SiteHeader() {
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
-                      {t(link.labelKey)}
+                      {link.label}
                     </Link>
                   );
                 })}
               </div>
               <div className="flex flex-col gap-3">
                 {showLogout ? <LogoutButton /> : null}
-                <LanguageSwitcher />
                 <ThemeToggle />
               </div>
               <p className="mt-auto text-xs text-muted-foreground">
-                {t("support.needHelp")}
+                Need help? Contact support.
               </p>
             </motion.div>
           </div>

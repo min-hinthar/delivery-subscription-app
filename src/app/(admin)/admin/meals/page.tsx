@@ -1,11 +1,8 @@
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { MealManagement } from "@/components/admin/meal-management";
 import { Card } from "@/components/ui/card";
-import { type Locale } from "@/i18n";
-import { getLocalizedPathname } from "@/lib/i18n-helpers";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type MealRow = {
@@ -22,11 +19,9 @@ type TemplateRow = {
 };
 
 export default async function AdminMealsPage() {
-  const locale = (await getLocale()) as Locale;
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   if (!hasSupabaseConfig) {
     return (
@@ -70,7 +65,7 @@ export default async function AdminMealsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={localizedLink("/admin")}
+            href={"/admin"}
             className="rounded-md border border-slate-200 bg-white/80 px-4 py-2 text-sm font-medium text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-400 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100"
           >
             Back to dashboard

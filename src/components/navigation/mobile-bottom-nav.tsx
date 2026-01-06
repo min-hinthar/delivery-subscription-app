@@ -10,16 +10,13 @@ import {
   User,
   type LucideIcon,
 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 
-import { type Locale } from "@/i18n";
-import { getLocalizedPathname, stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
   href: string;
   icon: LucideIcon;
-  translationKey: string;
+  label: string;
   matchPaths?: string[];
 };
 
@@ -27,37 +24,34 @@ const NAV_ITEMS: NavItem[] = [
   {
     href: "/menu",
     icon: UtensilsCrossed,
-    translationKey: "nav.menu",
+    label: "Menu",
     matchPaths: ["/menu/weekly", "/menu/dish"],
   },
   {
     href: "/schedule",
     icon: Calendar,
-    translationKey: "nav.schedule",
+    label: "Schedule",
     matchPaths: ["/schedule/new"],
   },
   {
     href: "/track",
     icon: MapPin,
-    translationKey: "nav.track",
+    label: "Track",
     matchPaths: ["/track/active"],
   },
   {
     href: "/account",
     icon: User,
-    translationKey: "nav.account",
+    label: "Account",
     matchPaths: ["/account/orders", "/account/settings", "/account/profile"],
   },
 ];
 
 export function MobileBottomNav() {
-  const t = useTranslations();
-  const locale = useLocale() as Locale;
   const pathname = usePathname();
-  const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
+  const normalizedPathname = pathname ?? "/";
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
-  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   useEffect(() => {
     let ticking = false;
@@ -130,7 +124,7 @@ export function MobileBottomNav() {
             return (
               <Link
                 key={item.href}
-                href={localizedLink(item.href)}
+                href={item.href}
                 className={cn(
                   "relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors",
                   isActive
@@ -143,7 +137,7 @@ export function MobileBottomNav() {
                   touchAction: "manipulation",
                   WebkitTapHighlightColor: "transparent",
                 }}
-                aria-label={t(item.translationKey)}
+                aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
               >
                 <Icon
@@ -151,7 +145,7 @@ export function MobileBottomNav() {
                   aria-hidden="true"
                 />
                 <span className={cn("text-xs font-medium", isActive && "font-semibold")}>
-                  {t(item.translationKey)}
+                  {item.label}
                 </span>
                 {isActive && (
                   <div

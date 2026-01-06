@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { cookies } from "next/headers";
 
 import "./globals.css";
 
@@ -62,14 +61,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Locale is now handled by middleware, read from cookie for HTML lang attribute
-  const storedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
-  const locale = storedLocale === "my" ? "my" : "en";
   const fontVariables = await getFontVariables();
 
   return (
     <html
-      lang={locale}
+      lang="en"
       className={fontVariables || "font-sans"}
       suppressHydrationWarning
     >

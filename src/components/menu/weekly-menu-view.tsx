@@ -3,23 +3,16 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { ChefHat, Clock } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { WeeklyMenuSkeleton } from "@/components/menu/weekly-menu-skeleton";
-import { type Locale } from "@/i18n";
-import { getLocalizedField } from "@/lib/i18n-helpers";
 import { reportError } from "@/lib/monitoring/report-error";
 import type { DayMenu, WeeklyMenu } from "@/types";
 import { PackageSelector } from "./package-selector";
 
 export function WeeklyMenuView() {
-  const t = useTranslations("weeklyMenu");
-  const tCommon = useTranslations("common");
-  const tDays = useTranslations("days");
-  const locale = useLocale() as Locale;
   const [menu, setMenu] = useState<WeeklyMenu | null>(null);
   const [dayMenus, setDayMenus] = useState<DayMenu[]>([]);
   const [loading, setLoading] = useState(true);

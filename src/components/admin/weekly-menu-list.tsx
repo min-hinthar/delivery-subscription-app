@@ -2,13 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useLocale } from "next-intl";
+
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { type Locale } from "@/i18n";
-import { getLocalizedPathname } from "@/lib/i18n-helpers";
 
 export type WeeklyMenuSummary = {
   id: string;
@@ -41,10 +39,8 @@ function formatDate(value?: string | null) {
 }
 
 export function WeeklyMenuList({ menus }: WeeklyMenuListProps) {
-  const locale = useLocale() as Locale;
   const [items, setItems] = useState(menus);
   const [savingId, setSavingId] = useState<string | null>(null);
-  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   const handleStatusChange = async (menuId: string, nextStatus: string) => {
     setSavingId(menuId);
@@ -95,7 +91,7 @@ export function WeeklyMenuList({ menus }: WeeklyMenuListProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">{menu.status ?? "draft"}</Badge>
-                  <Link href={localizedLink(`/admin/menus/${menu.id}/orders`)}>
+                  <Link href={`/admin/menus/${menu.id}/orders`}>
                     <Button size="sm" variant="ghost">
                       View orders
                     </Button>

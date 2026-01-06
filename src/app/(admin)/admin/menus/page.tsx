@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getLocale } from "next-intl/server";
 import { ChefHat, PlusCircle, RefreshCcw } from "lucide-react";
 
 import { LogoutButton } from "@/components/auth/logout-button";
@@ -7,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { WeeklyMenuList } from "@/components/admin/weekly-menu-list";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { type Locale } from "@/i18n";
-import { getLocalizedPathname } from "@/lib/i18n-helpers";
 
 function formatDate(value?: string | null) {
   if (!value) {
@@ -28,11 +25,9 @@ function formatDate(value?: string | null) {
 }
 
 export default async function AdminMenusPage() {
-  const locale = (await getLocale()) as Locale;
   const hasSupabaseConfig =
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL) &&
     Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   if (!hasSupabaseConfig) {
     return (
@@ -81,19 +76,19 @@ export default async function AdminMenusPage() {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link href={localizedLink("/admin/menus/templates")}>
+          <Link href="/admin/menus/templates">
             <Button variant="secondary">
               <ChefHat className="mr-2 h-4 w-4" />
               View templates
             </Button>
           </Link>
-          <Link href={localizedLink("/admin/menus/templates/new")}>
+          <Link href="/admin/menus/templates/new">
             <Button variant="secondary">
               <PlusCircle className="mr-2 h-4 w-4" />
               New template
             </Button>
           </Link>
-          <Link href={localizedLink("/admin/menus/generate")}>
+          <Link href="/admin/menus/generate">
             <Button>
               <RefreshCcw className="mr-2 h-4 w-4" />
               Generate weekly menu
