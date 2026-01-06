@@ -58,18 +58,18 @@ export function WeeklyMenuView() {
             JSON.stringify({ data: menuPayload, timestamp: Date.now() }),
           );
         } else {
-          setError(payload.error?.message ?? t("errorMessage"));
+          setError(payload.error?.message ?? "An error occurred loading the menu");
         }
       } catch (error) {
         reportError(error, { scope: "weekly-menu-view" });
-        setError(t("errorMessage"));
+        setError("An error occurred loading the menu");
       } finally {
         setLoading(false);
       }
     };
 
     void fetchWeeklyMenu();
-  }, [t, cacheKey, cacheTtlMs, reloadToken]);
+  }, [cacheKey, cacheTtlMs, reloadToken]);
 
   const activeDay = useMemo(
     () => dayMenus.find((day) => day.dayOfWeek === selectedDay),
@@ -83,7 +83,7 @@ export function WeeklyMenuView() {
   if (error) {
     return (
       <Card className="p-6 text-center">
-        <h2 className="text-lg font-semibold">{t("errorTitle")}</h2>
+        <h2 className="text-lg font-semibold">Error Loading Menu</h2>
         <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{error}</p>
         <Button
           className="mt-4"
@@ -95,7 +95,7 @@ export function WeeklyMenuView() {
             setReloadToken((prev) => prev + 1);
           }}
         >
-          {tCommon("retry")}
+          Retry
         </Button>
       </Card>
     );
@@ -105,8 +105,8 @@ export function WeeklyMenuView() {
     return (
       <div className="text-center py-12">
         <ChefHat className="mx-auto h-12 w-12 text-slate-400" />
-        <h2 className="mt-4 text-xl font-semibold">{t("noMenuAvailable")}</h2>
-        <p className="mt-2 text-slate-600">{t("noMenuDescription")}</p>
+        <h2 className="mt-4 text-xl font-semibold">No Menu Available</h2>
+        <p className="mt-2 text-slate-600">Check back soon for this week's menu</p>
       </div>
     );
   }
@@ -116,21 +116,19 @@ export function WeeklyMenuView() {
     ? Math.floor((deadline.getTime() - Date.now()) / (1000 * 60 * 60))
     : null;
   const deliveryDate = menu.delivery_date
-    ? new Date(menu.delivery_date).toLocaleDateString(locale, {
+    ? new Date(menu.delivery_date).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       })
     : null;
-  const templateName = menu.template ? getLocalizedField(menu.template, "name", locale) : "";
-  const templateDescription = menu.template
-    ? getLocalizedField(menu.template, "description", locale)
-    : "";
+  const templateName = menu.template?.name ?? "";
+  const templateDescription = menu.template?.description ?? "";
 
   return (
     <div className="space-y-8">
       <div className="text-center">
         <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
-          {t("title")}
+          This Week's Menu
         </h1>
         {templateName ? <p className="mt-2 text-xl text-[#D4A574]">{templateName}</p> : null}
         {templateDescription ? (
@@ -143,50 +141,53 @@ export function WeeklyMenuView() {
           <Clock className="h-5 w-5 text-orange-600" />
           <div className="flex-1">
             <p className="font-semibold text-orange-900 dark:text-orange-200">
-              {t("orderBy")}
+              Order Deadline
             </p>
             <p className="text-sm text-orange-700 dark:text-orange-300">
               {hoursRemaining !== null && hoursRemaining > 0
-                ? t("hoursRemaining", { hours: hoursRemaining })
-                : t("ordersClosed")}
+                ? `${hoursRemaining} hours remaining`
+                : "Orders closed"}
             </p>
           </div>
           {deliveryDate ? (
-            <Badge variant="secondary">{t("deliveryDate", { date: deliveryDate })}</Badge>
+            <Badge variant="secondary">Delivery: {deliveryDate}</Badge>
           ) : null}
         </div>
       </Card>
 
       <div className="overflow-x-auto">
         <div className="flex gap-2 min-w-max md:justify-center">
-          {dayMenus.map((day) => (
-            <button
-              key={day.dayOfWeek}
-              onClick={() => setSelectedDay(day.dayOfWeek)}
-              className={`px-4 py-3 rounded-lg transition-colors ${
-                selectedDay === day.dayOfWeek
-                  ? "bg-[#D4A574] text-white"
-                  : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
-              }`}
-            >
-              <div className="text-sm font-medium">
-                {tDays(dayKeys[day.dayOfWeek] ?? "monday")}
-              </div>
-              <div className="text-xs opacity-80">
-                {new Date(day.date).toLocaleDateString(locale, {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </div>
-            </button>
-          ))}
+          {dayMenus.map((day) => {
+            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            return (
+              <button
+                key={day.dayOfWeek}
+                onClick={() => setSelectedDay(day.dayOfWeek)}
+                className={`px-4 py-3 rounded-lg transition-colors ${
+                  selectedDay === day.dayOfWeek
+                    ? "bg-[#D4A574] text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                }`}
+              >
+                <div className="text-sm font-medium">
+                  {dayNames[day.dayOfWeek] ?? "Monday"}
+                </div>
+                <div className="text-xs opacity-80">
+                  {new Date(day.date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       <div className="space-y-4">
         {activeDay?.dishes.map((item, index) => {
-          const dishName = getLocalizedField(item.dish, "name", locale);
-          const dishDescription = getLocalizedField(item.dish, "description", locale);
+          const dishName = item.dish.name;
+          const dishDescription = item.dish.description;
           return (
             <Card key={item.id} className="overflow-hidden">
             <div className="flex flex-col md:flex-row">
@@ -204,14 +205,11 @@ export function WeeklyMenuView() {
               <div className="flex-1 p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <Badge className="mb-2">{t("dishNumber", { number: index + 1 })}</Badge>
+                    <Badge className="mb-2">Dish {index + 1}</Badge>
                     <h3 className="text-xl font-semibold">{dishName}</h3>
-                    {locale === "en" && item.dish.name_my ? (
-                      <p className="text-slate-500">{item.dish.name_my}</p>
-                    ) : null}
                   </div>
                   {!item.is_available && (
-                    <Badge variant="destructive">{t("soldOut")}</Badge>
+                    <Badge variant="destructive">Sold Out</Badge>
                   )}
                 </div>
 
@@ -231,9 +229,7 @@ export function WeeklyMenuView() {
 
                 {item.max_portions !== null && item.max_portions !== undefined && (
                   <p className="mt-4 text-sm text-slate-600">
-                    {t("portionsRemaining", {
-                      count: item.max_portions - item.current_orders,
-                    })}
+                    {item.max_portions - item.current_orders} portions remaining
                   </p>
                 )}
               </div>

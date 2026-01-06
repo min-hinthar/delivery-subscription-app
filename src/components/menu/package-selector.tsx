@@ -34,18 +34,18 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
         if (response.ok) {
           setPackages(payload.data?.packages ?? []);
         } else {
-          setError(payload.error?.message ?? tCommon("error"));
+          setError(payload.error?.message ?? "An error occurred");
         }
       } catch (error) {
         reportError(error, { scope: "package-selector" });
-        setError(tCommon("error"));
+        setError("An error occurred");
       } finally {
         setLoading(false);
       }
     };
 
     void fetchPackages();
-  }, [reloadToken, tCommon]);
+  }, [reloadToken]);
 
   const handleSelectPackage = (packageId: string) => {
     hapticSelection();
@@ -74,7 +74,7 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
             setReloadToken((prev) => prev + 1);
           }}
         >
-          {tCommon("retry")}
+          Retry
         </Button>
       </Card>
     );
@@ -123,7 +123,7 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
                   <span className="text-4xl font-bold text-[#D4A574]">
                     ${(pkg.price_cents / 100).toFixed(0)}
                   </span>
-                  <span className="text-slate-600">{t("perWeek")}</span>
+                  <span className="text-slate-600">/week</span>
                 </div>
 
                 <p className="text-center text-sm text-slate-700 dark:text-slate-300">
@@ -133,19 +133,19 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("dishesPerDay", { count: pkg.dishes_per_day })}</span>
+                    <span>{pkg.dishes_per_day} {pkg.dishes_per_day === 1 ? 'dish' : 'dishes'} per day</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("totalDishes", { count: pkg.total_dishes })}</span>
+                    <span>{pkg.total_dishes} total dishes</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("saturdayDelivery")}</span>
+                    <span>Saturday delivery</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("freshAuthentic")}</span>
+                    <span>Fresh, authentic recipes</span>
                   </li>
                 </ul>
 

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { stripLocaleFromPathname, getLocaleFromPathname } from "@/lib/i18n-helpers";
 import { getSafeRedirectPath } from "@/lib/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -35,13 +34,9 @@ export default async function DriverGuard({ children }: DriverGuardProps) {
     null;
 
   const currentPath = getSafeRedirectPath(rawPath, "/driver/dashboard");
-  const normalizedPath = stripLocaleFromPathname(currentPath);
-  const activeLocale = getLocaleFromPathname(currentPath);
-  const onboardingPath = activeLocale
-    ? `/${activeLocale}/driver/onboarding`
-    : "/driver/onboarding";
-  const loginPath = activeLocale ? `/${activeLocale}/driver/login` : "/driver/login";
-  const isOnboardingRoute = normalizedPath.startsWith("/driver/onboarding");
+  const onboardingPath = "/driver/onboarding";
+  const loginPath = "/driver/login";
+  const isOnboardingRoute = currentPath.startsWith("/driver/onboarding");
 
   const supabase = await createSupabaseServerClient({ allowSetCookies: true });
   const { data } = await supabase.auth.getUser();
