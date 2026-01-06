@@ -139,10 +139,15 @@ Not recommended for authenticated pages.
 
 ---
 
-## 8) Locale-Aware Routing (Optional)
-If we support Burmese + English without changing URLs, we may use middleware to set locale header/cookie, then wrap a locale provider in a route group. :contentReference[oaicite:13]{index=13}
+## 8) Locale-Aware Routing (Proxy via Rewrites)
+We keep locale-aware route groups under `src/app/[locale]`, but avoid edge middleware.
 
-This is optional and should be implemented only when i18n is prioritized.
+Instead, we use **proxy rewrites** that:
+- map locale-less URLs to `/en/*` by default
+- map locale-less URLs to `/my/*` when `NEXT_LOCALE=my` is set
+- preserve explicit `/en/*` and `/my/*` routes when needed
+
+This keeps URLs stable while preventing middleware-related runtime errors in serverless/edge environments. :contentReference[oaicite:13]{index=13}
 
 ---
 

@@ -88,7 +88,7 @@ It is designed to be used:
 ### Localization QA
 - [ ] Language switcher is visible in the header on marketing and app routes
 - [ ] Locale persists across navigation and refresh (cookie or locale-prefixed routes)
-- [ ] Burmese typography remains legible (line-height, font size, spacing)
+- [ ] Burmese typography remains legible with system fallback fonts (line-height, font size, spacing)
 - [ ] English fallback appears when Burmese translations are missing
 - [ ] Burmese translations reviewed by a native speaker before launch
 

@@ -274,3 +274,62 @@
 - [x] Feedback items implemented
 - [x] Tests executed (lint)
 - [ ] Typecheck clean (blocked by missing deps)
+
+## Codex Session - Routing hardening and font fallback
+**Date:** 2026-01-07
+**Branch:** codex/routing-r1-locale-hardening
+
+### Implemented
+- Added locale validation in the locale layout to 404 on unsupported locales.
+- Disabled Myanmar-specific font loading and body class toggles to avoid serverless font invocation errors.
+- Updated QA UX checklist to reflect Myanmar fallback font expectations.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- None.
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
+
+## Codex Session - Locale proxy rewrites (no middleware)
+**Date:** 2026-01-07
+**Branch:** codex/routing-r1-locale-proxy
+
+### Implemented
+- Removed Next.js middleware for locale detection to avoid edge runtime errors.
+- Added proxy rewrites that route locale-less URLs to `/en` or `/my` based on the `NEXT_LOCALE` cookie.
+- Updated language switcher to set locale cookie and navigate without locale prefixes.
+- Documented proxy-based locale routing in routing standards.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- Locale-prefixed URLs still resolve, but the UI now links to locale-less paths by design.
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
+
+## Codex Session - Root locale cookie read
+**Date:** 2026-01-07
+**Branch:** codex/routing-r1-locale-proxy
+
+### Implemented
+- Read locale from the NEXT_LOCALE cookie in the root layout to avoid next-intl locale helpers on the server.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- None.
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
