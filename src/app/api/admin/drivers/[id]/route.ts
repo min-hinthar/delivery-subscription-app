@@ -14,6 +14,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+
+  // Validate ID is a valid UUID
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    return bad("Invalid driver ID format.", { status: 422, headers: privateHeaders });
+  }
+
   const { supabase, user, isAdmin } = await requireAdmin();
 
   if (!isAdmin || !user) {
@@ -35,8 +42,13 @@ export async function PATCH(
     .select("id, status")
     .maybeSingle();
 
-  if (error || !driver) {
-    return bad("Unable to update driver status.", { status: 500, headers: privateHeaders });
+  if (error) {
+    console.error('Failed to update driver status:', error);
+    return bad("Unable to update driver status.", { status: 500, headers: privateHeaders, details: { error: error.message } });
+  }
+
+  if (!driver) {
+    return bad("Driver not found.", { status: 404, headers: privateHeaders });
   }
 
   return ok({ driver }, { headers: privateHeaders });

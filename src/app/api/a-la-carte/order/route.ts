@@ -110,8 +110,11 @@ export async function POST(request: NextRequest) {
 
     if (itemsInsertError) {
       // Rollback order creation
-      await supabase.from('orders').delete().eq('id', order.id);
-      return bad('Failed to create order items', { details: { error: itemsInsertError.message } });
+      const { error: rollbackError } = await supabase.from('orders').delete().eq('id', order.id);
+      if (rollbackError) {
+        console.error('Failed to rollback order creation:', rollbackError);
+      }
+      return bad('Failed to create order items', { status: 500, details: { error: itemsInsertError.message } });
     }
 
     // Create delivery appointment
@@ -139,7 +142,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating à la carte order:', error);
-    return bad('Internal server error');
+    return bad('Internal server error', {
+      status: 500,
+      details: { error: error instanceof Error ? error.message : 'Unknown error' }
+    });
   }
 }
 
@@ -187,6 +193,9 @@ export async function GET() {
     return ok({ orders });
   } catch (error) {
     console.error('Error fetching à la carte orders:', error);
-    return bad('Internal server error');
+    return bad('Internal server error', {
+      status: 500,
+      details: { error: error instanceof Error ? error.message : 'Unknown error' }
+    });
   }
 }

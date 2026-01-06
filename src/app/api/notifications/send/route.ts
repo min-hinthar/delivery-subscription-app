@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { ok, bad } from '@/lib/api/response';
+import { requireAdmin } from '@/lib/auth/admin';
 import { z } from 'zod';
 
 const SendNotificationSchema = z.object({
@@ -15,13 +15,15 @@ const SendNotificationSchema = z.object({
 /**
  * POST /api/notifications/send
  * Send a notification to a user (internal API)
+ * Protected endpoint - requires admin authentication
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createSupabaseServerClient();
+    const { supabase, isAdmin } = await requireAdmin();
 
-    // This endpoint should be protected - only internal services should call it
-    // In production, add proper authentication/authorization
+    if (!isAdmin) {
+      return bad('Admin access required', { status: 403 });
+    }
 
     const body = await request.json();
     const validationResult = SendNotificationSchema.safeParse(body);
@@ -35,11 +37,16 @@ export async function POST(request: NextRequest) {
     const { user_id, type, title, message, data, delivery_method } = validationResult.data;
 
     // Get user preferences
-    const { data: preferences } = await supabase
+    const { data: preferences, error: preferencesError } = await supabase
       .from('notification_preferences')
       .select('*')
       .eq('user_id', user_id)
       .maybeSingle();
+
+    if (preferencesError) {
+      console.error('Failed to fetch user notification preferences:', preferencesError);
+      return bad('Failed to fetch user preferences', { status: 500, details: { error: preferencesError.message } });
+    }
 
     // Check if user has enabled this type of notification
     const shouldSend = preferences
@@ -65,7 +72,8 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      return bad('Failed to create notification', { details: { error: error.message  }});
+      console.error('Failed to create notification:', error);
+      return bad('Failed to create notification', { status: 500, details: { error: error.message } });
     }
 
     // Here you would integrate with actual notification services:
@@ -82,7 +90,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error sending notification:', error);
-    return bad('Internal server error');
+    return bad('Internal server error', {
+      status: 500,
+      details: { error: error instanceof Error ? error.message : 'Unknown error' }
+    });
   }
 }
 

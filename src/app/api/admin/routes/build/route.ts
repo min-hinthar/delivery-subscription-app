@@ -101,11 +101,17 @@ export async function POST(request: Request) {
     return bad("Failed to create route.", { status: 500 });
   }
 
-  const { data: appointments } = await supabase
+  const { data: appointments, error: appointmentsError } = await supabase
     .from("delivery_appointments")
     .select("id, address:addresses(line1,line2,city,state,postal_code)")
     .eq("week_of", parsed.data.week_of)
     .in("id", appointmentIds);
+
+  if (appointmentsError) {
+    console.error('Failed to fetch appointments:', appointmentsError);
+    return bad("Failed to fetch appointments.", { status: 500, details: { error: appointmentsError.message } });
+  }
+
   const appointmentIdsFromWeek = appointments?.map((appointment) => appointment.id) ?? [];
   if (appointmentIdsFromWeek.length !== appointmentIds.length) {
     return bad("Some appointments are missing for this week.", { status: 422 });
@@ -197,14 +203,19 @@ export async function POST(request: Request) {
       });
 
       for (const update of etaUpdates) {
-        await supabase
+        const { error: etaUpdateError } = await supabase
           .from("delivery_stops")
           .update({ eta: update.eta })
           .eq("route_id", route.id)
           .eq("appointment_id", update.appointment_id);
+
+        if (etaUpdateError) {
+          console.error('Failed to update ETA for appointment:', update.appointment_id, etaUpdateError);
+          return bad("Failed to update delivery stop ETAs.", { status: 500, details: { error: etaUpdateError.message } });
+        }
       }
 
-      await supabase
+      const { error: routeUpdateError } = await supabase
         .from("delivery_routes")
         .update({
           polyline: directions.polyline,
@@ -222,6 +233,11 @@ export async function POST(request: Request) {
           status: "built",
         })
         .eq("id", route.id);
+
+      if (routeUpdateError) {
+        console.error('Failed to update route with directions:', routeUpdateError);
+        return bad("Failed to update route with directions.", { status: 500, details: { error: routeUpdateError.message } });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Route created, but directions failed.";
       return bad(message, { status: 502 });
@@ -241,11 +257,16 @@ export async function POST(request: Request) {
     }
   }
 
-  const { data: updatedRoute } = await supabase
+  const { data: updatedRoute, error: fetchRouteError } = await supabase
     .from("delivery_routes")
     .select("id, week_of, name, status, polyline, distance_meters, duration_seconds, created_at")
     .eq("id", route.id)
     .maybeSingle();
+
+  if (fetchRouteError) {
+    console.error('Failed to fetch updated route:', fetchRouteError);
+    return bad("Failed to fetch updated route.", { status: 500, details: { error: fetchRouteError.message } });
+  }
 
   return ok({
     route: updatedRoute ?? {
