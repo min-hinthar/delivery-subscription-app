@@ -43,6 +43,8 @@ export async function POST(request: Request) {
   response.cookies.set("NEXT_LOCALE", validation.data.locale, {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
   });
 
   return response;
