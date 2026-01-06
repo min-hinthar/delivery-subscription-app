@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState, useCallback } from "react";
 import { Mail, Phone, Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ type DriverCardProps = {
   onUpdate: (driver: DriverListItem) => void;
 };
 
-export function DriverCard({ driver, onUpdate }: DriverCardProps) {
+function DriverCardComponent({ driver, onUpdate }: DriverCardProps) {
   const [isUpdating, setIsUpdating] = useState(false);
 
   const statusLabel = driver.status.charAt(0).toUpperCase() + driver.status.slice(1);
@@ -47,7 +47,7 @@ export function DriverCard({ driver, onUpdate }: DriverCardProps) {
     ? `Invited ${new Date(driver.invited_at).toLocaleDateString()}`
     : null;
 
-  const handleStatusChange = async (status: "active" | "suspended") => {
+  const handleStatusChange = useCallback(async (status: "active" | "suspended") => {
     if (isUpdating) {
       return;
     }
@@ -69,22 +69,22 @@ export function DriverCard({ driver, onUpdate }: DriverCardProps) {
 
       onUpdate({ ...driver, status: payload.data.driver.status });
       toast({
-        title: "Driver updated",
-        description: `Status set to ${status}.`,
+        title: "Driver status updated successfully",
+        description: `Driver status has been changed to ${status}.`,
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to update driver.";
       toast({
-        title: "Update failed",
+        title: "Failed to update driver status",
         description: message,
         variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [driver, isUpdating, onUpdate]);
 
-  const handleResendInvite = async () => {
+  const handleResendInvite = useCallback(async () => {
     if (isUpdating) {
       return;
     }
@@ -103,20 +103,20 @@ export function DriverCard({ driver, onUpdate }: DriverCardProps) {
 
       onUpdate({ ...driver, invited_at: payload.data.sent_at ?? driver.invited_at });
       toast({
-        title: "Invite resent",
-        description: "The driver invite email was sent again.",
+        title: "Driver invite resent successfully",
+        description: "The driver invitation email has been sent again.",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to resend invite.";
       toast({
-        title: "Invite failed",
+        title: "Failed to resend invite",
         description: message,
         variant: "destructive",
       });
     } finally {
       setIsUpdating(false);
     }
-  };
+  }, [driver, isUpdating, onUpdate]);
 
   return (
     <Card className="flex flex-col gap-4 border border-slate-200 bg-white/80 p-5 shadow-sm dark:border-slate-800 dark:bg-slate-950/50">
@@ -190,3 +190,6 @@ export function DriverCard({ driver, onUpdate }: DriverCardProps) {
     </Card>
   );
 }
+
+// Memoize the component to prevent unnecessary re-renders
+export const DriverCard = memo(DriverCardComponent);

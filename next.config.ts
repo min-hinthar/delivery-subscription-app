@@ -61,12 +61,47 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: {
     turbopackUseSystemTlsCerts: true,
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-select"],
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.gstatic.com",
+      },
+    ],
+  },
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
   async headers() {
     return [
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
       },
     ];
   },
