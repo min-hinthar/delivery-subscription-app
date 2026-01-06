@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { getLocale } from "next-intl/server";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { cookies } from "next/headers";
 
 import "./globals.css";
 
@@ -64,13 +64,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let locale = "en";
-
-  try {
-    locale = await getLocale();
-  } catch {
-    locale = "en";
-  }
+  const storedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
+  const locale = storedLocale === "my" ? "my" : "en";
   const fontVariables = await getFontVariables();
 
   return (

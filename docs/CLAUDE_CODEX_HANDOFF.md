@@ -315,3 +315,21 @@
 - [x] Feature implemented
 - [x] Tests executed
 - [ ] Claude review pending
+
+## Codex Session - Root locale cookie read
+**Date:** 2026-01-07
+**Branch:** codex/routing-r1-locale-proxy
+
+### Implemented
+- Read locale from the NEXT_LOCALE cookie in the root layout to avoid next-intl locale helpers on the server.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- None.
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
