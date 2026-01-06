@@ -111,44 +111,6 @@ const nextConfig: NextConfig = {
         source: "/__e2e__/tracking",
         destination: "/e2e/tracking",
       },
-      {
-        source: "/",
-        destination: "/my",
-        has: [
-          {
-            type: "cookie",
-            key: "NEXT_LOCALE",
-            value: "my",
-          },
-        ],
-      },
-      {
-        source: "/",
-        destination: "/en",
-      },
-      {
-        source: "/en/:path*",
-        destination: "/en/:path*",
-      },
-      {
-        source: "/my/:path*",
-        destination: "/my/:path*",
-      },
-      {
-        source: "/:path((?!en/|my/|api|_next|__e2e__|.*\\..*).*)",
-        destination: "/my/:path*",
-        has: [
-          {
-            type: "cookie",
-            key: "NEXT_LOCALE",
-            value: "my",
-          },
-        ],
-      },
-      {
-        source: "/:path((?!en/|my/|api|_next|__e2e__|.*\\..*).*)",
-        destination: "/en/:path*",
-      },
     ];
   },
 };

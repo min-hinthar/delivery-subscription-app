@@ -57,13 +57,12 @@ export const viewport: Viewport = {
   ],
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Locale is now handled by middleware, read from cookie for HTML lang attribute
   const storedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
   const locale = storedLocale === "my" ? "my" : "en";
   const fontVariables = await getFontVariables();

@@ -9,8 +9,10 @@ export const localeNames: Record<Locale, string> = {
   my: "မြန်မာ",
 };
 
+export const defaultLocale: Locale = "en";
+
 export default getRequestConfig(async ({ locale }) => {
-  const resolvedLocale = (locale ?? "en") as Locale;
+  const resolvedLocale = (locale ?? defaultLocale) as Locale;
 
   if (!locales.includes(resolvedLocale)) {
     notFound();
@@ -19,5 +21,7 @@ export default getRequestConfig(async ({ locale }) => {
   return {
     locale: resolvedLocale,
     messages: (await import(`../messages/${resolvedLocale}.json`)).default,
+    timeZone: "Asia/Yangon",
+    now: new Date(),
   };
 });
