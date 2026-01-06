@@ -129,10 +129,15 @@ export function SiteHeader() {
   const showLogout = isAdminRoute || isAppRoute;
 
   return (
-    <header className="border-b border-border/60 bg-background/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-border/40 bg-gradient-to-r from-background/98 via-background/95 to-background/98 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-        <Link href="/" className="text-lg font-semibold text-foreground">
-          {t("branding.appName")}
+        <Link
+          href="/"
+          className="group flex items-center gap-2 text-lg font-bold tracking-tight transition-all hover:scale-105"
+        >
+          <span className="bg-gradient-to-r from-primary via-brand-primary to-brand-secondary bg-clip-text text-transparent">
+            {t("branding.appName")}
+          </span>
         </Link>
         <nav className="hidden items-center gap-4 text-sm md:flex">
           {navLinks.map((link) => {
@@ -142,10 +147,10 @@ export function SiteHeader() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5 motion-reduce:transition-none motion-reduce:hover:transform-none",
+                  "group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none",
                   isActiveRoute(normalizedPathname, link.href)
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+                    ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md"
+                    : "text-muted-foreground hover:bg-gradient-to-r hover:from-accent/70 hover:to-accent/50 hover:text-foreground",
                 )}
               >
                 <Icon className="h-4 w-4" aria-hidden="true" />
@@ -159,10 +164,10 @@ export function SiteHeader() {
         </nav>
         <button
           onClick={() => setOpenPathname(pathname)}
-          className="h-11 w-11 rounded-full border border-border bg-background p-0 text-foreground shadow-sm transition hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none md:hidden"
+          className="group h-11 w-11 rounded-full border border-border/40 bg-gradient-to-br from-background to-muted/30 p-0 text-foreground shadow-md transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none motion-reduce:hover:transform-none md:hidden"
           aria-label="Open navigation menu"
         >
-          <Menu className="h-5 w-5" aria-hidden="true" />
+          <Menu className="h-5 w-5 transition-transform group-hover:scale-110" aria-hidden="true" />
         </button>
       </div>
       <AnimatePresence>
@@ -178,23 +183,23 @@ export function SiteHeader() {
               transition={transition}
             />
             <motion.div
-              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-border bg-background p-6 shadow-2xl"
+              className="absolute right-0 top-0 flex h-full w-80 flex-col gap-6 border-l border-border/60 bg-gradient-to-br from-background via-background to-muted/20 p-6 shadow-2xl backdrop-blur-md"
               initial={panelInitial}
               animate={panelAnimate}
               exit={panelExit}
               transition={transition}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-foreground">
+                <p className="bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-sm font-bold text-transparent">
                   {t("common.navigation")}
                 </p>
                 <button
                   onClick={() => setOpenPathname(null)}
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-border text-muted-foreground transition hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
+                  className="group flex h-11 w-11 items-center justify-center rounded-full border border-border/40 bg-gradient-to-br from-background to-muted/30 text-muted-foreground shadow-sm transition-all hover:border-primary/30 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-reduce:transition-none"
                   aria-label="Close navigation menu"
                   ref={closeButtonRef}
                 >
-                  <X className="h-4 w-4" aria-hidden="true" />
+                  <X className="h-4 w-4 transition-transform group-hover:rotate-90" aria-hidden="true" />
                 </button>
               </div>
               <div className="flex flex-col gap-2">
@@ -206,10 +211,10 @@ export function SiteHeader() {
                       href={link.href}
                       onClick={() => setOpenPathname(null)}
                       className={cn(
-                        "flex h-11 items-center gap-3 rounded-lg px-4 text-sm font-medium transition motion-reduce:transition-none",
+                        "group relative flex h-11 items-center gap-3 overflow-hidden rounded-lg px-4 text-sm font-medium transition-all hover:pl-5 motion-reduce:transition-none",
                         isActiveRoute(normalizedPathname, link.href)
-                          ? "bg-primary text-primary-foreground shadow-sm"
-                          : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+                          ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md"
+                          : "text-muted-foreground hover:bg-gradient-to-r hover:from-accent/70 hover:to-accent/50 hover:text-foreground",
                       )}
                     >
                       <Icon className="h-4 w-4" aria-hidden="true" />
