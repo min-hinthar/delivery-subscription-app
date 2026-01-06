@@ -22,12 +22,21 @@ export function LanguageSwitcher() {
     html.setAttribute("lang", locale);
   }, [locale]);
 
-  const switchLocale = (newLocale: Locale) => {
+  const switchLocale = async (newLocale: Locale) => {
+    try {
+      await fetch("/api/locale", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ locale: newLocale }),
+      });
+    } catch {
+      // Ignore cookie write failures and proceed with navigation.
+    }
+
     const pathnameWithoutLocale = stripLocaleFromPathname(pathname, locale);
-    const nextPath =
-      newLocale === "en"
-        ? pathnameWithoutLocale || "/"
-        : `/${newLocale}${pathnameWithoutLocale || "/"}`;
+    const nextPath = pathnameWithoutLocale || "/";
 
     router.push(nextPath);
     router.refresh();
