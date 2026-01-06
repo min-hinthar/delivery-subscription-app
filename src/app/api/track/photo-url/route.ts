@@ -52,11 +52,16 @@ export async function POST(request: Request) {
 
   const { stop_id: stopId, photo_path: photoPath } = parsed.data;
 
-  const { data: stop } = await supabase
+  const { data: stop, error: stopError } = await supabase
     .from("delivery_stops")
     .select("id, appointment:delivery_appointments(user_id)")
     .eq("id", stopId)
     .maybeSingle();
+
+  if (stopError) {
+    console.error('Failed to fetch delivery stop:', stopError);
+    return bad("Failed to fetch delivery stop.", { status: 500, headers: privateHeaders, details: { error: stopError.message } });
+  }
 
   const appointment = Array.isArray(stop?.appointment) ? stop?.appointment[0] : stop?.appointment;
 
@@ -65,9 +70,14 @@ export async function POST(request: Request) {
   }
 
   const admin = createSupabaseAdminClient();
-  const { data } = await admin.storage
+  const { data, error: storageError } = await admin.storage
     .from("delivery-proofs")
     .createSignedUrl(photoPath, 60 * 60);
+
+  if (storageError) {
+    console.error('Failed to create signed URL:', storageError);
+    return bad("Failed to create signed URL.", { status: 500, headers: privateHeaders, details: { error: storageError.message } });
+  }
 
   if (!data?.signedUrl) {
     return bad("Unable to create photo URL.", { status: 500, headers: privateHeaders });

@@ -37,18 +37,28 @@ export async function GET(request: Request) {
     }
 
     // Fetch revenue data
-    const { data: currentOrders } = await supabase
+    const { data: currentOrders, error: currentOrdersError } = await supabase
       .from('orders')
       .select('total_cents')
       .gte('created_at', startDate.toISOString())
       .eq('status', 'completed');
 
-    const { data: previousOrders } = await supabase
+    if (currentOrdersError) {
+      console.error('Failed to fetch current orders:', currentOrdersError);
+      return bad('Failed to fetch revenue data', { status: 500, details: { error: currentOrdersError.message } });
+    }
+
+    const { data: previousOrders, error: previousOrdersError } = await supabase
       .from('orders')
       .select('total_cents')
       .gte('created_at', previousStartDate.toISOString())
       .lt('created_at', startDate.toISOString())
       .eq('status', 'completed');
+
+    if (previousOrdersError) {
+      console.error('Failed to fetch previous orders:', previousOrdersError);
+      return bad('Failed to fetch revenue data', { status: 500, details: { error: previousOrdersError.message } });
+    }
 
     const currentRevenue = currentOrders?.reduce((sum, o) => sum + o.total_cents, 0) || 0;
     const previousRevenue = previousOrders?.reduce((sum, o) => sum + o.total_cents, 0) || 0;
@@ -57,41 +67,71 @@ export async function GET(request: Request) {
       : 0;
 
     // Fetch customer data
-    const { count: totalCustomers } = await supabase
+    const { count: totalCustomers, error: totalCustomersError } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true });
 
-    const { count: activeCustomers } = await supabase
+    if (totalCustomersError) {
+      console.error('Failed to fetch total customers:', totalCustomersError);
+      return bad('Failed to fetch customer data', { status: 500, details: { error: totalCustomersError.message } });
+    }
+
+    const { count: activeCustomers, error: activeCustomersError } = await supabase
       .from('subscriptions')
       .select('*', { count: 'exact', head: true })
       .in('status', ['active', 'trialing']);
 
-    const { count: newCustomers } = await supabase
+    if (activeCustomersError) {
+      console.error('Failed to fetch active customers:', activeCustomersError);
+      return bad('Failed to fetch customer data', { status: 500, details: { error: activeCustomersError.message } });
+    }
+
+    const { count: newCustomers, error: newCustomersError } = await supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString());
 
+    if (newCustomersError) {
+      console.error('Failed to fetch new customers:', newCustomersError);
+      return bad('Failed to fetch customer data', { status: 500, details: { error: newCustomersError.message } });
+    }
+
     // Fetch order data
-    const { data: allOrders, count: totalOrders } = await supabase
+    const { data: allOrders, count: totalOrders, error: allOrdersError } = await supabase
       .from('orders')
       .select('total_cents', { count: 'exact' })
       .gte('created_at', startDate.toISOString());
+
+    if (allOrdersError) {
+      console.error('Failed to fetch orders:', allOrdersError);
+      return bad('Failed to fetch order data', { status: 500, details: { error: allOrdersError.message } });
+    }
 
     const averageValue = allOrders && allOrders.length > 0
       ? allOrders.reduce((sum, o) => sum + o.total_cents, 0) / allOrders.length
       : 0;
 
     // Fetch delivery data
-    const { count: scheduledDeliveries } = await supabase
+    const { count: scheduledDeliveries, error: scheduledDeliveriesError } = await supabase
       .from('delivery_appointments')
       .select('*', { count: 'exact', head: true })
       .gte('created_at', startDate.toISOString());
 
-    const { count: completedDeliveries } = await supabase
+    if (scheduledDeliveriesError) {
+      console.error('Failed to fetch scheduled deliveries:', scheduledDeliveriesError);
+      return bad('Failed to fetch delivery data', { status: 500, details: { error: scheduledDeliveriesError.message } });
+    }
+
+    const { count: completedDeliveries, error: completedDeliveriesError } = await supabase
       .from('delivery_stops')
       .select('*', { count: 'exact', head: true })
       .eq('status', 'completed')
       .gte('completed_at', startDate.toISOString());
+
+    if (completedDeliveriesError) {
+      console.error('Failed to fetch completed deliveries:', completedDeliveriesError);
+      return bad('Failed to fetch delivery data', { status: 500, details: { error: completedDeliveriesError.message } });
+    }
 
     const onTimeRate = scheduledDeliveries && scheduledDeliveries > 0
       ? ((completedDeliveries || 0) / scheduledDeliveries) * 100
@@ -130,6 +170,9 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error('Error in analytics endpoint:', error);
-    return bad('Internal server error');
+    return bad('Internal server error', {
+      status: 500,
+      details: { error: error instanceof Error ? error.message : 'Unknown error' }
+    });
   }
 }

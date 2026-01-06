@@ -33,11 +33,16 @@ export async function POST(request: Request) {
     return bad("Invalid week_of date.", { status: 422, headers: privateHeaders });
   }
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("is_admin")
     .eq("id", auth.user.id)
     .maybeSingle();
+
+  if (profileError) {
+    console.error('Failed to fetch user profile:', profileError);
+    return bad("Failed to fetch user profile.", { status: 500, headers: privateHeaders, details: { error: profileError.message } });
+  }
 
   if (!profile?.is_admin && isAfterCutoff(weekOfDate)) {
     return bad("The Friday 5PM PT cutoff has passed for this week.", {
@@ -46,11 +51,16 @@ export async function POST(request: Request) {
     });
   }
 
-  const { data: window } = await supabase
+  const { data: window, error: windowError } = await supabase
     .from("delivery_windows")
     .select("id, capacity, is_active")
     .eq("id", parsed.data.delivery_window_id)
     .maybeSingle();
+
+  if (windowError) {
+    console.error('Failed to fetch delivery window:', windowError);
+    return bad("Failed to fetch delivery window.", { status: 500, headers: privateHeaders, details: { error: windowError.message } });
+  }
 
   if (!window || !window.is_active) {
     return bad("Selected delivery window is unavailable.", {
@@ -59,11 +69,16 @@ export async function POST(request: Request) {
     });
   }
 
-  const { data: appointments } = await supabase
+  const { data: appointments, error: appointmentsError } = await supabase
     .from("delivery_appointments")
     .select("id")
     .eq("week_of", parsed.data.week_of)
     .eq("delivery_window_id", parsed.data.delivery_window_id);
+
+  if (appointmentsError) {
+    console.error('Failed to fetch appointments:', appointmentsError);
+    return bad("Failed to fetch appointments.", { status: 500, headers: privateHeaders, details: { error: appointmentsError.message } });
+  }
 
   if ((appointments?.length ?? 0) >= window.capacity) {
     return bad("Selected delivery window is full.", { status: 409, headers: privateHeaders });
@@ -72,24 +87,35 @@ export async function POST(request: Request) {
   let addressId = parsed.data.address_id ?? null;
 
   if (addressId) {
-    const { data: address } = await supabase
+    const { data: address, error: addressError } = await supabase
       .from("addresses")
       .select("id")
       .eq("id", addressId)
       .eq("user_id", auth.user.id)
       .maybeSingle();
 
+    if (addressError) {
+      console.error('Failed to fetch address:', addressError);
+      return bad("Failed to fetch address.", { status: 500, headers: privateHeaders, details: { error: addressError.message } });
+    }
+
     if (!address?.id) {
       return bad("Address not available.", { status: 403, headers: privateHeaders });
     }
   } else {
-    addressId =
-      (await supabase
-        .from("addresses")
-        .select("id")
-        .eq("user_id", auth.user.id)
-        .eq("is_primary", true)
-        .maybeSingle()).data?.id ?? null;
+    const { data: primaryAddress, error: primaryAddressError } = await supabase
+      .from("addresses")
+      .select("id")
+      .eq("user_id", auth.user.id)
+      .eq("is_primary", true)
+      .maybeSingle();
+
+    if (primaryAddressError) {
+      console.error('Failed to fetch primary address:', primaryAddressError);
+      return bad("Failed to fetch primary address.", { status: 500, headers: privateHeaders, details: { error: primaryAddressError.message } });
+    }
+
+    addressId = primaryAddress?.id ?? null;
   }
 
   const { data: appointment, error } = await supabase
@@ -109,7 +135,8 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (error) {
-    return bad("Failed to save appointment.", { status: 500, headers: privateHeaders });
+    console.error('Failed to save appointment:', error);
+    return bad("Failed to save appointment.", { status: 500, headers: privateHeaders, details: { error: error.message } });
   }
 
   return ok({ appointment }, { headers: privateHeaders });
