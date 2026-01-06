@@ -3,14 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Sparkles } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { type Locale } from "@/i18n";
 import { hapticMedium, hapticSelection } from "@/lib/haptics";
-import { getLocalizedField } from "@/lib/i18n-helpers";
 import { reportError } from "@/lib/monitoring/report-error";
 import { cn } from "@/lib/utils";
 import type { MealPackage } from "@/types";
@@ -20,9 +17,6 @@ type PackageSelectorProps = {
 };
 
 export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
-  const t = useTranslations("packages");
-  const tCommon = useTranslations("common");
-  const locale = useLocale() as Locale;
   const router = useRouter();
   const [packages, setPackages] = useState<MealPackage[]>([]);
   const [selectedPackageId, setSelectedPackageId] = useState<string | null>(null);
@@ -40,18 +34,18 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
         if (response.ok) {
           setPackages(payload.data?.packages ?? []);
         } else {
-          setError(payload.error?.message ?? tCommon("error"));
+          setError(payload.error?.message ?? "An error occurred");
         }
       } catch (error) {
         reportError(error, { scope: "package-selector" });
-        setError(tCommon("error"));
+        setError("An error occurred");
       } finally {
         setLoading(false);
       }
     };
 
     void fetchPackages();
-  }, [reloadToken, tCommon]);
+  }, [reloadToken]);
 
   const handleSelectPackage = (packageId: string) => {
     hapticSelection();
@@ -80,7 +74,7 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
             setReloadToken((prev) => prev + 1);
           }}
         >
-          {tCommon("retry")}
+          Retry
         </Button>
       </Card>
     );
@@ -89,17 +83,17 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
   return (
     <div className="mt-12 border-t border-slate-200 pt-12 dark:border-slate-800">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold">{t("choosePackage")}</h2>
-        <p className="mt-2 text-slate-600 dark:text-slate-400">{t("chooseDescription")}</p>
+        <h2 className="text-3xl font-bold">Choose Your Package</h2>
+        <p className="mt-2 text-slate-600 dark:text-slate-400">Select the perfect meal plan for your week</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
         {packages.map((pkg) => {
           const isSelected = selectedPackageId === pkg.id;
-          const badgeText = getLocalizedField(pkg, "badge_text", locale);
-          const packageName = getLocalizedField(pkg, "name", locale);
-          const packageDescription = getLocalizedField(pkg, "description", locale);
-          const isMostPopular = badgeText === t("mostPopular") || badgeText === "Most Popular";
+          const badgeText = pkg.badge_text;
+          const packageName = pkg.name;
+          const packageDescription = pkg.description;
+          const isMostPopular = badgeText === "Most Popular";
 
           return (
             <Card
@@ -124,15 +118,12 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
 
               <div className="p-6">
                 <h3 className="text-2xl font-bold text-center">{packageName}</h3>
-                {locale === "en" && pkg.name_my ? (
-                  <p className="text-center text-slate-500 mt-1">{pkg.name_my}</p>
-                ) : null}
 
                 <div className="my-6 text-center">
                   <span className="text-4xl font-bold text-[#D4A574]">
                     ${(pkg.price_cents / 100).toFixed(0)}
                   </span>
-                  <span className="text-slate-600">{t("perWeek")}</span>
+                  <span className="text-slate-600">/week</span>
                 </div>
 
                 <p className="text-center text-sm text-slate-700 dark:text-slate-300">
@@ -142,19 +133,19 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("dishesPerDay", { count: pkg.dishes_per_day })}</span>
+                    <span>{pkg.dishes_per_day} {pkg.dishes_per_day === 1 ? 'dish' : 'dishes'} per day</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("totalDishes", { count: pkg.total_dishes })}</span>
+                    <span>{pkg.total_dishes} total dishes</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("saturdayDelivery")}</span>
+                    <span>Saturday delivery</span>
                   </li>
                   <li className="flex items-center gap-2 text-sm">
                     <Check className="h-4 w-4 text-green-600" />
-                    <span>{t("freshAuthentic")}</span>
+                    <span>Fresh, authentic recipes</span>
                   </li>
                 </ul>
 
@@ -165,7 +156,7 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
                   )}
                   variant={isSelected ? "default" : "secondary"}
                 >
-                  {isSelected ? t("selected") : t("selectPackage")}
+                  {isSelected ? "Selected" : "Select Package"}
                 </Button>
               </div>
             </Card>
@@ -181,7 +172,7 @@ export function PackageSelector({ weeklyMenuId }: PackageSelectorProps) {
             onClick={handleContinueToCheckout}
             className="min-w-[280px]"
           >
-            {t("continueToCheckout")}
+            Continue to Checkout
           </Button>
         </div>
       )}

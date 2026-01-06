@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { cookies } from "next/headers";
 
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+
+// Force dynamic rendering globally - many pages need cookies() for Supabase auth
+export const dynamic = "force-dynamic";
 
 const shouldSkipFontOptimization = process.env.SKIP_FONT_OPTIMIZATION === "1";
 
@@ -62,14 +64,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Locale is now handled by middleware, read from cookie for HTML lang attribute
-  const storedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
-  const locale = storedLocale === "my" ? "my" : "en";
   const fontVariables = await getFontVariables();
 
   return (
     <html
-      lang={locale}
+      lang="en"
       className={fontVariables || "font-sans"}
       suppressHydrationWarning
     >
