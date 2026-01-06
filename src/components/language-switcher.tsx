@@ -17,16 +17,6 @@ export function LanguageSwitcher() {
   useEffect(() => {
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
 
-    // Update body font class for Burmese language
-    const body = document.body;
-    if (locale === "my") {
-      body.classList.remove("font-sans");
-      body.classList.add("font-myanmar");
-    } else {
-      body.classList.remove("font-myanmar");
-      body.classList.add("font-sans");
-    }
-
     // Update html lang attribute
     const html = document.documentElement;
     html.setAttribute("lang", locale);

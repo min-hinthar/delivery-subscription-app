@@ -15,19 +15,13 @@ async function getFontVariables() {
     return "";
   }
 
-  const { Noto_Sans, Noto_Sans_Myanmar } = await import("next/font/google");
+  const { Noto_Sans } = await import("next/font/google");
   const notoSans = Noto_Sans({
     subsets: ["latin"],
     variable: "--font-sans",
   });
 
-  const notoSansMyanmar = Noto_Sans_Myanmar({
-    subsets: ["myanmar"],
-    variable: "--font-myanmar",
-    weight: ["400", "500", "600", "700"],
-  });
-
-  return `${notoSans.variable} ${notoSansMyanmar.variable}`;
+  return `${notoSans.variable}`;
 }
 
 export const metadata: Metadata = {
@@ -85,11 +79,7 @@ export default async function RootLayout({
       className={fontVariables || "font-sans"}
       suppressHydrationWarning
     >
-      <body
-        className={`min-h-screen bg-white text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100 ${
-          locale === "my" ? "font-myanmar" : "font-sans"
-        }`}
-      >
+      <body className="min-h-screen bg-white text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100 font-sans">
         <ThemeProvider>
           {children}
           <Toaster />

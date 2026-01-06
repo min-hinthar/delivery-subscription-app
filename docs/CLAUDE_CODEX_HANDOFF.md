@@ -274,3 +274,23 @@
 - [x] Feedback items implemented
 - [x] Tests executed (lint)
 - [ ] Typecheck clean (blocked by missing deps)
+
+## Codex Session - Routing hardening and font fallback
+**Date:** 2026-01-07
+**Branch:** codex/routing-r1-locale-hardening
+
+### Implemented
+- Added locale validation in the locale layout to 404 on unsupported locales.
+- Disabled Myanmar-specific font loading and body class toggles to avoid serverless font invocation errors.
+- Updated QA UX checklist to reflect Myanmar fallback font expectations.
+
+### Tests
+- `bash scripts/codex/verify.sh`
+
+### Notes / Blockers
+- None.
+
+### Status
+- [x] Feature implemented
+- [x] Tests executed
+- [ ] Claude review pending
