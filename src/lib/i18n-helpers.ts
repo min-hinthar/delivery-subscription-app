@@ -39,3 +39,27 @@ export function stripLocaleFromPathname(pathname: string, locale?: Locale) {
 
   return stripped.length > 0 ? stripped : "/";
 }
+
+export function getLocaleFromPathname(pathname: string) {
+  return locales.find(
+    (candidate) => pathname === `/${candidate}` || pathname.startsWith(`/${candidate}/`),
+  );
+}
+
+export function getLocalizedPathname(pathname: string, locale: Locale) {
+  if (!pathname || !pathname.startsWith("/") || locale === "en") {
+    return pathname;
+  }
+
+  const existingLocale = getLocaleFromPathname(pathname);
+  if (existingLocale) {
+    return pathname;
+  }
+
+  const [pathWithQuery, hash] = pathname.split("#");
+  const [pathOnly, query] = pathWithQuery.split("?");
+  const localizedPath = `/${locale}${pathOnly === "/" ? "" : pathOnly}`;
+  const withQuery = query ? `${localizedPath}?${query}` : localizedPath;
+
+  return hash ? `${withQuery}#${hash}` : withQuery;
+}

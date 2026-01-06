@@ -198,6 +198,22 @@
 - Added next-intl configuration, locale-aware routing under `/[locale]`, and middleware-driven locale detection.
 - Added Burmese/English message catalogs, font setup (Noto Sans + Myanmar), and language switcher UI.
 - Localized weekly menu + package selector with locale-aware dish/package fields and fallback handling.
+
+## Codex Session - Admin meal management + locale fixes
+**Date:** 2026-01-06
+**Branch:** codex/ui-p1-admin-fixes
+
+### Implemented
+- Disabled locale auto-detection to keep English as the default entry point and added locale-aware path helpers for navigation links.
+- Normalized driver guard locale handling to allow pending drivers to reach onboarding.
+- Added admin meal and meal plan template toggles plus supporting API endpoints.
+- Hid the mobile bottom nav on non-app marketing routes and localized navigation destinations.
+
+### Tests
+- `bash scripts/codex/verify.sh` (fails in sandbox due to missing `@vercel/analytics` and `@vercel/speed-insights` types)
+
+### Notes / Blockers
+- Typecheck blocked by missing Vercel analytics/speed-insights packages in the environment.
 - Added Burmese columns migration for dishes/categories and localization helpers + tests.
 - Added bilingual order confirmation email template + sending helper.
 

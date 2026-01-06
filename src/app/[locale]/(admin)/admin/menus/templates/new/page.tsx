@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 import { DishSelector } from "@/components/admin/dish-selector";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ import { InputField } from "@/components/ui/input-field";
 import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { type Locale } from "@/i18n";
+import { getLocalizedPathname } from "@/lib/i18n-helpers";
 import type { MenuTheme } from "@/types";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -24,6 +27,7 @@ const THEME_OPTIONS = [
 
 export default function NewMenuTemplatePage() {
   const router = useRouter();
+  const locale = useLocale() as Locale;
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [nameMy, setNameMy] = useState("");
@@ -144,7 +148,7 @@ export default function NewMenuTemplatePage() {
         description: "Your menu template is ready to generate weekly menus.",
       });
       localStorage.removeItem(draftKey);
-      router.push("/admin/menus/templates");
+      router.push(getLocalizedPathname("/admin/menus/templates", locale));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to create template.";
       toast({ title: "Save failed", description: message, variant: "destructive" });

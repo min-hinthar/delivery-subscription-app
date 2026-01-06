@@ -13,7 +13,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 
 import { type Locale } from "@/i18n";
-import { stripLocaleFromPathname } from "@/lib/i18n-helpers";
+import { getLocalizedPathname, stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -57,6 +57,7 @@ export function MobileBottomNav() {
   const normalizedPathname = stripLocaleFromPathname(pathname ?? "/", locale);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   useEffect(() => {
     let ticking = false;
@@ -94,6 +95,10 @@ export function MobileBottomNav() {
     return null;
   }
 
+  if (!NAV_ITEMS.some((item) => normalizedPathname.startsWith(item.href))) {
+    return null;
+  }
+
   return (
     <>
       <div className="h-20 md:hidden" aria-hidden="true" />
@@ -125,7 +130,7 @@ export function MobileBottomNav() {
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={localizedLink(item.href)}
                 className={cn(
                   "relative flex flex-1 flex-col items-center justify-center gap-1 py-3 transition-colors",
                   isActive
