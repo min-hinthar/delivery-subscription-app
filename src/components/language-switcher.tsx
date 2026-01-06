@@ -16,6 +16,20 @@ export function LanguageSwitcher() {
 
   useEffect(() => {
     document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
+
+    // Update body font class for Burmese language
+    const body = document.body;
+    if (locale === "my") {
+      body.classList.remove("font-sans");
+      body.classList.add("font-myanmar");
+    } else {
+      body.classList.remove("font-myanmar");
+      body.classList.add("font-sans");
+    }
+
+    // Update html lang attribute
+    const html = document.documentElement;
+    html.setAttribute("lang", locale);
   }, [locale]);
 
   const switchLocale = (newLocale: Locale) => {
@@ -30,15 +44,22 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-2 rounded-full border border-border/60 bg-background/90 p-1 text-xs">
-      <Globe className="ml-2 h-4 w-4 text-muted-foreground" />
+    <div className="group relative flex items-center gap-1.5 rounded-full border border-border/40 bg-gradient-to-br from-background/95 to-muted/30 p-1 shadow-sm backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-md">
+      <Globe className="ml-2.5 h-4 w-4 text-muted-foreground transition-colors group-hover:text-primary" />
       {locales.map((loc) => (
         <Button
           key={loc}
           variant={locale === loc ? "secondary" : "ghost"}
           size="sm"
           onClick={() => switchLocale(loc)}
-          className="rounded-full px-3 text-xs"
+          className={`
+            rounded-full px-3.5 py-1.5 text-xs font-medium transition-all
+            ${
+              locale === loc
+                ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+            }
+          `}
           aria-pressed={locale === loc}
         >
           <span className="md:hidden">{loc.toUpperCase()}</span>

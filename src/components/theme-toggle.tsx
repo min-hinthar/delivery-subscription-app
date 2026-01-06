@@ -28,12 +28,20 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      className="w-full justify-center gap-2 md:w-auto"
+      className="group relative w-full justify-center gap-2.5 overflow-hidden rounded-full border border-border/40 bg-gradient-to-br from-background/95 to-muted/30 px-4 py-2.5 shadow-sm backdrop-blur-sm transition-all hover:border-primary/30 hover:shadow-md md:w-auto"
       onClick={() => setTheme(isDark ? "light" : "dark")}
       aria-label={label}
     >
-      {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
-      <span className="text-sm font-medium">{isDark ? "Light" : "Dark"}</span>
+      <div className="relative flex items-center gap-2.5">
+        {isDark ? (
+          <Sun className="h-4 w-4 text-amber-500 transition-all group-hover:rotate-90 group-hover:scale-110" aria-hidden="true" />
+        ) : (
+          <Moon className="h-4 w-4 text-indigo-500 transition-all group-hover:-rotate-12 group-hover:scale-110" aria-hidden="true" />
+        )}
+        <span className="text-sm font-medium text-muted-foreground transition-colors group-hover:text-foreground">
+          {isDark ? "Light" : "Dark"}
+        </span>
+      </div>
     </Button>
   );
 }
