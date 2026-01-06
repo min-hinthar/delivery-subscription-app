@@ -2,15 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { type Locale } from "@/i18n";
+import { getLocalizedPathname } from "@/lib/i18n-helpers";
 import type { MenuTemplate } from "@/types";
 
 export default function GenerateWeeklyMenuPage() {
   const router = useRouter();
+  const locale = useLocale() as Locale;
   const { toast } = useToast();
   const [templates, setTemplates] = useState<MenuTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
@@ -73,7 +77,7 @@ export default function GenerateWeeklyMenuPage() {
         title: "Weekly menu generated",
         description: "Your weekly menu is ready to publish.",
       });
-      router.push("/admin/menus");
+      router.push(getLocalizedPathname("/admin/menus", locale));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unable to generate menu.";
       toast({ title: "Generation failed", description: message, variant: "destructive" });

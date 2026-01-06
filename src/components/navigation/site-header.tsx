@@ -27,7 +27,7 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { type Locale } from "@/i18n";
-import { stripLocaleFromPathname } from "@/lib/i18n-helpers";
+import { getLocalizedPathname, stripLocaleFromPathname } from "@/lib/i18n-helpers";
 import { getMotionTransition, getSlideMotion } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -127,12 +127,13 @@ export function SiteHeader() {
 
   const navLinks = isAdminRoute ? ADMIN_LINKS : isAppRoute ? AUTH_LINKS : PUBLIC_LINKS;
   const showLogout = isAdminRoute || isAppRoute;
+  const localizedLink = (href: string) => getLocalizedPathname(href, locale);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/40 bg-gradient-to-r from-background/98 via-background/95 to-background/98 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
-          href="/"
+          href={localizedLink("/")}
           className="group flex items-center gap-2 text-lg font-bold tracking-tight transition-all hover:scale-105"
         >
           <span className="bg-gradient-to-r from-primary via-brand-primary to-brand-secondary bg-clip-text text-transparent">
@@ -145,7 +146,7 @@ export function SiteHeader() {
             return (
               <Link
                 key={link.href}
-                href={link.href}
+                href={localizedLink(link.href)}
                 className={cn(
                   "group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-4 py-2 text-sm font-medium transition-all hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:transform-none",
                   isActiveRoute(normalizedPathname, link.href)
@@ -208,7 +209,7 @@ export function SiteHeader() {
                   return (
                     <Link
                       key={link.href}
-                      href={link.href}
+                      href={localizedLink(link.href)}
                       onClick={() => setOpenPathname(null)}
                       className={cn(
                         "group relative flex h-11 items-center gap-3 overflow-hidden rounded-lg px-4 text-sm font-medium transition-all hover:pl-5 motion-reduce:transition-none",
