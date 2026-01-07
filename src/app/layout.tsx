@@ -6,25 +6,13 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
+import { SiteHeader } from "@/components/navigation/site-header";
+import { PageTransition } from "@/components/page-transition";
 
 // Force dynamic rendering globally - many pages need cookies() for Supabase auth
 export const dynamic = "force-dynamic";
 
-const shouldSkipFontOptimization = process.env.SKIP_FONT_OPTIMIZATION === "1";
 
-async function getFontVariables() {
-  if (shouldSkipFontOptimization) {
-    return "";
-  }
-
-  const { Noto_Sans } = await import("next/font/google");
-  const notoSans = Noto_Sans({
-    subsets: ["latin"],
-    variable: "--font-sans",
-  });
-
-  return `${notoSans.variable}`;
-}
 
 export const metadata: Metadata = {
   title: "Morning Star Weekly Delivery",
@@ -64,21 +52,27 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const fontVariables = await getFontVariables();
+
 
   return (
     <html
       lang="en"
-      className={fontVariables || "font-sans"}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-white text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100 font-sans">
-        <ThemeProvider>
-          {children}
-          <Toaster />
-        </ThemeProvider>
-        <Analytics />
-        <SpeedInsights />
+      <body className="flex min-h-screen flex-col bg-white text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100 font-sans">
+        <SiteHeader/>
+        <main className="flex-1 px-4 py-10 sm:px-6">
+          <div className="mx-auto w-full max-w-6xl">
+              <PageTransition>
+                <ThemeProvider>
+                    {children}
+                  <Toaster />
+                </ThemeProvider>
+              </PageTransition>
+            <Analytics />
+            <SpeedInsights />
+          </div>
+        </main>
       </body>
     </html>
   );
